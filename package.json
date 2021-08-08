@@ -1,0 +1,40 @@
+{
+  "name": "sleekgrid",
+  "version": "0.0.1",
+  "description": "A modern Data Grid / Spreadsheet component",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/sleekgrid.umd.js",
+  "unpkg": "dist/sleekgrid.iife.js",
+  "jsdelivr": "dist/sleekgrid.iife.js",
+  "module": "./dist/sleekgrid.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/sleekgrid.es.js",
+      "require": "./dist/sleekgrid.umd.js"
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --outfile=dist/sleekgrid.iife.js --global-name=Sleek",
+    "tsc": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/serenity-is/SleekGrid.git"
+  },
+  "keywords": [
+    "SleekGrid",
+    "SlickGrid"
+  ],
+  "author": "Volkan Ceylan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/serenity-is/SleekGrid/discussions"
+  },
+  "homepage": "https://github.com/serenity-is/SleekGrid#readme",
+  "devDependencies": {
+    "esbuild": "^0.12.17",
+    "typescript": "^4.3.5"
+  }
+}
