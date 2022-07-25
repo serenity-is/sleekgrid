@@ -1,0 +1,30 @@
+﻿{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "allowJs": false,
+    "experimentalDecorators": true,
+    "declaration": true,
+    "emitBOM": true,
+    "lib": [
+      "ES2015",
+      "DOM"
+    ],
+    "newLine": "lf",
+    "noEmit": true,
+    "noEmitHelpers": false,
+    "noImplicitAny": true,
+    "preserveConstEnums": false,
+    "sourceMap": false,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "suppressImplicitAnyIndexErrors": true,
+    "target": "ESNext",
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "types": [
+      "jquery"
+    ],
+    "useDefineForClassFields": false
+  }
+}

@@ -1,22 +1,3 @@
 {
-  "compilerOptions": {
-    "allowJs": false,
-    "baseUrl": "src",
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "esModuleInterop": false,
-    "isolatedModules": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "noUnusedLocals": true,
-    "sourceMap": false,
-    "target": "esnext",
-    "outDir": "dist",
-    "strict": true,
-    "strictNullChecks": false,
-    "rootDir": "src"
-  },
-  "include": [
-    "src"
-  ]
+  "extends": "./config/tsconfig.base.json"
 }

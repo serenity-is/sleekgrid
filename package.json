@@ -2,39 +2,36 @@
   "name": "sleekgrid",
   "version": "0.0.1",
   "description": "A modern Data Grid / Spreadsheet component",
+  "source": "src/index.ts",
+  "type": "module",
+  "module": "./dist/sleekgrid.mjs",
+  "unpkg": "./dist/sleekgrid.umd.js",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
-  "main": "dist/sleekgrid.umd.js",
-  "unpkg": "dist/sleekgrid.iife.js",
-  "jsdelivr": "dist/sleekgrid.iife.js",
-  "module": "./dist/sleekgrid.es.js",
-  "exports": {
-    ".": {
-      "import": "./dist/sleekgrid.es.js",
-      "require": "./dist/sleekgrid.umd.js"
-    }
-  },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --outfile=dist/sleekgrid.iife.js --global-name=Sleek",
+    "build": "esbuild --bundle --outdir=./dist ./src/index.ts --format=iife --target=ES6 --global-name=Sleek --footer:js=\"var Slick=Sleek\"",
     "tsc": "tsc"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/serenity-is/SleekGrid.git"
-  },
   "keywords": [
+    "grid",
+    "datagrid",
+    "datatable",
     "SleekGrid",
-    "SlickGrid"
+    "SlickGrid",
+    "spreadsheet",
+    "table"
   ],
-  "author": "Volkan Ceylan",
+  "author": "Volkan Ceylan, Furkan Evran, Victor Tomaili (https://serenity.is)",
+  "repository": "serenity-is/SleekGrid",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/serenity-is/SleekGrid/discussions"
-  },
+  "bugs": "https://github.com/serenity-is/SleekGrid/issues",
   "homepage": "https://github.com/serenity-is/SleekGrid#readme",
+  "dependencies": {
+    "@types/jquery": "^3.5.14"
+  },
   "devDependencies": {
-    "esbuild": "^0.12.17",
-    "typescript": "^4.3.5"
+    "esbuild": "^0.14.50"
   }
 }
