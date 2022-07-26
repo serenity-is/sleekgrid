@@ -1,15 +1,15 @@
-import { NonDataRow, preClickClassName } from "./base";
+import { NonDataRow, preClickClassName } from "../core/base";
 import type { Column, ColumnSort, ItemMetadata } from "./column";
-import { EditController, EditorLock } from "./editing";
+import { EditController, EditorLock } from "../core/editlock";
 import { EditCommand, Editor } from "./editor";
-import { Event, IEventData, EventData, keyCode } from "./event";
+import { Event, IEventData, EventData, keyCode } from "../core/event";
 import type { CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
-import { addUiStateHover, adjustFrozenColumnCompat, attrEncode, CachedRow, disableSelection, getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, H, htmlEncode, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
-import { IPlugin, Position, RowCell, SelectionModel, ViewRange } from "./types";
+import { addUiStateHover, adjustFrozenColumnCompat, attrEncode, CachedRow, disableSelection, getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, H, htmlEncode, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "../internal";
+import { IPlugin, Position, RowCell, SelectionModel, ViewRange } from "../types";
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
-import { GroupTotals } from "./group";
+import { GroupTotals } from "../core/group";
 import { gridDefaults, GridOptions } from "./gridoptions";
-import { Range } from "./range";
+import { Range } from "../core/range";
 
 
 export class Grid<TItem = any> {
@@ -176,16 +176,16 @@ export class Grid<TItem = any> {
 
         // make sure required JavaScript modules are loaded
         if (typeof jQuery === "undefined") {
-            throw "SlickGrid requires jquery module to be loaded";
+            throw "SleekGrid requires jquery module to be loaded";
         }
         if (!(jQuery.fn as any).drag) {
-            throw "SlickGrid requires jquery.event.drag module to be loaded";
+            throw "SleekGrid requires jquery.event.drag module to be loaded";
         }
 
         this._data = data;
 
         // settings
-        
+
 
         this._colDefaults = {
             name: "",
@@ -267,7 +267,7 @@ export class Grid<TItem = any> {
         }
 
         const uisd = this._options.useLegacyUI ? ' ui-state-default' : '';
-        
+
         var spacerW = this.getCanvasWidth() + (this._scrollDims = getScrollBarDimensions()).width + 'px';
 
         // -- PANE HEADER LEFT

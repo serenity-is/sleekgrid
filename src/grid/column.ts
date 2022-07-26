@@ -1,4 +1,4 @@
-import type { GroupTotals } from "./group";
+import type { GroupTotals } from "../core/group";
 import type { Grid } from "./grid";
 import type { Editor, ValidationResult } from "./editor";
 import type { AsyncPostCleanup, AsyncPostRender, ColumnFormatter } from "./formatting";

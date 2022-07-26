@@ -11,7 +11,7 @@
     "src"
   ],
   "scripts": {
-    "build": "esbuild --bundle --outdir=./dist ./src/index.ts --format=iife --target=ES6 --global-name=Sleek --footer:js=\"var Slick=Sleek\"",
+    "build": "node config/build",
     "tsc": "tsc"
   },
   "keywords": [
@@ -29,7 +29,7 @@
   "bugs": "https://github.com/serenity-is/SleekGrid/issues",
   "homepage": "https://github.com/serenity-is/SleekGrid#readme",
   "dependencies": {
-    "@types/jquery": "^3.5.14"
+    "@types/jquery": "2.0.48"
   },
   "devDependencies": {
     "esbuild": "^0.14.50"

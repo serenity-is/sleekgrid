@@ -1,5 +1,5 @@
-import type { Column } from "./column";
-import type { GridOptions } from "./gridoptions";
+import type { Column } from "./grid/column";
+import type { GridOptions } from "./grid/gridoptions";
 
 // shared across all grids on the page
 let maxSupportedCssHeight: number;  // browser's breaking point

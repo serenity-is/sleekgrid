@@ -1,7 +1,7 @@
 import type { Column } from "./column";
-import type { IEventData } from "./event";
+import type { IEventData } from "../core/event";
 import type { Grid } from "./grid";
-import type { Position } from "./types";
+import type { Position } from "../types";
 
 export interface EditorOptions {
     grid: Grid;
