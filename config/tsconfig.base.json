@@ -20,7 +20,7 @@
     "suppressImplicitAnyIndexErrors": true,
     "target": "ESNext",
     "typeRoots": [
-      "./node_modules/@types"
+      "../node_modules/@types"
     ],
     "types": [
       "jquery"

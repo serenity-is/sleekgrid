@@ -86,7 +86,7 @@ function extractColumns(node: any): TreeColumn[] {
 
         for (var i = 0; i < node.length; i++)
             result = result.concat(extractColumns(node[i]));
-    } 
+    }
     else {
         if (node.hasOwnProperty('columns'))
             result = result.concat(extractColumns(node.columns));
@@ -100,7 +100,7 @@ function extractColumns(node: any): TreeColumn[] {
 /**
  *
  * @param {Array} treeColumns Array com levels of columns
- * @returns {{hasDepth: 'hasDepth', getTreeColumns: 'getTreeColumns', extractColumns: 'extractColumns', getDepth: 'getDepth', 
+ * @returns {{hasDepth: 'hasDepth', getTreeColumns: 'getTreeColumns', extractColumns: 'extractColumns', getDepth: 'getDepth',
  * getColumnsInDepth: 'getColumnsInDepth', getColumnsInGroup: 'getColumnsInGroup', visibleColumns: 'visibleColumns', filter: 'filter', reOrder: reOrder}}
  * @constructor
  */
