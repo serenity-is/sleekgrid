@@ -1,5 +1,5 @@
-import type { Column } from "./grid/column";
-import type { GridOptions } from "./grid/gridoptions";
+import type { Column } from "./column";
+import type { GridOptions } from "./gridoptions";
 
 // shared across all grids on the page
 let maxSupportedCssHeight: number;  // browser's breaking point
@@ -73,7 +73,7 @@ export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { [key: 
     var k: string, v: (string | boolean), c: Node;
     if (attr) {
         for (k in attr) {
-            v = attr[k];    
+            v = attr[k];
             if (v != null && v !== false)
                 el.setAttribute(k, v === true ? '' : v);
         }
@@ -102,9 +102,9 @@ export function simpleArrayEquals(arr1: number[], arr2: number[]) {
 }
 
 /**
- * Helper to sort visible cols, while keeping invisible cols sticky to 
- * the previous visible col. For example, if columns are currently in order 
- * A, B, C, D, E, F, G, H and desired order is G, D, F (assuming A, B, C, E 
+ * Helper to sort visible cols, while keeping invisible cols sticky to
+ * the previous visible col. For example, if columns are currently in order
+ * A, B, C, D, E, F, G, H and desired order is G, D, F (assuming A, B, C, E
  * were invisible) the result is A, B, G, H, D, E, F.
  */
  export function sortToDesiredOrderAndKeepRest(columns: Column[], idOrder: string[]): Column[] {
