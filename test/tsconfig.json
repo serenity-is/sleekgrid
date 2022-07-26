@@ -1,0 +1,21 @@
+﻿{
+  "extends": "../config/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declaration": false,
+    "paths": {
+        "@/*": ["../src/*"]
+    },
+    "sourceMap": false,
+    "typeRoots": [
+      "../node_modules/@types/",
+    ],
+    "types": [
+      "jquery",
+      "jest"
+    ]
+  },
+  "include": [
+    "**/*.spec.ts"
+  ]
+}

@@ -3,9 +3,6 @@
   "version": "0.0.1",
   "description": "A modern Data Grid / Spreadsheet component",
   "source": "src/index.ts",
-  "type": "module",
-  "module": "./dist/sleekgrid.mjs",
-  "unpkg": "./dist/sleekgrid.umd.js",
   "files": [
     "dist",
     "src"
@@ -29,9 +26,14 @@
   "bugs": "https://github.com/serenity-is/SleekGrid/issues",
   "homepage": "https://github.com/serenity-is/SleekGrid#readme",
   "dependencies": {
-    "@types/jquery": "2.0.48"
   },
   "devDependencies": {
-    "esbuild": "^0.14.50"
+    "@types/jquery": "2.0.48",
+    "@types/jest": "^28.1.6",
+    "esbuild": "^0.14.50",
+    "jest": "^28.1.3",
+    "jest-esbuild": "^0.2.9",
+    "jquery": "^3.6.0",
+    "@happy-dom/jest-environment": "^6.0.4"
   }
 }
