@@ -178,9 +178,6 @@ export class Grid<TItem = any> {
         if (typeof jQuery === "undefined") {
             throw "SleekGrid requires jquery module to be loaded";
         }
-        if (!(jQuery.fn as any).drag) {
-            throw "SleekGrid requires jquery.event.drag module to be loaded";
-        }
 
         this._data = data;
 
@@ -415,11 +412,17 @@ export class Grid<TItem = any> {
             .on("keydown", this.handleKeyDown.bind(this))
             .on("click", this.handleClick.bind(this))
             .on("dblclick", this.handleDblClick.bind(this))
-            .on("contextmenu", this.handleContextMenu.bind(this))
-            .on("draginit", this.handleDragInit.bind(this))
-            .on("dragstart", { distance: 3 }, this.handleDragStart.bind(this))
-            .on("drag", this.handleDrag.bind(this))
-            .on("dragend", this.handleDragEnd.bind(this))
+            .on("contextmenu", this.handleContextMenu.bind(this));
+
+        if ((jQuery.fn as any).drag) {
+            canvases
+                .on("draginit", this.handleDragInit.bind(this))
+                .on("dragstart", { distance: 3 }, this.handleDragStart.bind(this))
+                .on("drag", this.handleDrag.bind(this))
+                .on("dragend", this.handleDragEnd.bind(this))
+        }
+
+        canvases
             .delegate(".slick-cell", "mouseenter", this.handleMouseEnter.bind(this))
             .delegate(".slick-cell", "mouseleave", this.handleMouseLeave.bind(this));
 
