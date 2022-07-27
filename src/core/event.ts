@@ -106,7 +106,7 @@ export class Event<TArgs = any, TEventData extends IEventData = IEventData> {
      *      If not specified, the scope will be set to the <code>Event</code> instance.
      */
     notify(args?: any, e?: TEventData, scope?: object) {
-        e = e || new EventData() as any;
+        e = patchEvent(e) || new EventData() as any;
         scope = scope || this;
 
         var returnValue;
@@ -180,4 +180,34 @@ export const keyCode = {
     RIGHT: 39,
     TAB: 9,
     UP: 38
+}
+
+function returnTrue() {
+	return true;
+}
+
+function returnFalse() {
+	return false;
+}
+
+// patches event so that it has methods jQuery event objects provides, for backward compatibility when jQuery is not loaded
+export function patchEvent(e: IEventData) {
+    if (e == null)
+        return e;
+
+    if (!e.isDefaultPrevented && e.preventDefault)
+        e.isDefaultPrevented = function() { return this.defaultPrevented; }
+
+    var org1: () => void, org2: () => void;
+    if (!e.isImmediatePropagationStopped && (org1 = e.stopImmediatePropagation)) {
+        e.isImmediatePropagationStopped = returnFalse;
+        e.stopImmediatePropagation = function() { this.isImmediatePropagationStopped = returnTrue; org1.call(this); }
+    }
+
+    if (!e.isPropagationStopped && (org2 = e.stopPropagation)) {
+        e.isPropagationStopped = returnFalse;
+        e.stopPropagation = function() { this.isPropagationStopped = returnTrue; org2.call(this); }
+    }
+
+    return e;
 }

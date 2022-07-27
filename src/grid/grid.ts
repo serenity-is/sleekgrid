@@ -3462,7 +3462,7 @@ export class Grid<TItem = any> {
         }
 
         var retval = this.trigger(this.onDragInit, dd, e);
-        if (e.isImmediatePropagationStopped()) {
+        if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
             return retval;
         }
 
@@ -3478,7 +3478,7 @@ export class Grid<TItem = any> {
         }
 
         var retval = this.trigger(this.onDragStart, dd, e);
-        if (e.isImmediatePropagationStopped()) {
+        if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
             return retval;
         }
 
@@ -3495,7 +3495,7 @@ export class Grid<TItem = any> {
 
     private handleKeyDown(e: JQueryKeyEventObject): void {
         this.trigger(this.onKeyDown, { row: this._activeRow, cell: this._activeCell }, e);
-        var handled = e.isImmediatePropagationStopped();
+        var handled = e.isImmediatePropagationStopped && e.isImmediatePropagationStopped();
 
         if (!handled) {
             if (!e.shiftKey && !e.altKey) {
@@ -3607,7 +3607,7 @@ export class Grid<TItem = any> {
         }
 
         this.trigger(this.onClick, { row: cell.row, cell: cell.cell }, e);
-        if (e.isImmediatePropagationStopped()) {
+        if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
             return;
         }
 
@@ -3643,7 +3643,7 @@ export class Grid<TItem = any> {
         }
 
         this.trigger(this.onDblClick, { row: cell.row, cell: cell.cell }, e);
-        if (e.isImmediatePropagationStopped()) {
+        if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
             return;
         }
 
