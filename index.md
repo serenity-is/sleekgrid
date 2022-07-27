@@ -1,5 +1,8 @@
+---
+title: Home
+---
 # Examples
 
-## Classic SlickGrid Samples (to check backwards compatibility)
+### Classic SlickGrid Samples (to check backwards compatibility)
 
-()[./examples/compat/]
+- [Example 1 - Basic grid](examples/classic/example1-simple.html)

@@ -41,7 +41,7 @@ var Event = class {
     }
   }
   notify(args, e, scope) {
-    e = e || new EventData();
+    e = patchEvent(e) || new EventData();
     scope = scope || this;
     var returnValue;
     for (var i = 0; i < this._handlers.length && !(e.isPropagationStopped() || e.isImmediatePropagationStopped()); i++) {
@@ -101,6 +101,36 @@ var keyCode = {
   TAB: 9,
   UP: 38
 };
+function returnTrue() {
+  return true;
+}
+function returnFalse() {
+  return false;
+}
+function patchEvent(e) {
+  if (e == null)
+    return e;
+  if (!e.isDefaultPrevented && e.preventDefault)
+    e.isDefaultPrevented = function() {
+      return this.defaultPrevented;
+    };
+  var org1, org2;
+  if (!e.isImmediatePropagationStopped && (org1 = e.stopImmediatePropagation)) {
+    e.isImmediatePropagationStopped = returnFalse;
+    e.stopImmediatePropagation = function() {
+      this.isImmediatePropagationStopped = returnTrue;
+      org1.call(this);
+    };
+  }
+  if (!e.isPropagationStopped && (org2 = e.stopPropagation)) {
+    e.isPropagationStopped = returnFalse;
+    e.stopPropagation = function() {
+      this.isPropagationStopped = returnTrue;
+      org2.call(this);
+    };
+  }
+  return e;
+}
 
 // src/core/editlock.ts
 var EditorLock = class {
@@ -1637,7 +1667,7 @@ var Grid = class {
     var style = getComputedStyle(el);
     if (el.style.boxSizing == "border-box")
       return 0;
-    var p = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"];
+    var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
     var delta = 0;
     p.forEach((val) => delta += parseFloat(style.getPropertyValue(val)) || 0);
     return delta;
@@ -1697,8 +1727,8 @@ var Grid = class {
     }
   }
   measureCellPaddingAndBorder() {
-    const h = ["borderLeftWidth", "borderRightWidth", "paddingLeft", "paddingRight"];
-    const v = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"];
+    const h = ["border-left-width", "border-right-width", "padding-left", "padding-right"];
+    const v = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
     var el = this._headerColsL.appendChild(H("div", { class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default" : ""), style: "visibility:hidden" }));
     this._headerColumnWidthDiff = 0;
     var cs = getComputedStyle(el);
@@ -3127,7 +3157,7 @@ var Grid = class {
       return false;
     }
     var retval = this.trigger(this.onDragInit, dd, e);
-    if (e.isImmediatePropagationStopped()) {
+    if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
       return retval;
     }
     return false;
@@ -3138,7 +3168,7 @@ var Grid = class {
       return false;
     }
     var retval = this.trigger(this.onDragStart, dd, e);
-    if (e.isImmediatePropagationStopped()) {
+    if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
       return retval;
     }
     return false;
@@ -3151,7 +3181,7 @@ var Grid = class {
   }
   handleKeyDown(e) {
     this.trigger(this.onKeyDown, { row: this._activeRow, cell: this._activeCell }, e);
-    var handled = e.isImmediatePropagationStopped();
+    var handled = e.isImmediatePropagationStopped && e.isImmediatePropagationStopped();
     if (!handled) {
       if (!e.shiftKey && !e.altKey) {
         if (this._options.editable && this._currentEditor && this._currentEditor.keyCaptureList) {
@@ -3243,7 +3273,7 @@ var Grid = class {
       return;
     }
     this.trigger(this.onClick, { row: cell.row, cell: cell.cell }, e);
-    if (e.isImmediatePropagationStopped()) {
+    if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
       return;
     }
     if (this.canCellBeActive(cell.row, cell.cell)) {
@@ -3271,7 +3301,7 @@ var Grid = class {
       return;
     }
     this.trigger(this.onDblClick, { row: cell.row, cell: cell.cell }, e);
-    if (e.isImmediatePropagationStopped()) {
+    if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
       return;
     }
     if (this._options.editable) {
@@ -4209,5 +4239,6 @@ export {
   columnDefaults,
   gridDefaults,
   keyCode,
+  patchEvent,
   preClickClassName
 };

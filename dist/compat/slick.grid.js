@@ -1480,7 +1480,7 @@ var Slick_ = (() => {
       var style = getComputedStyle(el);
       if (el.style.boxSizing == "border-box")
         return 0;
-      var p = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"];
+      var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
       var delta = 0;
       p.forEach((val) => delta += parseFloat(style.getPropertyValue(val)) || 0);
       return delta;
@@ -1540,8 +1540,8 @@ var Slick_ = (() => {
       }
     }
     measureCellPaddingAndBorder() {
-      const h = ["borderLeftWidth", "borderRightWidth", "paddingLeft", "paddingRight"];
-      const v = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"];
+      const h = ["border-left-width", "border-right-width", "padding-left", "padding-right"];
+      const v = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
       var el = this._headerColsL.appendChild(H("div", { class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default" : ""), style: "visibility:hidden" }));
       this._headerColumnWidthDiff = 0;
       var cs = getComputedStyle(el);
@@ -2970,7 +2970,7 @@ var Slick_ = (() => {
         return false;
       }
       var retval = this.trigger(this.onDragInit, dd, e);
-      if (e.isImmediatePropagationStopped()) {
+      if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
         return retval;
       }
       return false;
@@ -2981,7 +2981,7 @@ var Slick_ = (() => {
         return false;
       }
       var retval = this.trigger(this.onDragStart, dd, e);
-      if (e.isImmediatePropagationStopped()) {
+      if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
         return retval;
       }
       return false;
@@ -2994,7 +2994,7 @@ var Slick_ = (() => {
     }
     handleKeyDown(e) {
       this.trigger(this.onKeyDown, { row: this._activeRow, cell: this._activeCell }, e);
-      var handled = e.isImmediatePropagationStopped();
+      var handled = e.isImmediatePropagationStopped && e.isImmediatePropagationStopped();
       if (!handled) {
         if (!e.shiftKey && !e.altKey) {
           if (this._options.editable && this._currentEditor && this._currentEditor.keyCaptureList) {
@@ -3086,7 +3086,7 @@ var Slick_ = (() => {
         return;
       }
       this.trigger(this.onClick, { row: cell.row, cell: cell.cell }, e);
-      if (e.isImmediatePropagationStopped()) {
+      if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
         return;
       }
       if (this.canCellBeActive(cell.row, cell.cell)) {
@@ -3114,7 +3114,7 @@ var Slick_ = (() => {
         return;
       }
       this.trigger(this.onDblClick, { row: cell.row, cell: cell.cell }, e);
-      if (e.isImmediatePropagationStopped()) {
+      if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
         return;
       }
       if (this._options.editable) {

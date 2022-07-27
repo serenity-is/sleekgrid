@@ -30,6 +30,7 @@ var Slick = (() => {
     NonDataRow: () => NonDataRow,
     Range: () => Range,
     keyCode: () => keyCode,
+    patchEvent: () => patchEvent,
     preClickClassName: () => preClickClassName
   });
 
@@ -76,7 +77,7 @@ var Slick = (() => {
       }
     }
     notify(args, e, scope) {
-      e = e || new EventData();
+      e = patchEvent(e) || new EventData();
       scope = scope || this;
       var returnValue;
       for (var i = 0; i < this._handlers.length && !(e.isPropagationStopped() || e.isImmediatePropagationStopped()); i++) {
@@ -136,6 +137,36 @@ var Slick = (() => {
     TAB: 9,
     UP: 38
   };
+  function returnTrue() {
+    return true;
+  }
+  function returnFalse() {
+    return false;
+  }
+  function patchEvent(e) {
+    if (e == null)
+      return e;
+    if (!e.isDefaultPrevented && e.preventDefault)
+      e.isDefaultPrevented = function() {
+        return this.defaultPrevented;
+      };
+    var org1, org2;
+    if (!e.isImmediatePropagationStopped && (org1 = e.stopImmediatePropagation)) {
+      e.isImmediatePropagationStopped = returnFalse;
+      e.stopImmediatePropagation = function() {
+        this.isImmediatePropagationStopped = returnTrue;
+        org1.call(this);
+      };
+    }
+    if (!e.isPropagationStopped && (org2 = e.stopPropagation)) {
+      e.isPropagationStopped = returnFalse;
+      e.stopPropagation = function() {
+        this.isPropagationStopped = returnTrue;
+        org2.call(this);
+      };
+    }
+    return e;
+  }
 
   // src/core/editlock.ts
   var EditorLock = class {
