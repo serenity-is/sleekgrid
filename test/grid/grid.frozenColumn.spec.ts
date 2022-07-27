@@ -14,10 +14,14 @@ function threeCols(): Column[] {
     }]
 }
 
+function container() {
+    return document.body.appendChild(document.createElement('div'));
+}
+
 describe('options.frozenColumn', () => {
 
     it('is ignored when undefined', () => {
-        const grid = new Grid($('<div/>').appendTo(document.body), [], threeCols(), {
+        const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false
         });
 
@@ -27,7 +31,7 @@ describe('options.frozenColumn', () => {
     });
 
     it('is ignored when null', () => {
-        const grid = new Grid($('<div/>').appendTo(document.body), [], threeCols(), {
+        const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
             frozenColumn: null
         });
@@ -38,7 +42,7 @@ describe('options.frozenColumn', () => {
     });
 
     it('is ignored when less than zero', () => {
-        const grid = new Grid($('<div/>').appendTo(document.body), [], threeCols(), {
+        const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
             frozenColumn: -1
         });
@@ -49,7 +53,7 @@ describe('options.frozenColumn', () => {
     });
 
     it('sets first column to frozen when 0 and all cols are visible', () => {
-        const grid = new Grid($('<div/>').appendTo(document.body), [], threeCols(), {
+        const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
             frozenColumn: 0
         });
@@ -62,7 +66,7 @@ describe('options.frozenColumn', () => {
     it('sets the first visible column to frozen when 0', () => {
         var cols = threeCols();
         cols[0].visible = false;
-        const grid = new Grid($('<div/>').appendTo(document.body), [], cols , {
+        const grid = new Grid(container(), [], cols , {
             enableColumnReorder: false,
             frozenColumn: 0
         });
@@ -75,7 +79,7 @@ describe('options.frozenColumn', () => {
     });
 
     it('sets first two columns to frozen when 1 and all cols are visible', () => {
-        const grid = new Grid($('<div/>').appendTo(document.body), [], threeCols(), {
+        const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
             frozenColumn: 1
         });
@@ -89,7 +93,7 @@ describe('options.frozenColumn', () => {
     it('sets the first two visible column to frozen when 1', () => {
         var cols = threeCols();
         cols[0].visible = false;
-        const grid = new Grid($('<div/>').appendTo(document.body), [], cols , {
+        const grid = new Grid(container(), [], cols , {
             enableColumnReorder: false,
             frozenColumn: 1
         });
@@ -103,7 +107,7 @@ describe('options.frozenColumn', () => {
     });
 
     it('null gets deleted from options after processing', () => {
-        const grid = new Grid($('<div/>').appendTo(document.body), [], threeCols(), {
+        const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
             frozenColumn: null
         });

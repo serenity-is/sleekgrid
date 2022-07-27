@@ -8,7 +8,7 @@
     "src"
   ],
   "scripts": {
-    "build": "node config/build",
+    "build": "node config/build.mjs",
     "tsc": "tsc"
   },
   "keywords": [

@@ -41,14 +41,11 @@ export function defaultFormatter(_r: number, _c: number, value: any) {
     return htmlEncode(value);
 }
 
-export function disableSelection($target: JQuery) {
-    if ($target && $target.jquery) {
-        $target
-            .attr("unselectable", "on")
-            .css("MozUserSelect", "none")
-            .on("selectstart.ui", function () {
-                return false;
-            }); // from jquery:ui.core.js 1.7.2
+export function disableSelection(target: HTMLElement) {
+    if (target) {
+        target.setAttribute('unselectable', 'on');
+        target.style.userSelect = "none";
+        target.addEventListener('selectstart', () => false);
     }
 }
 
@@ -58,12 +55,14 @@ export function getMaxSupportedCssHeight(): number {
 
 export function getScrollBarDimensions(recalc?: boolean) {
     if (!scrollbarDimensions || recalc) {
-        var $c = $("<div style='position:absolute; top:-10000px; left:-10000px; width:100px; height:100px; overflow:scroll;'></div>").appendTo("body");
+        var c = document.body.appendChild(H('div', {
+            style: 'position:absolute;top:-10000px;left:-10000px;width:100px;height:100px;overflow: scroll;border:0'
+        }));
         scrollbarDimensions = {
-            width: Math.round($c.width() - $c[0].clientWidth),
-            height: Math.round($c.height() - $c[0].clientHeight)
+            width: Math.round(c.offsetWidth - c.clientWidth),
+            height: Math.round(c.offsetWidth - c.clientHeight)
         };
-        $c.remove();
+        c.remove();
     }
     return scrollbarDimensions;
 }
@@ -152,15 +151,16 @@ export function simpleArrayEquals(arr1: number[], arr2: number[]) {
 }
 
 export function addUiStateHover() {
-    $(this).addClass("ui-state-hover");
+    (this as HTMLElement)?.classList?.add("ui-state-hover");
 }
 
 export function removeUiStateHover() {
-    $(this).removeClass("ui-state-hover");
+    (this as HTMLElement)?.classList?.remove("ui-state-hover");
 }
 
 export interface CachedRow {
-    rowNode: JQuery,
+    rowNodeL: HTMLDivElement,
+    rowNodeR: HTMLDivElement,
     // ColSpans of rendered cells (by column idx).
     // Can also be used for checking whether a cell has been rendered.
     cellColSpans: number[],
@@ -184,6 +184,7 @@ export interface PostProcessCleanupEntry {
     groupId: number,
     cellNode?: HTMLElement,
     columnIdx?: number,
-    rowNode?: JQuery;
+    rowNodeL?: HTMLDivElement;
+    rowNodeR?: HTMLDivElement;
     rowIdx?: number;
 }
