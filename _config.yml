@@ -10,5 +10,9 @@ defaults:
     scope:
       path: 'examples'
     values:
-      layout: examples
-        
+      layout: examples    
+  - 
+    scope:
+      path: 'examples/classic'
+    values:
+      layout: examples-classic
