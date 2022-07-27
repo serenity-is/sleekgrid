@@ -794,8 +794,8 @@ export class Grid<TItem = any> {
         for (var i = 0; i < cols.length; i++) {
             var m = cols[i];
 
-            var footerRowCell = H("div", { class: "slick-footerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? 'ui-state-default ' : '') });
-
+            var footerRowCell = H("div", { class: "slick-footerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? ' ui-state-default' : '') });
+            footerRowCell.dataset.c = i.toString();
             _$ && $(footerRowCell).data("column", m);
 
             if (m.footerCssClass)
@@ -907,12 +907,13 @@ export class Grid<TItem = any> {
             else
                 name.innerText = m.name;
             var header = H("div", {
-                class: "slick-header-column l" + i + (this._options.useLegacyUI ? "ui-state-default " : ""),
+                class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default " : ""),
                 id: "" + this._uid + m.id,
                 title: m.toolTip || "",
                 style: "width: " + (m.width - this._headerColumnWidthDiff) + "px"
             }, name);
 
+            header.dataset.c = i.toString();
             _$ && $(header).data("column", m);
 
             m.headerCssClass && header.classList.add(m.headerCssClass);
@@ -939,7 +940,8 @@ export class Grid<TItem = any> {
             if (this._options.showHeaderRow) {
                 var headerRowTarget = frozenCols > 0 && i >= frozenCols ? this._headerRowColsR : this._headerRowColsL;
 
-                var headerRowCell = H("div", { class: "slick-headerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? "ui-state-default " : "") });
+                var headerRowCell = H("div", { class: "slick-headerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? " ui-state-default" : "") });
+                headerRowCell.dataset.c = i.toString();
                 _$ && $(headerRowCell).data("column", m);
                 headerRowTarget.appendChild(headerRowCell);
 
@@ -3704,6 +3706,10 @@ export class Grid<TItem = any> {
     getCellFromNode(cellNode: Element): number {
         if (cellNode == null)
             return null;
+
+        var c = (cellNode as HTMLElement).dataset.c;
+        if (c != null)
+            return parseInt(c, 10);
 
         // read column number from .l<columnNumber> CSS class
         var cls = /\sl(\d+)\s/.exec(' ' + cellNode.className + ' ');
