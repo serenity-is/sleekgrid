@@ -1,5 +1,5 @@
 ﻿{
-  "extends": "../config/tsconfig.base.json",
+  "extends": "../build/tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "declaration": false,
@@ -7,9 +7,6 @@
         "@/*": ["../src/*"]
     },
     "sourceMap": false,
-    "typeRoots": [
-      "../node_modules/@types/",
-    ],
     "types": [
       "jquery",
       "jest"

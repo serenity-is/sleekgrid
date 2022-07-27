@@ -1,19 +1,3 @@
-export const esmTarget = {
-    bundle: true,
-    target: 'es6',
-    color: true,
-    logLevel: 'info'
-}
-
-export const compatTarget = {
-    bundle: true,
-    target: 'es6',
-    format: 'iife',
-    globalName: 'Slick',
-    color: true,
-    logLevel: 'info'
-}
-
 export function globalExternals(filter, externals) {
     return {
         name: "global-externals",
@@ -42,40 +26,49 @@ export function globalExternals(filter, externals) {
     };
 }
 
-// coreExports = ["EditorLock", "Event", "EventData", "EventHandler", "GlobalEditorLock", "Group", "GroupTotals", "keyCode", "NonDataRow", "preClickClassName", "Range" ];
-// gridExports = coreExports.concat(["Grid", "gridDefaults"]);
-
-export const sleekgridEsmBuildOptions = {
-    ...esmTarget,
-    format: 'esm',
-    entryPoints: ['./src/index.ts'],
-    outfile: './dist/sleekgrid.esm.js'
-}
-
-export const sleekgridBuildOptions = {
-    ...esmTarget,
+const compatDefaults = {
+    bundle: true,
+    target: 'es6',
     format: 'iife',
-    globalName: 'Sleek',
-    entryPoints: ['./src/index.ts'],
-    outfile: './dist/sleekgrid.js'
+    globalName: 'Slick',
+    color: true,
+    logLevel: 'info',
+    sourcemap: true
 }
 
-
-export const slickCoreBuildOptions = {
-    ...compatTarget,
+export const compatCore = {
+    ...compatDefaults,
     entryPoints: ['./src/core/index.ts'],
-    outfile: './dist/slick.core.js'
+    outfile: './dist/compat/slick.core.js',
+    sourcemap: true
 }
 
-export const slickGridBuildOptions = {
-    ...compatTarget,
+export const compatGrid = {
+    ...compatDefaults,
     entryPoints: ['./src/grid/index.ts'],
-    globalName: 'Slick._',
-    footer: {
-        js: 'Object.assign(Slick, Slick._); delete Slick._'
+    globalName: 'Slick_',
+    banner: {
+        js: 'var Slick = Slick || {};'
     },
-    outfile: './dist/slick.grid.js',
+    footer: {
+        js: 'Object.assign(Slick, Slick_); delete Slick_;'
+    },
+    outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
         Slick: ["Event", "EventData", "GlobalEditorLock", "keyCode", "NonDataRow", "preClickClassName", "Range"],
     })]
+}
+
+export const sleekDefaults = {
+    bundle: true,
+    target: 'es6',
+    color: true,
+    logLevel: 'info'
+}
+
+export const sleekIndex = {
+    ...sleekDefaults,
+    format: 'esm',
+    entryPoints: ['./src/index.ts'],
+    outfile: './dist/index.js'
 }
