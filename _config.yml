@@ -1,0 +1,14 @@
+title: 'SleekGrid'
+description: 'A modern Data Grid / Spreadsheet component (inspired by SlickGrid)'
+defaults:
+  -
+    scope:
+      path: ''
+    values:
+      layout: default
+  - 
+    scope:
+      path: 'examples'
+    values:
+      layout: examples
+        
