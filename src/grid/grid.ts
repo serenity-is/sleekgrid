@@ -1,5 +1,5 @@
 import { NonDataRow, preClickClassName } from "../core/base";
-import type { Column, ColumnSort, ItemMetadata } from "./column";
+import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
 import { EditController, EditorLock } from "../core/editlock";
 import { EditCommand, Editor } from "./editor";
 import { Event, IEventData, EventData, keyCode } from "../core/event";
@@ -178,18 +178,7 @@ export class Grid<TItem = any> {
         // settings
 
 
-        this._colDefaults = {
-            name: "",
-            resizable: true,
-            sortable: false,
-            minWidth: 30,
-            rerenderOnResize: false,
-            headerCssClass: null,
-            footerCssClass: null,
-            defaultSortAsc: true,
-            focusable: true,
-            selectable: true
-        };
+        this._colDefaults = Object.assign({}, columnDefaults);
 
         //////////////////////////////////////////////////////////////////////////////////////////////
         // Initialization
@@ -913,7 +902,10 @@ export class Grid<TItem = any> {
 
             var name = document.createElement("span");
             name.className = "slick-column-name";
-            name.innerHTML = m.name;
+            if (m.nameIsHtml)
+                name.innerHTML = m.name;
+            else
+                name.innerText = m.name;
             var header = H("div", {
                 class: "slick-header-column l" + i + (this._options.useLegacyUI ? "ui-state-default " : ""),
                 id: "" + this._uid + m.id,

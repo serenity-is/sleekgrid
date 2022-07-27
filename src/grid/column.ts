@@ -22,6 +22,7 @@ export interface Column<TItem = any> {
     maxWidth?: any;
     minWidth?: number;
     name?: string;
+    nameIsHtml?: boolean;
     previousWidth?: number;
     referencedFields?: string[];
     rerenderOnResize?: boolean;
@@ -34,6 +35,20 @@ export interface Column<TItem = any> {
     visible?: boolean;
     width?: number;
 }
+
+export const columnDefaults: Partial<Column> = {
+    name: "",
+    nameIsHtml: false,
+    resizable: true,
+    sortable: false,
+    minWidth: 30,
+    rerenderOnResize: false,
+    headerCssClass: null,
+    footerCssClass: null,
+    defaultSortAsc: true,
+    focusable: true,
+    selectable: true
+};
 
 export interface ColumnMetadata<TItem = any> {
     colspan: number | '*';
@@ -49,3 +64,4 @@ export interface ItemMetadata<TItem = any> {
     columns?: { [key: string]: ColumnMetadata<TItem> };
     formatter?: ColumnFormatter<TItem>;
 }
+
