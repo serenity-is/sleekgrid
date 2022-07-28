@@ -1355,7 +1355,7 @@ export class Grid<TItem = any> {
         if (el.style.boxSizing == 'border-box')
             return 0;
 
-        var p = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"];
+        var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
         var delta = 0;
         p.forEach(val => delta += parseFloat(style.getPropertyValue(val)) || 0);
         return delta;
@@ -1432,8 +1432,8 @@ export class Grid<TItem = any> {
     }
 
     private measureCellPaddingAndBorder(): void {
-        const h = ["borderLeftWidth", "borderRightWidth", "paddingLeft", "paddingRight"];
-        const v = ["borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"];
+        const h = ["border-left-width", "border-right-width", "padding-left", "padding-right"];
+        const v = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
 
         var el = this._headerColsL.appendChild(H("div", { class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default" : ""), style: "visibility:hidden" }));
         this._headerColumnWidthDiff = 0;
