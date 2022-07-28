@@ -194,6 +194,8 @@ export class Grid<TItem = any> {
             throw new Error("SleekGrid requires a valid container, " + container + " does not exist in the DOM.");
         }
 
+        this._container.classList.add('slick-container');
+
         this._rtl = document.body.classList.contains('rtl') || (typeof getComputedStyle != "undefined" &&
             getComputedStyle(this._container).direction == 'rtl');
         if (this._rtl) {
