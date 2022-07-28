@@ -1,5 +1,10 @@
-﻿import { Column } from "@/grid/column";
-import { Grid } from "@/grid/grid";
+﻿import { Column } from "src/grid/column";
+import { Grid } from "src/grid/grid";
+
+const slickPaneRight = "slick-pane-right";
+const slickPaneLeft = "slick-pane-left";
+const slickPaneTop = "slick-pane-top";
+const slickPaneBottom = "slick-pane-bottom";
 
 function threeCols(): Column[] {
     return [{
@@ -113,6 +118,30 @@ describe('options.frozenColumn', () => {
         });
 
         expect(grid.getOptions().frozenColumn).toBeUndefined();
+    });
+
+    it('sets pane visibilities properly', () => {
+        const div = container();
+        const grid = new Grid(div, [], threeCols(), {
+            enableColumnReorder: false,
+            frozenColumn: 1
+        });
+
+        const paneTopLeft = div.querySelector(`.${slickPaneTop}.${slickPaneRight}`) as HTMLDivElement;
+        expect(paneTopLeft).toBeDefined();
+        expect(paneTopLeft.style.display).toBe('');
+
+        const paneTopRight = div.querySelector(`.${slickPaneTop}.${slickPaneRight}`) as HTMLDivElement;
+        expect(paneTopRight).toBeDefined();
+        expect(paneTopRight.style.display).toBe('');
+
+        const paneBottomLeft = div.querySelector(`.${slickPaneBottom}.${slickPaneLeft}`) as HTMLDivElement;
+        expect(paneBottomLeft).toBeDefined();
+        expect(paneBottomLeft.style.display).toBe('none');
+
+        const paneBottomRight = div.querySelector(`.${slickPaneBottom}.${slickPaneRight}`) as HTMLDivElement;
+        expect(paneBottomRight).toBeDefined();
+        expect(paneBottomRight.style.display).toBe('none');
     });
 
 

@@ -310,6 +310,7 @@ export class Grid<TItem = any> {
             this._paneTopL,
             this._paneTopR,
             this._paneBottomL,
+            this._paneBottomR,
             this._focusSink2 = this._focusSink1.cloneNode() as HTMLDivElement);
 
         if (options.viewportClass)
@@ -1380,7 +1381,7 @@ export class Grid<TItem = any> {
     }
 
     private setPaneVisibility(): void {
-        this._paneHeaderR.style.display = this._paneTopR.style.display = this._hasFrozenRows ? '' : 'none';
+        this._paneHeaderR.style.display = this._paneTopR.style.display = this.hasFrozenColumns() ? '' : 'none';
         this._paneBottomL.style.display = this._hasFrozenRows ? '' : 'none';
         this._paneBottomR.style.display = this._hasFrozenRows && this.hasFrozenColumns() ? '' : 'none';
     }
