@@ -1210,7 +1210,7 @@ export class Grid<TItem = any> {
                 }
                 maxPageX = pageX + Math.min(shrinkLeewayOnRight, stretchLeewayOnLeft);
                 minPageX = pageX - Math.min(shrinkLeewayOnLeft, stretchLeewayOnRight);
-                noJQueryDrag && e.dataTransfer.effectAllowed = 'move';
+                noJQueryDrag && (e.dataTransfer.effectAllowed = 'move');
                     
             };
 

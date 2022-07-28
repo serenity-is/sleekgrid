@@ -30,10 +30,13 @@ const compatDefaults = {
     bundle: true,
     target: 'es6',
     format: 'iife',
-    globalName: 'Slick',
+    globalName: 'Slick._',
     color: true,
     logLevel: 'info',
-    sourcemap: true
+    sourcemap: true,
+    footer: {
+        js: 'Slick.Plugins = Object.assign(Slick.Plugins || {}, Slick._.Plugins || {})); Object.assign(Slick, Slick._); delete Slick._;'
+    }
 }
 
 export const compatCore = {
@@ -46,13 +49,6 @@ export const compatCore = {
 export const compatGrid = {
     ...compatDefaults,
     entryPoints: ['./src/grid/index.ts'],
-    globalName: 'Slick_',
-    banner: {
-        js: 'var Slick = Slick || {};'
-    },
-    footer: {
-        js: 'Object.assign(Slick, Slick_); delete Slick_;'
-    },
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
         Slick: ["Event", "EventData", "GlobalEditorLock", "keyCode", "NonDataRow", "preClickClassName", "Range"],
