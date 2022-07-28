@@ -35,7 +35,7 @@ const compatDefaults = {
     logLevel: 'info',
     sourcemap: true,
     footer: {
-        js: 'Slick.Plugins = Object.assign(Slick.Plugins || {}, Slick._.Plugins || {})); Object.assign(Slick, Slick._); delete Slick._;'
+        js: 'Slick.Plugins = Object.assign(Slick.Plugins || {}, Slick._.Plugins || {}); Object.assign(Slick, Slick._); delete Slick._;'
     }
 }
 
