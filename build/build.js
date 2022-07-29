@@ -17,8 +17,8 @@ for (var esmOpt of [compatCore, compatGrid, sleekIndex]) {
 }
 
 const root = resolve(join(fileURLToPath(new URL('.', import.meta.url)), '../'));
-if (existsSync(join(root, "www/_config.yml"))) {
-    const target = join(root, 'www/assets/local');
+if (existsSync(join(root, "docs/_config.yml"))) {
+    const target = join(root, 'docs/assets/local');
     if (!existsSync(target)) {
         mkdirSync(target);
     }

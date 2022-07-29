@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "build": "node build/build",
-    "www": "npm run build && cd www && jekyll serve --livereload --config _config.yml,_config_local.yml"
+    "www": "npm run build && cd docs && jekyll serve --livereload --config _config.yml,_config_local.yml"
   },
   "keywords": [
     "grid",
