@@ -1160,7 +1160,7 @@ export class Grid<TItem = any> {
             const handle = el.appendChild(document.createElement('div'));
             handle.classList.add('slick-resizable-handle');
             handle.draggable = true;
-           
+
             var docDragOver: any = null;
 
             const dragStart = (e: DragEvent) => {
@@ -1168,12 +1168,12 @@ export class Grid<TItem = any> {
                     !noJQueryDrag && e.preventDefault();
                     return;
                 }
-                
+
                 if (noJQueryDrag) {
                     docDragOver = (z: DragEvent) => z.preventDefault();
                     document.addEventListener('dragover', docDragOver);
                 }
-                
+
                 pageX = e.pageX;
                 (e.target as HTMLElement).parentElement?.classList.add("slick-header-column-active");
                 var shrinkLeewayOnRight = null, stretchLeewayOnRight = null;
@@ -1229,7 +1229,7 @@ export class Grid<TItem = any> {
                 maxPageX = pageX + Math.min(shrinkLeewayOnRight, stretchLeewayOnLeft);
                 minPageX = pageX - Math.min(shrinkLeewayOnLeft, stretchLeewayOnRight);
                 noJQueryDrag && (e.dataTransfer.effectAllowed = 'move');
-                    
+
             };
 
             const drag = (e: DragEvent) => {
@@ -1374,7 +1374,7 @@ export class Grid<TItem = any> {
                 if (this._options.syncColumnCellResize) {
                     this.applyColumnWidths();
                 }
-            }            
+            }
 
             const dragEnd = (e: any) => {
                 if (docDragOver) {
@@ -2325,8 +2325,10 @@ export class Grid<TItem = any> {
             if (toolTip != null && toolTip.length)
                 sb.push('tooltip="' + attrEncode(toolTip) + '"');
 
-            if (fmtResult.text?.length)
-                sb.push('>' + fmtResult.text + '</div>');
+            if (fmtResult.html?.length)
+                sb.push('>' + fmtResult.html + '</div>');
+            else if (fmtResult.text?.length)
+                sb.push('>' + htmlEncode(fmtResult.text) + '</div>');
             else
                 sb.push('></div>');
         }
@@ -2478,7 +2480,10 @@ export class Grid<TItem = any> {
             return;
         }
 
-        cellNode.innerHTML = fmtResult.text;
+        if (fmtResult.html !== null)
+            cellNode.innerHTML = fmtResult.html;
+        else
+            cellNode.innerText = fmtResult.text;
 
         if (fmtResult.addClass?.length) {
             cellNode.classList.add(...fmtResult.addClass.split(' '));
@@ -2552,7 +2557,7 @@ export class Grid<TItem = any> {
         this._topPanelH = this._options.showTopPanel ? (this._options.topPanelHeight + this.getVBoxDelta(this._topPanelL.parentElement)) : 0;
         this._headerRowH = this._options.showHeaderRow ? (this._options.headerRowHeight + this.getVBoxDelta(this._headerRowColsL.parentElement)) : 0;
         this._footerRowH = this._options.showFooterRow ? (this._options.footerRowHeight + this.getVBoxDelta(this._footerRowColsL.parentElement)) : 0;
-        
+
         var headerH = (this._options.showColumnHeader) ? (parseFloat(getComputedStyle(this._headerColsL.parentElement).height) + this.getVBoxDelta(this._headerColsL.parentElement)) : 0;
 
         if (this._options.autoHeight) {
