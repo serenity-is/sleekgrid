@@ -1,5 +1,5 @@
 import type { Column } from "./column";
-import type { IEventData } from "../core/event";
+import type { IEventData } from "../core/index";
 import type { Grid } from "./grid";
 import type { Position } from "./types";
 

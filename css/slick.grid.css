@@ -74,6 +74,7 @@ classes should alter those!
   white-space: nowrap;
   cursor: default;
   overflow: hidden;
+  line-height: var(--slick-line-height);
   background-color: var(--slick-header-bg);
 }
 

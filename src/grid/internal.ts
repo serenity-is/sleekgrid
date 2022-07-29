@@ -26,20 +26,6 @@ export function adjustFrozenColumnCompat(columns: Column[], options: GridOptions
     }
 }
 
-export function attrEncode(s: string) {
-    if (s == null)
-        return '';
-
-    return s
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-}
-
-export function defaultFormatter(_r: number, _c: number, value: any) {
-    return htmlEncode(value);
-}
 
 export function disableSelection(target: HTMLElement) {
     if (target) {
@@ -82,10 +68,6 @@ export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { [key: 
             el.appendChild(c);
     }
     return el;
-}
-
-export function htmlEncode(s: string) {
-    return (s + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 }
 
 export function simpleArrayEquals(arr1: number[], arr2: number[]) {

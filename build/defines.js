@@ -35,7 +35,7 @@ const compatDefaults = {
     logLevel: 'info',
     sourcemap: true,
     footer: {
-        js: 'Slick.Plugins = Object.assign(Slick.Plugins || {}, Slick._.Plugins || {}); Object.assign(Slick, Slick._); delete Slick._;'
+        js: '["Plugins", "Formatters", "Editors"].forEach(ns => Slick[ns] = Object.assign(Slick[ns] || {}, Slick._[ns] || {})); Object.assign(Slick, Slick._); delete Slick._;'
     }
 }
 
@@ -51,7 +51,7 @@ export const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["Event", "EventData", "GlobalEditorLock", "keyCode", "NonDataRow", "preClickClassName", "Range"],
+        Slick: ["attrEncode", "Event", "EventData", "GlobalEditorLock", "htmlEncode", "keyCode", "NonDataRow", "preClickClassName", "Range"],
     })]
 }
 

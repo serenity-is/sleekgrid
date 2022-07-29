@@ -1,6 +1,5 @@
-import type { Event } from "../core/event";
+import type { Event, Range } from "../core/index";
 import type { Grid } from "./grid";
-import type { Range } from "../core/range";
 
 export interface IPlugin {
     init(grid: Grid): void;

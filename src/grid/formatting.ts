@@ -1,3 +1,4 @@
+import { htmlEncode } from "../core/index";
 import type { Column } from "./column";
 import type { Grid } from "./grid";
 
@@ -8,6 +9,7 @@ export interface FormatterFactory<TItem = any> {
 export interface FormatterResult {
     addClass?: string;
     addAttrs?: { [key: string]: string };
+    html?: string;
     text?: string;
     toolTip?: string;
 }
@@ -17,3 +19,8 @@ export type AsyncPostRender<TItem = any> = (cellNode: HTMLElement, row: number, 
 export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number, column?: Column<TItem>) => void;
 
 export type CellStylesHash = { [row: number]: { [cell: number]: string } }
+
+export function defaultFormatter(_r: number, _c: number, value: any) {
+    return htmlEncode(value);
+}
+

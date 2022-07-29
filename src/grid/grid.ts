@@ -1,15 +1,11 @@
-import { NonDataRow, preClickClassName } from "../core/base";
+import { attrEncode, htmlEncode, EditController, EditorLock, Event, IEventData, EventData, keyCode, GroupTotals, NonDataRow, preClickClassName, Range } from "../core/index";
 import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
-import { EditController, EditorLock } from "../core/editlock";
 import { EditCommand, Editor } from "./editor";
-import { Event, IEventData, EventData, keyCode } from "../core/event";
 import type { CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
-import { addUiStateHover, adjustFrozenColumnCompat, attrEncode, CachedRow, disableSelection, getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, H, htmlEncode, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
+import { addUiStateHover, adjustFrozenColumnCompat, CachedRow, disableSelection, getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, H, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
 import { IPlugin, Position, RowCell, SelectionModel, ViewRange } from "./types";
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
-import { GroupTotals } from "../core/group";
 import { gridDefaults, GridOptions } from "./gridoptions";
-import { Range } from "../core/range";
 
 
 export class Grid<TItem = any> {
@@ -1071,7 +1067,8 @@ export class Grid<TItem = any> {
             forcePlaceholderSize: hasGrouping ? true : undefined,
             appendTo: hasGrouping ? "body" : undefined,
             start: (_: any, ui: any) => {
-                ui.placeholder.width(ui.helper.outerWidth() - this._headerColumnWidthDiff);
+                ui.placeholder.outerHeight(ui.helper.outerHeight());
+                ui.placeholder.outerWidth(ui.helper.outerWidth());
                 canDragScroll = !this.hasFrozenColumns() ||
                     (ui.placeholder.offset()[this._rtlS] + Math.round(ui.placeholder.width())) > $(this._scrollContainerX).offset()[this._rtlS];
                 $(ui.helper).addClass("slick-header-column-active");
@@ -1116,10 +1113,10 @@ export class Grid<TItem = any> {
 
                 ;
                 var reorderedCols = sortToDesiredOrderAndKeepRest(this._initCols,
-                    (this._headerColsL as any).sortable("toArray").map((x: string) => x.substring(this._uid.length)));
+                    ($(this._headerColsL) as any).sortable("toArray").map((x: string) => x.substring(this._uid.length)));
 
                 reorderedCols = sortToDesiredOrderAndKeepRest(reorderedCols,
-                    (this._headerColsR as any).sortable("toArray").map((x: string) => x.substring(this._uid.length)));
+                    ($(this._headerColsR) as any).sortable("toArray").map((x: string) => x.substring(this._uid.length)));
 
                 this.setColumns(reorderedCols);
                 this.trigger(this.onColumnsReordered, {});
@@ -2325,9 +2322,9 @@ export class Grid<TItem = any> {
             if (toolTip != null && toolTip.length)
                 sb.push('tooltip="' + attrEncode(toolTip) + '"');
 
-            if (fmtResult.html?.length)
+            if (fmtResult.html != null)
                 sb.push('>' + fmtResult.html + '</div>');
-            else if (fmtResult.text?.length)
+            else if (fmtResult.text != null)
                 sb.push('>' + htmlEncode(fmtResult.text) + '</div>');
             else
                 sb.push('></div>');

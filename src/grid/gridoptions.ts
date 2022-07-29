@@ -1,8 +1,7 @@
 import type { Column } from "./column";
 import { EditorLock, GlobalEditorLock } from "../core/editlock";
 import type { EditCommand, EditorFactory } from "./editor";
-import type { ColumnFormatter, FormatterFactory } from "./formatting";
-import { defaultFormatter } from "./internal";
+import { ColumnFormatter, FormatterFactory, defaultFormatter } from "./formatting";
 
 export interface GridOptions<TItem = any> {
     addNewRowCssClass?: string;

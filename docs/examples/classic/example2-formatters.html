@@ -1,0 +1,106 @@
+---
+title: 'Example 2: Formatters'
+
+demonstrates:
+    - width, minWidth, maxWidth, resizable, cssClass column attributes
+    - custom column formatters
+    - 'an extended formatter returning an object { html or text, addClasses, toolTip } rather than a string,
+    allowing adding classes to the cell. You can also optionally use toolTip to fill the "title" attribute'
+
+requires_jqueryui: true
+
+requires_scripts:
+    - slick.editors.js
+    - slick.formatters.js
+
+---
+
+<style>
+    .slick-cell a {
+        color: var(--bs-body-color);
+    }
+
+    .cell-title {
+        font-weight: bold;
+    }
+
+    .cell-effort-driven {
+        text-align: center;
+    }
+
+    .green {
+        background-color: #aaffaa;
+    }
+
+    .red {
+        background-color: #ff7777;
+    }
+
+    .orange {
+        background-color: #ffbb66;
+    }
+</style>
+
+<div id="myGrid"></div>
+
+<script>
+    // a standard formatter returns a string
+    function formatter(row, cell, value, columnDef, item) {
+        return value;
+    }
+
+    // an extended formatter returns an object { text, addClass, toolTip }
+    function statusFormatter(row, cell, value, column, item) {
+        var rtn = { text: value };
+        if (value !== null && value !== "") {
+            if (value < 33) {
+                rtn.addClass = "red";
+                rtn.toolTip = "danger zone";
+            } else if (value < 66) {
+                rtn.addClass = "orange";
+                rtn.toolTip = "might want to look at it";
+            } else {
+                rtn.addClass = "green";
+                rtn.toolTip = "all good";
+            }
+        }
+        return rtn;
+    }
+
+    function checkMark(row, cell, value) {
+        return value ? '<i class="fa fa-check-square text-success" style="font-size: 1.5rem"></i>' : '';
+    }
+
+    var grid;
+    var data = [];
+    var columns = [
+        { id: "title", name: "Title", field: "title", width: 120, cssClass: "cell-title", formatter: formatter },
+        { id: "duration", name: "Duration", field: "duration" },
+        { id: "%", name: "% Complete", field: "percentComplete", width: 100, resizable: false, formatter: Slick.Formatters.PercentCompleteBar },
+        { id: "status", name: "Status", field: "percentComplete", width: 70, resizable: false, formatter: statusFormatter, editor: Slick.Editors.Text },
+        { id: "start", name: "Start", field: "start", minWidth: 90 },
+        { id: "finish", name: "Finish", field: "finish", minWidth: 90 },
+        { id: "effort-driven", name: "Effort Driven", sortable: false, width: 100, minWidth: 20, maxWidth: 100, cssClass: "cell-effort-driven", field: "effortDriven", formatter: checkMark }
+    ];
+
+    var options = {
+        editable: true,
+        enableAddRow: false,
+        enableCellNavigation: true
+    };
+
+    $(function () {
+        for (var i = 0; i < 5; i++) {
+            var d = (data[i] = {});
+
+            d["title"] = "<a href='#' tabindex='0'>Task</a> " + i;
+            d["duration"] = "5 days";
+            d["percentComplete"] = Math.min(100, Math.round(Math.random() * 110));
+            d["start"] = "01/01/2022";
+            d["finish"] = "01/05/2022";
+            d["effortDriven"] = (i % 4 == 0);
+        }
+
+        grid = new Slick.Grid("#myGrid", data, columns, options);
+    })
+</script>
