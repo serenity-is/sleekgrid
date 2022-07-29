@@ -1,10 +1,8 @@
 import esbuild from "esbuild";
 import { compatCore, compatGrid, sleekIndex } from "./defines.js";
-import { existsSync, cpSync } from "fs";
+import { existsSync, cpSync, mkdirSync } from "fs";
 import { resolve, join } from "path";
 import { fileURLToPath } from 'url';
-
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 for (var esmOpt of [compatCore, compatGrid, sleekIndex]) {
     await esbuild.build({
@@ -18,8 +16,14 @@ for (var esmOpt of [compatCore, compatGrid, sleekIndex]) {
     }).catch(() => process.exit());
 }
 
-var myDist = resolve(__dirname, '../dist');
-var ghDist = resolve(__dirname, "../gh-pages/dist");
-if (existsSync(myDist) && existsSync(join(ghDist, "../_config.yml"))) {
-    cpSync(myDist, ghDist, { force: true, recursive: true });
+const root = resolve(join(fileURLToPath(new URL('.', import.meta.url)), '../'));
+if (existsSync(join(root, "www/_config.yml"))) {
+    const target = join(root, 'www/assets/local');
+    if (!existsSync(target)) {
+        mkdirSync(target);
+    }
+
+    existsSync(join(root, 'css')) && cpSync(join(root, 'css'), join(target, 'css'), { force: true, recursive: true });
+    existsSync(join(root, 'dist')) && cpSync(join(root, 'dist'), join(target, 'dist'), { force: true, recursive: true });
+    existsSync(join(root, 'lib')) && cpSync(join(root, 'lib'), join(target, 'lib'), { force: true, recursive: true });
 }

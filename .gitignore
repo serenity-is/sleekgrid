@@ -4,6 +4,7 @@ _site
 .jekyll-*
 GemFile*
 node_modules/
+/www/assets/local
 *.bak
 *.orig
 *.log

@@ -4,6 +4,7 @@
   "description": "A modern Data Grid / Spreadsheet component",
   "type": "module",
   "source": "src/index.ts",
+  "main": "dist/index.js",
   "files": [
     "dist/**/*.css",
     "dist/**/*.js",
@@ -15,7 +16,8 @@
     "src/**/tsconfig.json"
   ],
   "scripts": {
-    "build": "node build/build"
+    "build": "node build/build",
+    "www": "npm run build && cd www && jekyll serve --livereload --config _config.yml,_config_local.yml"
   },
   "keywords": [
     "grid",

@@ -1,10 +1,10 @@
 {% if page.demonstrates %}
 <div class="example-demonstrates">
-  <h3>Demonstrates:</h3>
-  <ul>
-    {% for d in page.demonstrates %}
-    <li>d</li>
-    {% endfor %}
-  </ul>
+    <h3>Demonstrates:</h3>
+    <ul>
+        {% for d in page.demonstrates %}
+        <li>{{ d }}</li>
+        {% endfor %}
+    </ul>
 </div>
 {% endif %}
