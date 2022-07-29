@@ -1,4 +1,5 @@
-var Slick = (() => {
+var Slick = Slick || {};
+Slick._ = (() => {
   var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -213,6 +214,9 @@ var Slick = (() => {
       this.collapsed = false;
       this.rows = [];
     }
+    equals(group) {
+      return this.value === group.value && this.count === group.count && this.collapsed === group.collapsed && this.title === group.title;
+    }
   };
   var GroupTotals = class extends NonDataRow {
     constructor() {
@@ -253,4 +257,5 @@ var Slick = (() => {
   };
   return __toCommonJS(core_exports);
 })();
+Slick.Plugins = Object.assign(Slick.Plugins || {}, Slick._.Plugins || {}); Object.assign(Slick, Slick._); delete Slick._;
 //# sourceMappingURL=slick.core.js.map

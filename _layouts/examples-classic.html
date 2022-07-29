@@ -1,20 +1,32 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    {% include _head.html %}
-    <link rel="stylesheet" href="{{ site.baseurl }}/assets/slick.grid.css" type="text/css"/>
-    <link rel="stylesheet" href="{{ site.baseurl }}/assets/slick-default-theme.css" type="text/css"/>
-    <link rel="stylesheet" href="{{ site.baseurl }}/assets/examples-classic.css" type="text/css"/>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <script src="{{ site.baseurl }}/dist/compat/slick.core.js"></script>
-    <script src="{{ site.baseurl }}/dist/compat/slick.grid.js"></script>
-    <script src="{{ site.baseurl }}/assets/slick.dataview.js"></script>
-  </head>
-  <body>
-    <h1>{{ page.title }} - Classic SlickGrid Examples</h1>
-    <section>
-      {{ content }}
-    </section>
+
+<head>
+  {% include _head.html %}
+  <link rel="stylesheet" href="{{ site.baseurl }}/assets/slick.grid.css" type="text/css" />
+  <link rel="stylesheet" href="{{ site.baseurl }}/assets/slick-default-theme.css" type="text/css" />
+  <link rel="stylesheet" href="{{ site.baseurl }}/assets/examples-classic.css" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="{{ site.baseurl }}/dist/compat/slick.core.js"></script>
+  <script src="{{ site.baseurl }}/dist/compat/slick.grid.js"></script>
+  <script src="{{ site.baseurl }}/assets/slick.dataview.js"></script>
+</head>
+
+<body>
+  <section class="container container-xl">
+    <h1 class="page-title">{{ page.title }} - Classic SlickGrid Examples</h1>
+    <div class="row example-container">
+      <div class="col-md-8 example-content">
+        {{ content }}
+      </div>
+      <div class="col-md-4 example-info">
+        {% include _example_demonstrates.html %}
+        {% include _example_sources.html %}
+      </div>
+    </div>
     {% include _footer.html %}
-  </body>
+  </section>
+</body>
+
 </html>

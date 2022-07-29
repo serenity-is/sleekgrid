@@ -1,0 +1,10 @@
+  <div class="example-sources">
+    <h3>View Source:</h3>
+    <ul>
+      <li><a href="{{ site.data.globals.srcurl }}{{ page.url }}" target="_sourcewindow"> View the source for this example on Github</a></li>
+      {% for s in page.sources %}
+      <li><a href="{{ site.data.globals.srcurl }}{{ page.dir }}{{s}}" target="_sourcewindow"> View the source for this example on Github</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>         

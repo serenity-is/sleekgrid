@@ -177,6 +177,9 @@ var Group = class extends NonDataRow {
     this.collapsed = false;
     this.rows = [];
   }
+  equals(group) {
+    return this.value === group.value && this.count === group.count && this.collapsed === group.collapsed && this.title === group.title;
+  }
 };
 var GroupTotals = class extends NonDataRow {
   constructor() {
@@ -381,7 +384,7 @@ var gridDefaults = {
   enableTabKeyNavigation: true,
   enableTextSelectionOnCells: false,
   explicitInitialization: false,
-  footerRowHeight: 25,
+  footerRowHeight: 32,
   forceFitColumns: false,
   forceSyncScrolling: false,
   formatterFactory: null,
@@ -390,14 +393,14 @@ var gridDefaults = {
   fullWidthRows: false,
   groupingPanel: false,
   groupingPanelHeight: 34,
-  headerRowHeight: 25,
+  headerRowHeight: 32,
   leaveSpaceForNewRows: false,
   useLegacyUI: true,
   minBuffer: 3,
   multiColumnSort: false,
   multiSelect: true,
   renderAllCells: false,
-  rowHeight: 25,
+  rowHeight: 32,
   selectedCellCssClass: "selected",
   showCellSelection: true,
   showColumnHeader: true,
@@ -589,7 +592,7 @@ var Grid = class {
         this._paneTopL.style.position = "relative";
       } else
         this._paneTopL.style.position = "";
-      this._paneTopL.style.top = (parseFloat(getComputedStyle(this._paneHeaderL).height) || (this._options.showHeaderRow ? this._options.headerRowHeight : 0) + this._groupingPanelH) + "px";
+      this._paneTopL.style.top = this._groupingPanelH + (parseFloat(getComputedStyle(this._paneHeaderL).height) || this._headerRowH) + "px";
       this._paneTopL.style.height = this._paneTopH + "px";
       var paneBottomTop = this._paneTopL.offsetTop + this._paneTopH;
       if (!this._options.autoHeight) {
@@ -686,10 +689,19 @@ var Grid = class {
     if (this._container == null) {
       throw new Error("SleekGrid requires a valid container, " + container + " does not exist in the DOM.");
     }
+    this._container.classList.add("slick-container");
     this._rtl = document.body.classList.contains("rtl") || typeof getComputedStyle != "undefined" && getComputedStyle(this._container).direction == "rtl";
     if (this._rtl) {
       this._rtlS = "right";
       this._rtlE = "left";
+    }
+    if (options == null ? void 0 : options.createPreHeaderPanel) {
+      if (options.groupingPanel == null)
+        options.groupingPanel = true;
+      if (options.groupingPanelHeight == null && options.preHeaderPanelHeight != null)
+        options.groupingPanelHeight = options.preHeaderPanelHeight;
+      if (options.showGroupingPanel == null && options.showPreHeaderPanel != null)
+        options.showGroupingPanel = options.showPreHeaderPanel;
     }
     options = Object.assign({}, gridDefaults, options);
     this._options = options;
@@ -724,6 +736,9 @@ var Grid = class {
         class: "slick-grouping-panel",
         style: "overflow:hidden; position:relative;" + (!options.showGroupingPanel ? " display: none" : "")
       }));
+      if (options.createPreHeaderPanel) {
+        this._groupingPanel.appendChild(H("div", { class: "slick-preheader-panel" }));
+      }
     }
     const uisd = this._options.useLegacyUI ? " ui-state-default" : "";
     var spacerW = this.getCanvasWidth() + (this._scrollDims = getScrollBarDimensions()).width + "px";
@@ -826,6 +841,7 @@ var Grid = class {
       this._paneTopL,
       this._paneTopR,
       this._paneBottomL,
+      this._paneBottomR,
       this._focusSink2 = this._focusSink1.cloneNode()
     );
     if (options.viewportClass)
@@ -1140,6 +1156,10 @@ var Grid = class {
   getGroupingPanel() {
     return this._groupingPanel;
   }
+  getPreHeaderPanel() {
+    var _a;
+    return (_a = this._groupingPanel) == null ? void 0 : _a.querySelector(".slick-preheader-panel");
+  }
   getHeaderRow() {
     return this._headerRowColsL;
   }
@@ -1453,12 +1473,13 @@ var Grid = class {
     });
   }
   setupColumnResize() {
-    if (typeof $ === "undefined" || !$.fn || !$.fn.drag)
-      return;
-    var $col, j, k, c, pageX, columnElements, minPageX, maxPageX, firstResizable, lastResizable, cols = this._cols;
-    columnElements = $([this._headerColsL, this._headerColsR]).children();
-    columnElements.find(".slick-resizable-handle").remove();
-    columnElements.each((i) => {
+    var minPageX, pageX, maxPageX, cols = this._cols;
+    const columnElements = Array.from(this._headerColsL.children).concat(Array.from(this._headerColsR.children));
+    var j, k, c, pageX, minPageX, maxPageX, firstResizable, lastResizable, cols = this._cols;
+    var firstResizable, lastResizable;
+    columnElements.forEach((el, i) => {
+      var _a;
+      (_a = el.querySelector("slick-resizable-handle")) == null ? void 0 : _a.remove();
       if (cols[i].resizable) {
         if (firstResizable === void 0) {
           firstResizable = i;
@@ -1469,20 +1490,30 @@ var Grid = class {
     if (firstResizable === void 0) {
       return;
     }
-    columnElements.each((i, e) => {
+    const noJQueryDrag = typeof $ === "undefined" || !$.fn || !$.fn.drag;
+    columnElements.forEach((el, i) => {
       if (i < firstResizable || this._options.forceFitColumns && i >= lastResizable) {
         return;
       }
-      $col = $(e);
-      $("<div class='slick-resizable-handle' />").appendTo(e).on("dragstart", (e2, dd) => {
+      const handle = el.appendChild(document.createElement("div"));
+      handle.classList.add("slick-resizable-handle");
+      handle.draggable = true;
+      var docDragOver = null;
+      const dragStart = (e) => {
+        var _a;
         if (!this.getEditorLock().commitCurrentEdit()) {
-          return false;
+          !noJQueryDrag && e.preventDefault();
+          return;
         }
-        pageX = e2.pageX;
-        $(e2.target).parent().addClass("slick-header-column-active");
+        if (noJQueryDrag) {
+          docDragOver = (z) => z.preventDefault();
+          document.addEventListener("dragover", docDragOver);
+        }
+        pageX = e.pageX;
+        (_a = e.target.parentElement) == null ? void 0 : _a.classList.add("slick-header-column-active");
         var shrinkLeewayOnRight = null, stretchLeewayOnRight = null;
-        columnElements.each((i2, e3) => {
-          cols[i2].previousWidth = $(e3).outerWidth();
+        columnElements.forEach((e2, i2) => {
+          cols[i2].previousWidth = e2.offsetWidth;
         });
         if (this._options.forceFitColumns) {
           shrinkLeewayOnRight = 0;
@@ -1529,112 +1560,120 @@ var Grid = class {
         }
         maxPageX = pageX + Math.min(shrinkLeewayOnRight, stretchLeewayOnLeft);
         minPageX = pageX - Math.min(shrinkLeewayOnLeft, stretchLeewayOnRight);
-      }).on("drag", (e2, dd) => {
-        var actualMinWidth, d = Math.min(maxPageX, Math.max(minPageX, e2.pageX)) - pageX, x;
+        noJQueryDrag && (e.dataTransfer.effectAllowed = "move");
+      };
+      const drag = (e) => {
+        if (!e.pageX && !e.clientX && !e.pageY && !e.clientY)
+          return;
+        if (noJQueryDrag) {
+          e.dataTransfer.effectAllowed = "none";
+          e.preventDefault();
+        }
+        var actualMinWidth, d = Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX, x, j2, k2, c2;
         if (d < 0) {
           x = d;
           var newCanvasWidthL = 0, newCanvasWidthR = 0;
-          for (j = i; j >= 0; j--) {
-            c = cols[j];
-            if (c.resizable) {
-              actualMinWidth = Math.max(c.minWidth || 0, this._absoluteColMinWidth);
-              if (x && c.previousWidth + x < actualMinWidth) {
-                x += c.previousWidth - actualMinWidth;
-                c.width = actualMinWidth;
+          for (j2 = i; j2 >= 0; j2--) {
+            c2 = cols[j2];
+            if (c2.resizable) {
+              actualMinWidth = Math.max(c2.minWidth || 0, this._absoluteColMinWidth);
+              if (x && c2.previousWidth + x < actualMinWidth) {
+                x += c2.previousWidth - actualMinWidth;
+                c2.width = actualMinWidth;
               } else {
-                c.width = c.previousWidth + x;
+                c2.width = c2.previousWidth + x;
                 x = 0;
               }
             }
           }
           var frozenCols = this._frozenCols;
-          for (k = 0; k <= i; k++) {
-            c = cols[k];
-            if (frozenCols > 0 && k >= frozenCols) {
-              newCanvasWidthR += c.width;
+          for (k2 = 0; k2 <= i; k2++) {
+            c2 = cols[k2];
+            if (frozenCols > 0 && k2 >= frozenCols) {
+              newCanvasWidthR += c2.width;
             } else {
-              newCanvasWidthL += c.width;
+              newCanvasWidthL += c2.width;
             }
           }
           if (this._options.forceFitColumns) {
             x = -d;
-            for (j = i + 1; j < columnElements.length; j++) {
-              c = cols[j];
-              if (c.resizable) {
-                if (x && c.maxWidth && c.maxWidth - c.previousWidth < x) {
-                  x -= c.maxWidth - c.previousWidth;
-                  c.width = c.maxWidth;
+            for (j2 = i + 1; j2 < columnElements.length; j2++) {
+              c2 = cols[j2];
+              if (c2.resizable) {
+                if (x && c2.maxWidth && c2.maxWidth - c2.previousWidth < x) {
+                  x -= c2.maxWidth - c2.previousWidth;
+                  c2.width = c2.maxWidth;
                 } else {
-                  c.width = c.previousWidth + x;
+                  c2.width = c2.previousWidth + x;
                   x = 0;
                 }
-                if (frozenCols > 0 && j >= frozenCols) {
-                  newCanvasWidthR += c.width;
+                if (frozenCols > 0 && j2 >= frozenCols) {
+                  newCanvasWidthR += c2.width;
                 } else {
-                  newCanvasWidthL += c.width;
+                  newCanvasWidthL += c2.width;
                 }
               }
             }
           } else {
-            for (j = i + 1; j < columnElements.length; j++) {
-              c = cols[j];
-              if (frozenCols >= 0 && j >= frozenCols) {
-                newCanvasWidthR += c.width;
+            for (j2 = i + 1; j2 < columnElements.length; j2++) {
+              c2 = cols[j2];
+              if (frozenCols >= 0 && j2 >= frozenCols) {
+                newCanvasWidthR += c2.width;
               } else {
-                newCanvasWidthL += c.width;
+                newCanvasWidthL += c2.width;
               }
             }
           }
         } else {
           x = d;
           var newCanvasWidthL = 0, newCanvasWidthR = 0;
-          for (j = i; j >= 0; j--) {
-            c = cols[j];
-            if (c.resizable) {
-              if (x && c.maxWidth && c.maxWidth - c.previousWidth < x) {
-                x -= c.maxWidth - c.previousWidth;
-                c.width = c.maxWidth;
+          for (j2 = i; j2 >= 0; j2--) {
+            c2 = cols[j2];
+            if (c2.resizable) {
+              if (x && c2.maxWidth && c2.maxWidth - c2.previousWidth < x) {
+                x -= c2.maxWidth - c2.previousWidth;
+                c2.width = c2.maxWidth;
               } else {
-                c.width = c.previousWidth + x;
+                c2.width = c2.previousWidth + x;
                 x = 0;
               }
             }
           }
-          for (k = 0; k <= i; k++) {
-            c = cols[k];
-            if (frozenCols > 0 && k >= frozenCols) {
-              newCanvasWidthR += c.width;
+          for (k2 = 0; k2 <= i; k2++) {
+            c2 = cols[k2];
+            if (frozenCols > 0 && k2 >= frozenCols) {
+              newCanvasWidthR += c2.width;
             } else {
-              newCanvasWidthL += c.width;
+              newCanvasWidthL += c2.width;
             }
           }
           if (this._options.forceFitColumns) {
             x = -d;
-            for (j = i + 1; j < columnElements.length; j++) {
-              c = cols[j];
-              if (c.resizable) {
-                actualMinWidth = Math.max(c.minWidth || 0, this._absoluteColMinWidth);
-                if (x && c.previousWidth + x < actualMinWidth) {
-                  x += c.previousWidth - actualMinWidth;
-                  c.width = actualMinWidth;
+            for (j2 = i + 1; j2 < columnElements.length; j2++) {
+              c2 = cols[j2];
+              if (c2.resizable) {
+                actualMinWidth = Math.max(c2.minWidth || 0, this._absoluteColMinWidth);
+                if (x && c2.previousWidth + x < actualMinWidth) {
+                  x += c2.previousWidth - actualMinWidth;
+                  c2.width = actualMinWidth;
                 } else {
-                  c.width = c.previousWidth + x;
+                  c2.width = c2.previousWidth + x;
                   x = 0;
                 }
-                if (frozenCols && j >= frozenCols) {
-                  newCanvasWidthR += c.width;
+                if (frozenCols && j2 >= frozenCols) {
+                  newCanvasWidthR += c2.width;
                 } else {
-                  newCanvasWidthL += c.width;
+                  newCanvasWidthL += c2.width;
                 }
               }
             }
           } else {
-            for (j = i + 1; j < columnElements.length; j++) {
-              c = cols[j];
-              if (frozenCols > 0 && j >= frozenCols) {
-                newCanvasWidthR += c.width;
+            for (j2 = i + 1; j2 < columnElements.length; j2++) {
+              c2 = cols[j2];
+              if (frozenCols > 0 && j2 >= frozenCols) {
+                newCanvasWidthR += c2.width;
               } else {
-                newCanvasWidthL += c.width;
+                newCanvasWidthL += c2.width;
               }
             }
           }
@@ -1647,12 +1686,17 @@ var Grid = class {
         if (this._options.syncColumnCellResize) {
           this.applyColumnWidths();
         }
-      }).on("dragend", (e2) => {
-        var newWidth;
-        $(e2.target).parent().removeClass("slick-header-column-active");
+      };
+      const dragEnd = (e) => {
+        var _a;
+        if (docDragOver) {
+          document.removeEventListener("dragover", docDragOver);
+          docDragOver = null;
+        }
+        (_a = e.target.parentElement) == null ? void 0 : _a.classList.remove("slick-header-column-active");
         for (j = 0; j < columnElements.length; j++) {
           c = cols[j];
-          newWidth = $(columnElements[j]).outerWidth();
+          var newWidth = columnElements[j].offsetWidth;
           if (c.previousWidth !== newWidth && c.rerenderOnResize) {
             this.invalidateAllRows();
           }
@@ -1660,12 +1704,23 @@ var Grid = class {
         this.updateCanvasWidth(true);
         this.render();
         this.trigger(this.onColumnsResized);
-      });
+      };
+      if (noJQueryDrag) {
+        handle.addEventListener("dragstart", dragStart);
+        handle.addEventListener("drag", drag);
+        handle.addEventListener("dragend", dragEnd);
+        handle.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.dataTransfer.effectAllowed = "move";
+        });
+      } else {
+        $(handle).on("dragstart", dragStart).on("drag", drag).on("dragend", dragEnd);
+      }
     });
   }
   getVBoxDelta(el) {
     var style = getComputedStyle(el);
-    if (el.style.boxSizing == "border-box")
+    if (style.boxSizing == "border-box")
       return 0;
     var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
     var delta = 0;
@@ -1684,7 +1739,7 @@ var Grid = class {
     }
   }
   setPaneVisibility() {
-    this._paneHeaderR.style.display = this._paneTopR.style.display = this._hasFrozenRows ? "" : "none";
+    this._paneHeaderR.style.display = this._paneTopR.style.display = this.hasFrozenColumns() ? "" : "none";
     this._paneBottomL.style.display = this._hasFrozenRows ? "" : "none";
     this._paneBottomR.style.display = this._hasFrozenRows && this.hasFrozenColumns() ? "" : "none";
   }
@@ -1931,8 +1986,11 @@ var Grid = class {
     }
     var h, cols = this._cols, colsL = cols.length, frozenCols = this._frozenCols, headersL = this._headerColsL.children, headersR = this._headerColsR.children;
     for (var i = 0, ii = headersL.length + headersR.length; i < ii && i < colsL; i++) {
-      h = (frozenCols && i >= frozenCols ? headersR : headersL).item(i);
-      h.style.width = cols[i].width + "px";
+      h = (frozenCols && i >= frozenCols ? headersR : headersL).item(frozenCols > 0 && i >= frozenCols ? i - frozenCols : i);
+      var target = cols[i].width - this._headerColumnWidthDiff;
+      if (h.offsetWidth !== target) {
+        h.style.width = target + "px";
+      }
     }
     this.updateViewColLeftRight();
   }
@@ -2181,6 +2239,9 @@ var Grid = class {
         $(this._groupingPanel).slideUp("fast", this.resizeCanvas);
       }
     }
+  }
+  setPreHeaderPanelVisibility(visible) {
+    this.setGroupingPanelVisibility(visible);
   }
   setHeaderRowVisibility(visible) {
     if (this._options.showHeaderRow != visible) {
@@ -2516,24 +2577,23 @@ var Grid = class {
     this.invalidatePostProcessingResults(row);
   }
   getViewportHeight() {
-    if (!this._options.autoHeight || this.hasFrozenColumns()) {
-      this._topPanelH = this._options.showTopPanel ? this._options.topPanelHeight + this.getVBoxDelta(this._topPanelL.parentElement) : 0;
-      this._headerRowH = this._options.showHeaderRow ? this._options.headerRowHeight + this.getVBoxDelta(this._headerRowColsL.parentElement) : 0;
-      this._footerRowH = this._options.showFooterRow ? this._options.footerRowHeight + this.getVBoxDelta(this._footerRowColsL.parentElement) : 0;
-    }
+    this._groupingPanelH = this._options.groupingPanel && this._options.showGroupingPanel ? this._options.groupingPanelHeight + this.getVBoxDelta(this._groupingPanel) : 0;
+    this._topPanelH = this._options.showTopPanel ? this._options.topPanelHeight + this.getVBoxDelta(this._topPanelL.parentElement) : 0;
+    this._headerRowH = this._options.showHeaderRow ? this._options.headerRowHeight + this.getVBoxDelta(this._headerRowColsL.parentElement) : 0;
+    this._footerRowH = this._options.showFooterRow ? this._options.footerRowHeight + this.getVBoxDelta(this._footerRowColsL.parentElement) : 0;
+    var headerH = this._options.showColumnHeader ? parseFloat(getComputedStyle(this._headerColsL.parentElement).height) + this.getVBoxDelta(this._headerColsL.parentElement) : 0;
     if (this._options.autoHeight) {
       this._viewportH = this._options.rowHeight * this.getDataLengthIncludingAddNew();
       if (!this.hasFrozenColumns()) {
-        this._viewportH += this._paneHeaderL.offsetHeight;
-        this._viewportH += this._options.showHeaderRow ? this._options.headerRowHeight + this.getVBoxDelta(this._headerRowColsL.parentElement) : 0;
-        this._viewportH += this._options.showFooterRow ? this._options.footerRowHeight + this.getVBoxDelta(this._footerRowColsL.parentElement) : 0;
+        this._viewportH += this._groupingPanelH;
+        this._viewportH += headerH;
+        this._viewportH += this._headerRowH;
+        this._viewportH += this._footerRowH;
         this._viewportH += this.getCanvasWidth() > this._viewportW ? this._scrollDims.height : 0;
       }
     } else {
-      var columnNamesH = this._options.showColumnHeader ? parseFloat(getComputedStyle(this._headerColsL.parentElement).height) + this.getVBoxDelta(this._headerColsL.parentElement) : 0;
-      this._groupingPanelH = this._options.groupingPanel && this._options.showGroupingPanel ? this._options.groupingPanelHeight + this.getVBoxDelta(this._groupingPanel) : 0;
       var style = getComputedStyle(this._container);
-      this._viewportH = parseFloat(style.height) - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - columnNamesH - this._topPanelH - this._headerRowH - this._footerRowH - this._groupingPanelH;
+      this._viewportH = parseFloat(style.height) - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - headerH - this._topPanelH - this._headerRowH - this._footerRowH - this._groupingPanelH;
     }
     this._numVisibleRows = Math.ceil(this._viewportH / this._options.rowHeight);
     return this._viewportH;

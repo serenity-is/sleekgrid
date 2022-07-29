@@ -1,64 +1,5 @@
-* {
-    font-family: arial;
-    font-size: 8pt;
-}
-
-h2 {
-    border-bottom: 1px dotted gray;
-}
-
-ul {
-    margin-left: 0;
-    padding: 0;
-    cursor: default;
-}
-
-.options-panel li {
-    background: url("../images/arrow_right_spearmint.png") no-repeat center left;
-    padding: 0 0 0 14px;
-
-    list-style: none;
-    margin: 0;
-}
-
-#myGrid,
-.example-grid {
-    background: white;
-    outline: 0;
-    border: 1px solid gray;
-}
-
-.grid-header {
-    border: 1px solid gray;
-    border-bottom: 0;
-    border-top: 0;
-    background: url('../images/header-bg.gif') repeat-x center top;
-    color: black;
-    height: 24px;
-    line-height: 24px;
-}
-
-.grid-header label {
-    display: inline-block;
-    font-weight: bold;
-    margin: auto auto auto 6px;
-}
-
-.grid-header .ui-icon {
-    margin: 4px 4px auto 6px;
-    background-color: transparent;
-    border-color: transparent;
-}
-
-.grid-header .ui-icon.ui-state-hover {
-    background-color: white;
-}
-
-.grid-header #txtSearch {
-    margin: 0 4px 0 4px;
-    padding: 2px 2px;
-    border-radius: 2px;
-    border: 1px solid silver;
+#myGrid {
+    min-height: 450px;
 }
 
 .options-panel {
@@ -73,7 +14,12 @@ ul {
     left: 650px;
 }
 
-/* Individual cell styles */
+.options-panel li {
+    padding: 0 0 0 14px;
+    list-style: none;
+    margin: 0;
+}
+
 .slick-cell.task-name {
     font-weight: bold;
     text-align: right;

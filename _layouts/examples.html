@@ -1,13 +1,24 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    {% include _head.html %}
-  </head>
-  <body>
-    {% include _topnav.html %}
-    <section>
-      {{ content }}
-    </section>
+
+<head>
+  {% include _head.html %}
+</head>
+
+<body>
+  <section class="container container-xl">
+    <h1 class="page-title">{{ page.title }} - Classic SlickGrid Examples</h1>
+    <div class="row example-container">
+      <div class="col-md-8 example-content">
+        {{ content }}
+      </div>
+      <div class="col-md-4 example-info">
+        {% include _example_demonstrates.html %}
+        {% include _example_sources.html %}
+      </div>
+    </div>
     {% include _footer.html %}
-  </body>
+  </section>
+</body>
+
 </html>
