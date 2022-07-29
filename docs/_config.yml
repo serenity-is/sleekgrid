@@ -9,7 +9,7 @@ packageurl:
     slickgrid: https://cdn.jsdelivr.net/npm/slickgrid@2.4.45
 
 srcurl:
-    www: https://github.com/serenity-is/sleekgrid/blob/main/www
+    docs: https://github.com/serenity-is/sleekgrid/blob/main/docs
 
 defaults:
     -
