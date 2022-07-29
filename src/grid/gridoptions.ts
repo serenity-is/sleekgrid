@@ -17,6 +17,7 @@ export interface GridOptions<TItem = any> {
     cellFlashingCssClass?: string;
     cellHighlightCssClass?: string;
     columns?: Column<TItem>[];
+    createPreHeaderPanel?: boolean;
     dataItemColumnValueExtractor?: (item: TItem, column: Column<TItem>) => void;
     defaultColumnWidth?: number;
     defaultFormatter?: ColumnFormatter<TItem>;
@@ -49,6 +50,7 @@ export interface GridOptions<TItem = any> {
     minBuffer?: number;
     multiColumnSort?: boolean;
     multiSelect?: boolean;
+    preHeaderPanelHeight?: number;
     renderAllCells?: boolean;
     rowHeight?: number;
     selectedCellCssClass?: string;
@@ -57,6 +59,7 @@ export interface GridOptions<TItem = any> {
     showFooterRow?: boolean;
     showGroupingPanel?: boolean;
     showHeaderRow?: boolean;
+    showPreHeaderPanel?: boolean;
     showTopPanel?: boolean;
     slickCompat?: boolean;
     suppressActiveCellChangeOnEdit?: boolean;

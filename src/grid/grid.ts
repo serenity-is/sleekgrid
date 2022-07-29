@@ -203,6 +203,16 @@ export class Grid<TItem = any> {
             this._rtlE = 'left';
         }
 
+        if (options?.createPreHeaderPanel) {
+            // for compat, as draggable grouping plugin expects preHeaderPanel for grouping
+            if (options.groupingPanel == null)
+                options.groupingPanel = true;
+            if (options.groupingPanelHeight == null && options.preHeaderPanelHeight != null)
+                options.groupingPanelHeight = options.preHeaderPanelHeight;
+            if (options.showGroupingPanel == null && options.showPreHeaderPanel != null)
+                options.showGroupingPanel = options.showPreHeaderPanel;
+        }
+
         options = Object.assign({}, gridDefaults, options);
         this._options = options;
         this.validateAndEnforceOptions();
@@ -245,6 +255,10 @@ export class Grid<TItem = any> {
                 class: "slick-grouping-panel",
                 style: "overflow:hidden; position:relative;" + (!options.showGroupingPanel ? " display: none" : "")
             }));
+
+            if (options.createPreHeaderPanel) {
+                this._groupingPanel.appendChild(H('div', { class: 'slick-preheader-panel'}));
+            }
         }
 
         const uisd = this._options.useLegacyUI ? ' ui-state-default' : '';
@@ -724,6 +738,10 @@ export class Grid<TItem = any> {
 
     getGroupingPanel(): HTMLDivElement {
         return this._groupingPanel;
+    }
+
+    getPreHeaderPanel(): HTMLDivElement {
+        return this._groupingPanel?.querySelector('.slick-preheader-panel');
     }
 
     getHeaderRow(): HTMLDivElement {
@@ -1394,7 +1412,7 @@ export class Grid<TItem = any> {
 
     private getVBoxDelta(el: HTMLElement): number {
         var style = getComputedStyle(el);
-        if (el.style.boxSizing == 'border-box')
+        if (style.boxSizing == 'border-box')
             return 0;
 
         var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
@@ -2086,6 +2104,10 @@ export class Grid<TItem = any> {
         }
     }
 
+    setPreHeaderPanelVisibility(visible: boolean): void {
+        this.setGroupingPanelVisibility(visible);
+    }
+
     setHeaderRowVisibility(visible: boolean): void {
         if (this._options.showHeaderRow != visible) {
             this._options.showHeaderRow = visible;
@@ -2526,32 +2548,30 @@ export class Grid<TItem = any> {
     }
 
     private getViewportHeight(): number {
-        if (!this._options.autoHeight || this.hasFrozenColumns()) {
-            this._topPanelH = this._options.showTopPanel ? this._options.topPanelHeight + this.getVBoxDelta(this._topPanelL.parentElement) : 0;
-            this._headerRowH = this._options.showHeaderRow ? this._options.headerRowHeight + this.getVBoxDelta(this._headerRowColsL.parentElement) : 0;
-            this._footerRowH = this._options.showFooterRow ? this._options.footerRowHeight + this.getVBoxDelta(this._footerRowColsL.parentElement) : 0;
-        }
+        this._groupingPanelH = (this._options.groupingPanel && this._options.showGroupingPanel) ? (this._options.groupingPanelHeight + this.getVBoxDelta(this._groupingPanel)) : 0
+        this._topPanelH = this._options.showTopPanel ? (this._options.topPanelHeight + this.getVBoxDelta(this._topPanelL.parentElement)) : 0;
+        this._headerRowH = this._options.showHeaderRow ? (this._options.headerRowHeight + this.getVBoxDelta(this._headerRowColsL.parentElement)) : 0;
+        this._footerRowH = this._options.showFooterRow ? (this._options.footerRowHeight + this.getVBoxDelta(this._footerRowColsL.parentElement)) : 0;
+        
+        var headerH = (this._options.showColumnHeader) ? (parseFloat(getComputedStyle(this._headerColsL.parentElement).height) + this.getVBoxDelta(this._headerColsL.parentElement)) : 0;
 
         if (this._options.autoHeight) {
             this._viewportH = this._options.rowHeight * this.getDataLengthIncludingAddNew();
 
             if (!this.hasFrozenColumns()) {
-                this._viewportH += this._paneHeaderL.offsetHeight;
-                this._viewportH += this._options.showHeaderRow ? this._options.headerRowHeight + this.getVBoxDelta(this._headerRowColsL.parentElement) : 0;
-                this._viewportH += this._options.showFooterRow ? this._options.footerRowHeight + this.getVBoxDelta(this._footerRowColsL.parentElement) : 0;
+                this._viewportH += this._groupingPanelH;
+                this._viewportH += headerH;
+                this._viewportH += this._headerRowH;
+                this._viewportH += this._footerRowH;
                 this._viewportH += this.getCanvasWidth() > this._viewportW ? this._scrollDims.height : 0;
             }
         } else {
-            var columnNamesH = (this._options.showColumnHeader) ? parseFloat(getComputedStyle(this._headerColsL.parentElement).height)
-                + this.getVBoxDelta(this._headerColsL.parentElement) : 0;
-            this._groupingPanelH = (this._options.groupingPanel && this._options.showGroupingPanel) ?
-                (this._options.groupingPanelHeight + this.getVBoxDelta(this._groupingPanel)) : 0;
 
             var style = getComputedStyle(this._container);
             this._viewportH = parseFloat(style.height)
                 - parseFloat(style.paddingTop)
                 - parseFloat(style.paddingBottom)
-                - columnNamesH
+                - headerH
                 - this._topPanelH
                 - this._headerRowH
                 - this._footerRowH
@@ -2591,14 +2611,14 @@ export class Grid<TItem = any> {
             this._paneTopH = this._viewportH;
         }
 
-        // The top pane includes the top panel and the header row
+        // The top pane includes the top panel, the header row and the footer row
         this._paneTopH += this._topPanelH + this._headerRowH + this._footerRowH;
 
         if (this.hasFrozenColumns() && this._options.autoHeight) {
             this._paneTopH += this._scrollDims.height;
         }
 
-        // The top viewport does not contain the top panel or header row
+        // The top viewport does not contain the top panel, the header row or the footer row
         this._viewportTopH = this._paneTopH - this._topPanelH - this._headerRowH - this._footerRowH;
 
         if (this._options.autoHeight) {
@@ -2611,7 +2631,7 @@ export class Grid<TItem = any> {
         else
             this._paneTopL.style.position = '';
 
-        this._paneTopL.style.top = (parseFloat(getComputedStyle(this._paneHeaderL).height) || (this._options.showHeaderRow ? this._options.headerRowHeight : 0) + this._groupingPanelH) + "px";
+        this._paneTopL.style.top = (this._groupingPanelH + (parseFloat(getComputedStyle(this._paneHeaderL).height) || this._headerRowH)) + "px";
         this._paneTopL.style.height = this._paneTopH + 'px';
 
         var paneBottomTop = this._paneTopL.offsetTop + this._paneTopH;

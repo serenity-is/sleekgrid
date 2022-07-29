@@ -69,6 +69,20 @@ export class Group<TEntity = any> extends NonDataRow {
      * @type {Object}
      */
     groupingKey: string;
+
+
+  /***
+   * Compares two Group instances.
+   * @method equals
+   * @return {Boolean}
+   * @param group {Group} Group instance to compare to.
+   */    
+    equals(group: Group): boolean {
+        return this.value === group.value &&
+            this.count === group.count &&
+            this.collapsed === group.collapsed &&
+            this.title === group.title;    
+    }
 }
 
 /***
