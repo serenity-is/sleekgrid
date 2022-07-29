@@ -1,0 +1,21 @@
+:root {
+    font-size: 14px;
+}
+
+footer {
+    color: #ccc;
+    margin-top: 2rem;
+}
+
+body {
+    padding: 1rem;
+}
+
+.page-title {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+}
+
+#myGrid {
+    min-height: 450px;
+}

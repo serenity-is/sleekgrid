@@ -1,0 +1,240 @@
+/*
+IMPORTANT:
+In order to preserve the uniform grid appearance, all cell styles need to have padding, margin and border sizes.
+No built-in (selected, editable, highlight, flashing, invalid, loading, :focus) or user-specified CSS
+classes should alter those!
+*/
+
+:root {
+  --slick-header-bg: #f7f7f5;
+  --slick-header-border: #d6d7d6;
+  --slick-line-height: 20px;
+  --slick-cell-border: #d6d7d6;
+  --slick-row-bg: #ffffff;
+  --slick-row-odd-bg: #f9f9f9;
+  --slick-cell-padding-v: 4px;
+  --slick-cell-padding-h: 6px;
+}
+
+.slick-container {
+  border: 1px solid #e7e7e7;
+}
+
+.slick-pane {
+  position: absolute;
+  outline: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.slick-viewport {
+  position: relative;
+  outline: 0;
+  width: 100%;
+}
+
+.grid-canvas {
+  position: relative;
+  outline: 0;
+}
+
+.slick-group-header,
+.slick-header,
+.slick-headerrow,
+.slick-footerrow,
+.slick-top-panel-scroller {
+  width: 100%;
+  overflow: auto;
+  position: relative;
+}
+
+.slick-header,
+.slick-headerrow,
+.slick-footerrow {
+  overflow: hidden;
+  position: relative;
+  line-height: var(--slick-line-height);
+}
+
+.slick-header {
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+
+.slick-header::-webkit-scrollbar,
+.slick-headerrow::-webkit-scrollbar,
+.slick-footerrow::-webkit-scrollbar {
+  display: none
+}
+
+.slick-group-header-columns,
+.slick-header-columns,
+.slick-headerrow-columns,
+.slick-footerrow-columns {
+  position: relative;
+  white-space: nowrap;
+  cursor: default;
+  overflow: hidden;
+  background-color: var(--slick-header-bg);
+}
+
+.slick-header-columns {
+  border-bottom: 1px solid var(--slick-header-border);
+}
+
+.slick-group-header,
+.slick-headerrow-column,
+.slick-header-column,
+.slick-footerrow-column {
+  background-color: var(--slick-header-bg);
+}
+
+.slick-group-header,
+.slick-headerrow-column,
+.slick-header-column,
+.slick-footerrow-column,
+.slick-cell {
+  padding: var(--slick-cell-padding-v) var(--slick-cell-padding-h);
+}
+
+.slick-cell.active {
+  background-color: rgba(0, 98, 255, 0.05);
+}
+
+.slick-group-header,
+.slick-header-column,
+.slick-headerrow-column,
+.slick-footerrow-column {
+  float: left;
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-right: 1px solid var(--slick-header-border);
+  line-height: var(--slick-line-height);
+}
+
+.slick-header-column {
+  border-right-color: transparent;
+}
+
+.slick-sort-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 5px;
+  margin-left: 4px;
+  margin-top: 6px;
+}
+
+.slick-sort-indicator-numbered {
+  float: left;
+  width: 8px;
+  height: 5px;
+  margin-left: 4px;
+  margin-top: 0;
+  font-family: Arial;
+  font-style: normal;
+  font-weight: bold;
+  color: #6190CD;
+}
+
+.slick-sort-indicator-desc {
+  background: url(images/sort-desc.gif);
+}
+
+.slick-sort-indicator-asc {
+  background: url(images/sort-asc.gif);
+}
+
+.slick-resizable-handle {
+  position: absolute;
+  font-size: 0.1px;
+  display: block;
+  cursor: col-resize;
+  width: 9px;
+  right: -5px;
+  top: 0;
+  height: 100%;
+  z-index: 1;
+}
+
+.slick-sortable-placeholder {
+  background: silver;
+}
+
+.slick-row {
+  position: absolute;
+  width: 100%;
+}
+
+.slick-cell,
+.slick-headerrow-column,
+.slick-footerrow-column {
+  position: absolute;
+  border-right: 1px solid var(--slick-cell-border);
+  border-bottom: 1px solid var(--slick-cell-border);
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  z-index: 1;
+  padding: var(--slick-cell-padding-v) var(--slick-cell-padding-h);
+  margin: 0;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.slick-group-toggle {
+  display: inline-block;
+}
+
+.slick-cell.highlighted {
+  background: lightskyblue;
+  background: rgba(0, 0, 255, 0.2);
+  -webkit-transition: all 0.5s;
+  -moz-transition: all 0.5s;
+  -o-transition: all 0.5s;
+  transition: all 0.5s;
+}
+
+.slick-cell.flashing {
+  border-right-color: 1px solid red !important;
+  border-bottom-color: 1px solid red !important;
+}
+
+.slick-cell.editable {
+  z-index: 11;
+  overflow: visible;
+  background: white;
+  border-color: black;
+}
+
+.slick-cell:focus {
+  outline: none;
+}
+
+.slick-reorder-proxy {
+  display: inline-block;
+  background: blue;
+  opacity: 0.15;
+  filter: alpha(opacity=15);
+  cursor: move;
+}
+
+.slick-reorder-guide {
+  display: inline-block;
+  height: 2px;
+  background: blue;
+  opacity: 0.7;
+  filter: alpha(opacity=70);
+}
+
+.slick-reorder-shadow-row {
+  position: absolute;
+  z-index: 999999;
+  box-shadow: rgb(0 0 0 / 20%) 8px 2px 8px 4px, rgb(0 0 0 / 19%) 2px 2px 0px 0px;
+}
+
+.slick-selection {
+  z-index: 10;
+  position: absolute;
+  border: 2px dashed black;
+}

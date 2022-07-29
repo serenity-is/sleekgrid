@@ -1,3 +1,10 @@
-/dist/
-/gh-pages/
+.vs/
+_site
+/dist
+.jekyll-*
+GemFile*
 node_modules/
+*.bak
+*.orig
+*.log
+*.tgz

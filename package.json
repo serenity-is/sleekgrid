@@ -1,12 +1,18 @@
 {
   "name": "@serenity-is/sleekgrid",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A modern Data Grid / Spreadsheet component",
   "type": "module",
   "source": "src/index.ts",
   "files": [
-    "dist",
-    "src"
+    "dist/**/*.css",
+    "dist/**/*.js",
+    "dist/**/*.map",
+    "lib/**/*.js",
+    "css/**/*.css",
+    "src/**/*.ts",
+    "src/**/*.css",
+    "src/**/tsconfig.json"
   ],
   "scripts": {
     "build": "node build/build"
