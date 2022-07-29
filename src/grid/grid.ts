@@ -1134,7 +1134,7 @@ export class Grid<TItem = any> {
         var j: number, k: number, c: Column<TItem>, pageX: number, minPageX: number, maxPageX: number, firstResizable: number, lastResizable: number, cols = this._cols;
         var firstResizable: number, lastResizable: number;
         columnElements.forEach((el, i) => {
-            el.querySelector("slick-resizable-handle")?.remove();
+            el.querySelector(".slick-resizable-handle")?.remove();
             if (cols[i].resizable) {
                 if (firstResizable === undefined) {
                     firstResizable = i;
@@ -1230,9 +1230,9 @@ export class Grid<TItem = any> {
             };
 
             const drag = (e: DragEvent) => {
-                if (!e.pageX && !e.clientX && !e.pageY && !e.clientY)
-                    return;
                 if (noJQueryDrag) {
+                    if (!e.pageX && !e.clientX && !e.pageY && !e.clientY)
+                        return;
                     e.dataTransfer.effectAllowed = 'none';
                     e.preventDefault();
                 }

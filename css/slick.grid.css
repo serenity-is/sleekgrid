@@ -113,10 +113,6 @@ classes should alter those!
   line-height: var(--slick-line-height);
 }
 
-.slick-header-column {
-  border-right-color: transparent;
-}
-
 .slick-sort-indicator {
   display: inline-block;
   width: 8px;
@@ -239,3 +235,4 @@ classes should alter those!
   position: absolute;
   border: 2px dashed black;
 }
+

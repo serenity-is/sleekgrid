@@ -44,9 +44,11 @@ requires_scripts:
 <div id="myGrid"></div>
 
 <script>
-    // a standard formatter returns a string
+    // a custom formatter returns a HTML string. you should
+    // ALWAYS HTML ENCODE the VALUE using Slick.htmlEncode etc.
+    // or might be a victim of script injection attacks
     function formatter(row, cell, value, columnDef, item) {
-        return value;
+        return `<a href='#' tabindex='0'>${Slick.htmlEncode(value)}</a>`;
     }
 
     // an extended formatter returns an object { text, addClass, toolTip }
@@ -68,7 +70,7 @@ requires_scripts:
     }
 
     function checkMark(row, cell, value) {
-        return value ? '<i class="fa fa-check-square text-success" style="font-size: 1.5rem"></i>' : '';
+        return value ? '<i class="fa fa-check-square text-success" style="font-size: 1.8rem"></i>' : '';
     }
 
     var grid;
@@ -93,7 +95,7 @@ requires_scripts:
         for (var i = 0; i < 5; i++) {
             var d = (data[i] = {});
 
-            d["title"] = "<a href='#' tabindex='0'>Task</a> " + i;
+            d["title"] = "Task " + i;
             d["duration"] = "5 days";
             d["percentComplete"] = Math.min(100, Math.round(Math.random() * 110));
             d["start"] = "01/01/2022";
