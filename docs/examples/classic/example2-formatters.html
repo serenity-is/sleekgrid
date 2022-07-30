@@ -1,13 +1,11 @@
 ---
-title: 'Example 2: Formatters'
+title: 'Formatters'
 
 demonstrates:
 - width, minWidth, maxWidth, resizable, cssClass column attributes
 - custom column formatters
 - 'an extended formatter returning an object { html or text, addClasses, toolTip } rather than a string,
 allowing adding classes to the cell. You can also optionally use toolTip to fill the "title" attribute'
-
-requires_jqueryui: true
 
 requires_scripts:
 - slick.editors.js
@@ -101,7 +99,5 @@ requires_scripts:
         d["effortDriven"] = (i % 4 == 0);
     }
 
-    $(function () {
-        grid = new Slick.Grid("#myGrid", data, columns, options);
-    });
+    grid = new Slick.Grid("#myGrid", data, columns, options);
 </script>

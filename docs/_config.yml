@@ -27,4 +27,4 @@ defaults:
         scope:
             path: 'examples/classic'
         values:
-            layout: examples-classic
+            layout: layout-classic-examples

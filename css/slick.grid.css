@@ -179,11 +179,7 @@ classes should alter those!
 }
 
 .slick-cell.highlighted {
-  background: lightskyblue;
   background: rgba(0, 0, 255, 0.2);
-  -webkit-transition: all 0.5s;
-  -moz-transition: all 0.5s;
-  -o-transition: all 0.5s;
   transition: all 0.5s;
 }
 
@@ -239,5 +235,5 @@ classes should alter those!
   background: transparent;
   outline: 0;
   padding: 0;
-  line-height: var(--bs-body);
+  font-weight: inherit;
 }

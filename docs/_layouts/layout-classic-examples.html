@@ -8,9 +8,7 @@
     <script src="{{ site.packageurl.jquery }}/dist/jquery.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="{{ site.packageurl.sleekgrid }}/lib/jquery.event.drag-2.3.0.js" crossorigin="anonymous"></script>
-    {% if page.requires_jqueryui %}
     <script src="{{ site.packageurl.jqueryui }}/dist/jquery-ui.min.js" crossorigin="anonymous"></script>
-    {% endif %}
     <script src="{{ site.packageurl.sleekgrid }}/dist/compat/slick.core.js"></script>
     <script src="{{ site.packageurl.sleekgrid }}/dist/compat/slick.grid.js"></script>
     {% for x in page.requires_scripts %}
@@ -19,14 +17,30 @@
 </head>
 
 <body>
-    <section class="container container-xl">
-        <h1 class="page-title">{{ page.title }} - Classic SlickGrid Examples</h1>
-        <div class="row example-container">
-            <div class="col-md-8 example-content">
-                {{ content }}
+    <section class="container container-xxl">
+        <h2 class="mb-4">{{ page.title }}</h2>
+        <div class="row">
+            <div class="example-sidenav col-lg-2 d-none d-lg-block">
+                <h5 class="text-muted">Classic Examples</h5>
+                <ul class="m-0 p-0 list-unstyled">
+                    {% assign classic_examples_pages = site.pages | where: "dir", "/examples/classic/" %}
+                    {% for p in classic_examples_pages %}
+                    <li{% if page.url == p.url %} class="active-link"{% endif %}>
+                        <a href="{{ site.baseurl }}{{ p.url | replace: ".html", "" }}">
+                            {{ p.title }}</a>
+                    {% endfor %}
+                    </li>
+                </ul>
             </div>
-            <div class="col-md-4 example-info">
+            <div class="col-lg-7 example-container mb-4">
+                <div class="example-content">
+                    {{ content }}
+                </div>
+            </div>
+            <div class="col-lg-3 example-info">
+                {% include _example_about.html %}
                 {% include _example_demonstrates.html %}
+                {% include _example_controls.html %}
                 {% include _example_sources.html %}
             </div>
         </div>
