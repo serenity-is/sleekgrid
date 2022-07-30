@@ -4119,8 +4119,8 @@ export class Grid<TItem = any> {
             column: columnDef,
             item: item || {},
             event: e,
-            commitChanges: this.commitEditAndSetFocus,
-            cancelChanges: this.cancelEditAndSetFocus
+            commitChanges: this.commitEditAndSetFocus.bind(this),
+            cancelChanges: this.cancelEditAndSetFocus.bind(this)
         });
 
         if (item) {
@@ -4157,17 +4157,16 @@ export class Grid<TItem = any> {
     private absBox(elem: HTMLElement): Position {
         var box: Position = {
             top: elem.offsetTop,
+            left: elem.offsetLeft,
             bottom: 0,
+            right: 0,
             width: elem.offsetWidth,
             height: elem.offsetHeight,
             visible: true
         };
 
-        box[this._rtlS] = elem.offsetLeft;
-        box[this._rtlE] = 0;
-
         box.bottom = box.top + box.height;
-        box[this._rtlE] = box[this._rtlS] + box.width;
+        box.right = box.left + box.width;
 
         // walk up the tree
         var offsetParent = elem.offsetParent;
@@ -4177,20 +4176,20 @@ export class Grid<TItem = any> {
             }
 
             if (box.visible && elem.scrollWidth != elem.offsetWidth && getComputedStyle(elem).overflowX != "visible") {
-                box.visible = box[this._rtlE] > elem.scrollLeft && box[this._rtlS] < elem.scrollLeft + elem.clientWidth;
+                box.visible = box.right > elem.scrollLeft && box.left < elem.scrollLeft + elem.clientWidth;
             }
 
-            box[this._rtlS] -= elem.scrollLeft;
+            box.left -= elem.scrollLeft;
             box.top -= elem.scrollTop;
 
             if (elem === offsetParent) {
-                box.right += elem.offsetLeft;
+                box.left += elem.offsetLeft;
                 box.top += elem.offsetTop;
                 offsetParent = elem.offsetParent;
             }
 
             box.bottom = box.top + box.height;
-            box[this._rtlE] = box[this._rtlS] + box.width;
+            box.right = box.left + box.width;
         }
 
         return box;
