@@ -1,4 +1,4 @@
-import type { Column } from "./column";
+import type { Column, ColumnMetadata } from "./column";
 import type { IEventData } from "../core/index";
 import type { Grid } from "./grid";
 import type { Position } from "./types";
@@ -8,6 +8,7 @@ export interface EditorOptions {
     gridPosition?: Position;
     position?: Position;
     column?: Column;
+    columnMetaData?: ColumnMetadata<any>;
     container?: HTMLElement;
     item?: any;
     event: IEventData;

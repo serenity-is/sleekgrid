@@ -1,5 +1,5 @@
 import { attrEncode, htmlEncode, EditController, EditorLock, Event, IEventData, EventData, keyCode, GroupTotals, NonDataRow, preClickClassName, Range } from "../core/index";
-import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
+import { Column, columnDefaults, ColumnMetadata, ColumnSort, ItemMetadata } from "./column";
 import { EditCommand, Editor } from "./editor";
 import type { CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
 import { addUiStateHover, adjustFrozenColumnCompat, CachedRow, disableSelection, getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, H, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
@@ -2167,12 +2167,12 @@ export class Grid<TItem = any> {
 
     getFormatter(row: number, column: Column<TItem>): ColumnFormatter<TItem> {
         var data = this._data;
-        var rowMetadata = data.getItemMetadata && data.getItemMetadata(row) as ItemMetadata;
-        var colsMetadata = rowMetadata && rowMetadata.columns;
-        var colOverrides = colsMetadata && (colsMetadata[column.id] || colsMetadata[this.getInitialColumnIndex(column.id)]);
+        var itemMetadata = data.getItemMetadata && data.getItemMetadata(row) as ItemMetadata;
+        var colsMetadata = itemMetadata && itemMetadata.columns;
+        var columnMetadata = colsMetadata && (colsMetadata[column.id] || colsMetadata[this.getColumnIndex(column.id)]);
 
-        return (colOverrides && colOverrides.formatter) ||
-            (rowMetadata && rowMetadata.formatter) ||
+        return (columnMetadata && columnMetadata.formatter) ||
+            (itemMetadata && itemMetadata.formatter) ||
             column.formatter ||
             (this._options.formatterFactory && this._options.formatterFactory.getFormatter(column)) ||
             this._options.defaultFormatter;
@@ -2180,14 +2180,14 @@ export class Grid<TItem = any> {
 
     private getEditor(row: number, cell: number): Editor {
         var column = this._cols[cell];
-        var rowMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
-        var columnMetadata = rowMetadata && rowMetadata.columns;
+        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
+        var colsMetadata = itemMetadata && itemMetadata.columns;
 
-        if (columnMetadata && columnMetadata[column.id] && columnMetadata[column.id].editor !== undefined) {
-            return columnMetadata[column.id].editor;
+        if (colsMetadata && colsMetadata[column.id] && colsMetadata[column.id].editor !== undefined) {
+            return colsMetadata[column.id].editor;
         }
-        if (columnMetadata && columnMetadata[cell] && columnMetadata[cell].editor !== undefined) {
-            return columnMetadata[cell].editor;
+        if (colsMetadata && colsMetadata[cell] && colsMetadata[cell].editor !== undefined) {
+            return colsMetadata[cell].editor;
         }
 
         return column.editor || (this._options.editorFactory && this._options.editorFactory.getEditor(column));
@@ -2213,10 +2213,10 @@ export class Grid<TItem = any> {
             rowCss += " " + this._options.addNewRowCssClass;
         }
 
-        var metadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
+        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
 
-        if (metadata && metadata.cssClasses) {
-            rowCss += " " + metadata.cssClasses;
+        if (itemMetadata && itemMetadata.cssClasses) {
+            rowCss += " " + itemMetadata.cssClasses;
         }
 
         var frozenRowOffset = this.getFrozenRowOffset(row);
@@ -2236,8 +2236,8 @@ export class Grid<TItem = any> {
             var columnData = null;
             m = cols[i];
             colspan = 1;
-            if (metadata && metadata.columns) {
-                columnData = metadata.columns[m.id] || metadata.columns[i];
+            if (itemMetadata && itemMetadata.columns) {
+                columnData = itemMetadata.columns[m.id] || itemMetadata.columns[i];
                 colspan = (columnData && columnData.colspan) || 1;
                 if (colspan === "*") {
                     colspan = ii - i;
@@ -2951,8 +2951,8 @@ export class Grid<TItem = any> {
             // Render missing cells.
             cellsAdded = 0;
 
-            var metadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
-            metadata = metadata && metadata.columns;
+            var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row) as ItemMetadata;
+            var colsMetadata = itemMetadata && itemMetadata.columns;
 
             var d = this.getDataItem(row);
 
@@ -2971,8 +2971,8 @@ export class Grid<TItem = any> {
 
                 var columnData = null;
                 colspan = 1;
-                if (metadata) {
-                    columnData = metadata[cols[i].id] || metadata[i];
+                if (colsMetadata) {
+                    columnData = colsMetadata[cols[i].id] || colsMetadata[i];
                     colspan = (columnData && columnData.colspan) || 1;
                     if (colspan === "*") {
                         colspan = ii - i;
@@ -4107,9 +4107,9 @@ export class Grid<TItem = any> {
             this._activeCellNode.innerHTML = "";
         }
 
-        var metadata = this._data.getItemMetadata && this._data.getItemMetadata(this._activeRow);
-        metadata = metadata && metadata.columns;
-        var columnMetaData = metadata && (metadata[columnDef.id] || metadata[this._activeCell]);
+        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(this._activeRow) as ItemMetadata;
+        var colsMetadata = itemMetadata && itemMetadata.columns;
+        var columnMetadata = colsMetadata && (colsMetadata[columnDef.id] || colsMetadata[this._activeCell]);
 
         this._currentEditor = new useEditor({
             grid: this,
@@ -4117,6 +4117,7 @@ export class Grid<TItem = any> {
             position: this.absBox(this._activeCellNode),
             container: this._activeCellNode,
             column: columnDef,
+            columnMetaData: columnMetadata,
             item: item || {},
             event: e,
             commitChanges: this.commitEditAndSetFocus.bind(this),
@@ -4732,12 +4733,12 @@ export class Grid<TItem = any> {
             return rowMetadata.focusable;
         }
 
-        var columnMetadata = rowMetadata && rowMetadata.columns;
-        if (columnMetadata && cols[cell] && columnMetadata[cols[cell].id] && typeof columnMetadata[cols[cell].id].focusable === "boolean") {
-            return columnMetadata[cols[cell].id].focusable;
+        var colsMetadata = rowMetadata && rowMetadata.columns;
+        if (colsMetadata && cols[cell] && colsMetadata[cols[cell].id] && typeof colsMetadata[cols[cell].id].focusable === "boolean") {
+            return colsMetadata[cols[cell].id].focusable;
         }
-        if (columnMetadata && columnMetadata[cell] && typeof columnMetadata[cell].focusable === "boolean") {
-            return columnMetadata[cell].focusable;
+        if (colsMetadata && colsMetadata[cell] && typeof colsMetadata[cell].focusable === "boolean") {
+            return colsMetadata[cell].focusable;
         }
 
         return cols[cell].focusable;
@@ -4749,12 +4750,12 @@ export class Grid<TItem = any> {
             return false;
         }
 
-        var rowMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
-        if (rowMetadata && typeof rowMetadata.selectable === "boolean") {
-            return rowMetadata.selectable;
+        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
+        if (itemMetadata && typeof itemMetadata.selectable === "boolean") {
+            return itemMetadata.selectable;
         }
 
-        var columnMetadata = rowMetadata && rowMetadata.columns && (rowMetadata.columns[cols[cell].id] || rowMetadata.columns[cell]);
+        var columnMetadata = itemMetadata && itemMetadata.columns && (itemMetadata.columns[cols[cell].id] || itemMetadata.columns[cell]);
         if (columnMetadata && typeof columnMetadata.selectable === "boolean") {
             return columnMetadata.selectable;
         }
