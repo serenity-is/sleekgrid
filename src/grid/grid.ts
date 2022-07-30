@@ -688,7 +688,10 @@ export class Grid<TItem = any> {
     }
 
     updateColumnHeader(columnId: string, title?: string, toolTip?: string): void {
-        if (!this._initialized) { return; }
+        if (!this._initialized) {
+            return;
+        }
+
         var idx = this.getColumnIndex(columnId);
         if (idx == null) {
             return;
@@ -711,9 +714,16 @@ export class Grid<TItem = any> {
             column: columnDef
         });
 
-        header.title = toolTip || "";
-        var child = header.firstElementChild;
-        child && (child.innerHTML = title);
+        if (toolTip !== undefined)
+            header.title = toolTip || "";
+
+        if (title !== undefined) {
+            var child = header.firstElementChild;
+            if (columnDef.nameIsHtml)
+                child && (child.innerHTML = title ?? '');
+            else
+                child && (child.textContent = title ?? '')
+        }
 
         this.trigger(this.onHeaderCellRendered, {
             node: header,
@@ -918,9 +928,9 @@ export class Grid<TItem = any> {
             var name = document.createElement("span");
             name.className = "slick-column-name";
             if (m.nameIsHtml)
-                name.innerHTML = m.name;
+                name.innerHTML = m.name ?? '';
             else
-                name.innerText = m.name;
+                name.textContent = m.name ?? '';
             var header = H("div", {
                 class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default " : ""),
                 id: "" + this._uid + m.id,
@@ -2296,7 +2306,8 @@ export class Grid<TItem = any> {
 
         if (fmtResult == null)
             sb.push('<div class="' + attrEncode(klass) + '"></div>');
-        else if (typeof fmtResult === "string")
+        else if (typeof fmtResult === "string" ||
+            Object.prototype.toString.call(fmtResult)  !== '[object Object]')
             sb.push('<div class="' + attrEncode(klass) + '">' + fmtResult + '</div>');
         else {
             if (fmtResult.addClass?.length)
@@ -2471,15 +2482,15 @@ export class Grid<TItem = any> {
             return;
         }
 
-        if (typeof fmtResult === "string") {
-            cellNode.innerHTML = fmtResult;
+        if (typeof fmtResult === "string" || Object.prototype.toString.call(fmtResult)  !== '[object Object]') {
+            cellNode.innerHTML = "" + fmtResult;
             return;
         }
 
         if (fmtResult.html != null)
             cellNode.innerHTML = fmtResult.html;
         else
-            cellNode.innerText = fmtResult.text;
+            cellNode.textContent = fmtResult.text ?? '';
 
         if (fmtResult.addClass?.length) {
             cellNode.classList.add(...fmtResult.addClass.split(' '));
@@ -2496,8 +2507,8 @@ export class Grid<TItem = any> {
             }
         }
 
-        if (fmtResult.toolTip?.length)
-            cellNode.setAttribute('tooltip', fmtResult.toolTip);
+        if (fmtResult.toolTip !== undefined)
+            cellNode.setAttribute('tooltip', fmtResult.toolTip ?? '');
     }
 
     updateCell(row: number, cell: number): void {
