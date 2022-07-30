@@ -96,157 +96,13 @@ input.editor-percentcomplete {
   display: block;
 }
 
-
-/*!
- * jQuery UI Datepicker 1.9.0
- * http://jqueryui.com
- *
- * Copyright 2012 jQuery Foundation and other contributors
- * Released under the MIT license.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Datepicker#theming
- */
- .ui-datepicker-trigger {
-  border: 0;
-  background-color: transparent;
-  padding: 0 2px;
-  line-height: 1.5em;
-  vertical-align: -2px;
-}
-
 .ui-datepicker {
-  width: 16em;
-  padding: 0;
-  display: none;
-  background-color: white;
+  background: white;
   border: 1px solid #ccc;
 }
 
-.ui-datepicker .ui-datepicker-header {
-  position: relative;
-  padding: 0.35em 0;
-  border-bottom: 1px solid #ccc;
-}
-
-.ui-datepicker .ui-datepicker-prev,
-.ui-datepicker .ui-datepicker-next {
-  position: absolute;
-  top: 0px;
-  width: 1.8em;
-  height: 1.8em;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.ui-datepicker .ui-datepicker-prev-hover,
-.ui-datepicker .ui-datepicker-next-hover {
-  border: 1px none;
-}
-
-.ui-datepicker .ui-datepicker-prev {
-  left: 2px;
-}
-
-.ui-datepicker .ui-datepicker-next {
-  right: 2px;
-}
-
-.ui-datepicker .ui-datepicker-prev span,
-.ui-datepicker .ui-datepicker-next span {
-  display: none;
-}
-
-.ui-datepicker .ui-datepicker-prev::after,
-.ui-datepicker .ui-datepicker-next::after {
-  font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
-  font-size: 21px;
-}
-
-.ui-datepicker .ui-datepicker-prev::after {
-  content: "\f104";
-}
-
-.ui-datepicker .ui-datepicker-next::after {
-  content: "\f105";
-}
-
-.ui-datepicker .ui-datepicker-title {
-  margin: 0 2.3em;
-  line-height: 1.8em;
-  text-align: center;
-  font-size: 12px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.ui-datepicker .ui-datepicker-title select {
-  font-size: 1em;
-  margin: 1px 0;
-}
-
-.ui-datepicker select.ui-datepicker-month-year {
-  width: 100%;
-}
-
-.ui-datepicker select.ui-datepicker-month,
-.ui-datepicker select.ui-datepicker-year {
-  width: 47%;
-}
-
-.ui-datepicker select.ui-datepicker-month {
-  margin-right: 3%;
-}
-
-.ui-datepicker table {
-  width: 100%;
-  font-size: 0.9em;
-  border-collapse: collapse;
-  margin: 0 0 0.4em;
-}
-
-.ui-datepicker th {
-  padding: 0.7em 0.3em;
-  text-align: center;
-  font-weight: bold;
-  border: 0;
-}
-
-.ui-datepicker td {
-  border: 0;
-  padding: 1px;
-}
-
-.ui-datepicker td span,
-.ui-datepicker td a {
-  display: block;
-  padding: 0.2em;
-  text-align: right;
-  text-decoration: none;
-}
-
-.ui-datepicker .ui-datepicker-buttonpane {
-  background-image: none;
-  margin: 0.7em 0 0 0;
-  padding: 0 0.2em;
-  border-left: 0;
-  border-right: 0;
-  border-bottom: 0;
-}
-
-.ui-datepicker .ui-datepicker-buttonpane button {
-  float: right;
-  margin: 0.5em 0.2em 0.4em;
-  cursor: pointer;
-  padding: 0.2em 0.6em 0.3em 0.6em;
-  width: auto;
-  border: 1px solid #ccc;
-  background-color: #aaa;
-  overflow: visible;
-}
-
-.ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current {
-  float: left;
+.ui-datepicker-trigger {
+  vertical-align: -2px;
 }
 
 .ui-datepicker table .ui-state-highlight {
@@ -256,7 +112,6 @@ input.editor-percentcomplete {
 .ui-datepicker table .ui-state-hover {
   background: #5F83B9;
   color: #FFF;
-  font-weight: bold;
   text-shadow: 0 1px 1px #234386;
   box-shadow: 0 0px 0 rgba(255, 255, 255, 0.6) inset;
   border-color: #5F83B9;
@@ -273,46 +128,4 @@ input.editor-percentcomplete {
   color: #FFF;
   font-weight: bold;
   text-shadow: 0 1px 1px #234386;
-}
-
-.ui-datepicker.ui-datepicker-multi {
-  width: auto;
-}
-
-.ui-datepicker-multi .ui-datepicker-group {
-  float: left;
-}
-
-.ui-datepicker-multi .ui-datepicker-group table {
-  width: 95%;
-  margin: 0 auto 0.4em;
-}
-
-.ui-datepicker-multi-2 .ui-datepicker-group {
-  width: 50%;
-}
-
-.ui-datepicker-multi-3 .ui-datepicker-group {
-  width: 33.3%;
-}
-
-.ui-datepicker-multi-4 .ui-datepicker-group {
-  width: 25%;
-}
-
-.ui-datepicker-multi .ui-datepicker-group-last .ui-datepicker-header {
-  border-left-width: 0;
-}
-
-.ui-datepicker-multi .ui-datepicker-group-middle .ui-datepicker-header {
-  border-left-width: 0;
-}
-
-.ui-datepicker-multi .ui-datepicker-buttonpane {
-  clear: left;
-}
-
-.ui-datepicker-row-break {
-  clear: both;
-  width: 100%;
 }
