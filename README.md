@@ -7,7 +7,7 @@
 - This is a complete rewrite of the original [SlickGrid](https://github.com/mleibman/SlickGrid) in TypeScript with ES6 modules
 - Includes many of the extra features and fixes from the 6pac fork (https://github.com/6pac/SlickGrid/)
 - Can work without jQuery or jQuery UI (but can use them for column ordering / resizing if available in global namespace)
-- Backward compatible with the original via the provided compat files. Just replace SlickGrid scripts with the ones in the [dist/compat](https:/cdn.jsdelivr.net/npm/@serenity-is/sleekgrid/dist/compat) directory.
+- Backward compatible with the original via the provided compat files. Just replace SlickGrid scripts with the ones in the [dist/compat](https://www.jsdelivr.com/package/npm/@serenity-is/sleekgrid?path=dist%2Fcompat) directory.
 
 Please visit https://serenity-is.github.io/sleekgrid/ to see the documentation and examples.
 
