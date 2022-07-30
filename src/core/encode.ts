@@ -10,5 +10,11 @@ export function attrEncode(s: any) {
 }
 
 export function htmlEncode(s: any) {
-    return (s + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    if (s == null)
+        return '';
+
+    return (s + "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
 }
