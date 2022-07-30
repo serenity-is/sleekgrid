@@ -18,9 +18,9 @@
     "src/**/tsconfig.json"
   ],
   "scripts": {
+    "prepare": "npm run build && npm run test",
     "build": "node build/build",
     "test": "npx jest",
-    "mypublish": "node build/build && npx jest && npm publish --access=public",
     "www": "npm run build && cd docs && jekyll serve --livereload --config _config.yml,_config_local.yml"
   },
   "keywords": [
