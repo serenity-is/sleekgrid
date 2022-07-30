@@ -17,7 +17,9 @@ requires_scripts:
 - plugins/slick.cellselectionmodel.js
 ---
 
-<div id="myGrid"></div>
+<div style="position: relative">
+    <div id="myGrid"></div>
+</div>
 
 <style>
     .cell-title {
@@ -46,7 +48,7 @@ requires_scripts:
         buttonImage: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E`
     });
 
-    const percentCompleteEditor = function(args) {
+    const patchedPercentCompleteEditor = function(args) {
         Slick.Editors.PercentComplete.call(this, args);
         args.container.querySelector('.editor-percentcomplete-wrapper')
             .appendChild(args.container.querySelector('.editor-percentcomplete-buttons'));
@@ -58,7 +60,7 @@ requires_scripts:
         { id: "title", name: "Title", field: "title", width: 100, cssClass: "cell-title", editor: Slick.Editors.Text, validator: requiredFieldValidator },
         { id: "desc", name: "Description", field: "description", width: 120, editor: Slick.Editors.LongText },
         { id: "duration", name: "Duration", field: "duration", editor: Slick.Editors.Text },
-        { id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, formatter: Slick.Formatters.PercentCompleteBar, editor: percentCompleteEditor },
+        { id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, formatter: Slick.Formatters.PercentCompleteBar, editor: patchedPercentCompleteEditor },
         { id: "start", name: "Start", field: "start", minWidth: 110, editor: Slick.Editors.Date },
         { id: "finish", name: "Finish", field: "finish", minWidth: 110, editor: Slick.Editors.Date },
         { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", formatter: checkMark }

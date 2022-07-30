@@ -96,6 +96,11 @@ input.editor-percentcomplete {
   display: block;
 }
 
+.slick-large-editor-text button {
+  border-width: 1px;
+  margin-right: 4px;
+}
+
 .ui-datepicker {
   background: white;
   border: 1px solid #ccc;
