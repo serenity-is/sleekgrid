@@ -9,6 +9,7 @@ import { gridDefaults, GridOptions } from "./gridoptions";
 
 
 export class Grid<TItem = any> {
+    private _hasJQuery = typeof jQuery !== "undefined";
 
     private _absoluteColMinWidth: number;
     private _activeCanvasNode: HTMLElement;
@@ -179,7 +180,7 @@ export class Grid<TItem = any> {
         //////////////////////////////////////////////////////////////////////////////////////////////
         // Initialization
 
-        if (typeof jQuery !== "undefined" && container instanceof jQuery)
+        if (this._hasJQuery && container instanceof jQuery)
             this._container = container[0];
         else if (container instanceof Element)
             this._container = container as HTMLElement;
@@ -222,7 +223,7 @@ export class Grid<TItem = any> {
             "cancelCurrentEdit": this.cancelCurrentEdit.bind(this)
         };
 
-        if (typeof $ !== "undefined")
+        if (this._hasJQuery)
             $(this._container).empty();
         else
             this._container.innerHTML = '';
@@ -354,7 +355,7 @@ export class Grid<TItem = any> {
 
         var viewports = this.getViewports();
 
-        if (typeof $ !== "undefined" && !this._options.enableTextSelectionOnCells) {
+        if (this._hasJQuery && !this._options.enableTextSelectionOnCells) {
             // disable text selection in grid cells except in input and textarea elements
             // (this is IE-specific, because selectstart event will only fire in IE)
             $(viewports).on("selectstart.ui", function () {
@@ -379,7 +380,7 @@ export class Grid<TItem = any> {
 
         viewports.forEach(vp => vp.addEventListener("scroll", this.handleScroll.bind(this)));
 
-        if (typeof $ !== "undefined" && ($.fn as any).mousewheel && (this.hasFrozenColumns() || this._hasFrozenRows)) {
+        if (this._hasJQuery && ($.fn as any).mousewheel && (this.hasFrozenColumns() || this._hasFrozenRows)) {
             $(viewports).on("mousewheel", this.handleMouseWheel.bind(this));
         }
 
@@ -408,7 +409,7 @@ export class Grid<TItem = any> {
             canvas.addEventListener("contextmenu", this.handleContextMenu.bind(this));
         });
 
-        if (typeof $ !== "undefined" && ($.fn as any).drag) {
+        if (this._hasJQuery && ($.fn as any).drag) {
             $(canvases)
                 .on("draginit", this.handleDragInit.bind(this))
                 .on("dragstart", { distance: 3 }, this.handleDragStart.bind(this))
@@ -426,7 +427,7 @@ export class Grid<TItem = any> {
         // Work around http://crbug.com/312427.
         if (navigator.userAgent.toLowerCase().match(/webkit/) &&
             navigator.userAgent.toLowerCase().match(/macintosh/) &&
-            typeof $ !== "undefined") {
+            this._hasJQuery) {
             $(canvases).on("mousewheel", this.handleMouseWheel.bind(this));
         }
     }
@@ -499,7 +500,7 @@ export class Grid<TItem = any> {
 
     getCanvases(): JQuery {
         var canvases = [this._canvasTopL, this._canvasTopR, this._canvasBottomL, this._canvasBottomR];
-        return typeof $ !== "undefined" ? $(canvases) : canvases as any;
+        return this._hasJQuery ? $(canvases) : canvases as any;
     }
 
     getActiveCanvasNode(e?: IEventData): HTMLElement {
@@ -796,9 +797,7 @@ export class Grid<TItem = any> {
                 }
             }));
 
-        const _$ = typeof $ !== "undefined";
-
-        if (_$) {
+        if (this._hasJQuery) {
             $(this._footerRowColsL).empty();
             $(this._footerRowColsR).empty();
         }
@@ -813,7 +812,7 @@ export class Grid<TItem = any> {
 
             var footerRowCell = H("div", { class: "slick-footerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? ' ui-state-default' : '') });
             footerRowCell.dataset.c = i.toString();
-            _$ && $(footerRowCell).data("column", m);
+            this._hasJQuery && $(footerRowCell).data("column", m);
 
             if (m.footerCssClass)
                 footerRowCell.classList.add(m.footerCssClass);
@@ -896,8 +895,7 @@ export class Grid<TItem = any> {
                 }
             }));
 
-        const _$ = typeof $ !== "undefined";
-        if (_$) {
+        if (this._hasJQuery) {
             $(this._headerColsL).empty();
             $(this._headerColsR).empty();
         }
@@ -931,7 +929,7 @@ export class Grid<TItem = any> {
             }, name);
 
             header.dataset.c = i.toString();
-            _$ && $(header).data("column", m);
+            this._hasJQuery && $(header).data("column", m);
 
             m.headerCssClass && header.classList.add(m.headerCssClass);
 
@@ -959,7 +957,7 @@ export class Grid<TItem = any> {
 
                 var headerRowCell = H("div", { class: "slick-headerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? " ui-state-default" : "") });
                 headerRowCell.dataset.c = i.toString();
-                _$ && $(headerRowCell).data("column", m);
+                this._hasJQuery && $(headerRowCell).data("column", m);
                 headerRowTarget.appendChild(headerRowCell);
 
                 this.trigger(this.onHeaderRowCellRendered, {
@@ -1147,7 +1145,7 @@ export class Grid<TItem = any> {
             return;
         }
 
-        const noJQueryDrag = typeof $ === "undefined" || !$.fn || !($.fn as any).drag;
+        const noJQueryDrag = !this._hasJQuery || !$.fn || !($.fn as any).drag;
         columnElements.forEach((el, i) => {
 
             if (i < firstResizable || (this._options.forceFitColumns && i >= lastResizable)) {
@@ -3794,7 +3792,7 @@ export class Grid<TItem = any> {
             return null;
 
         var cell = this.getCellFromNode(cellNode);
-        if (cell === null && typeof $ !== "undefined")
+        if (cell === null && this._hasJQuery)
             return $(cell).data("column") as Column<TItem>;
 
         return this._cols[cell];
