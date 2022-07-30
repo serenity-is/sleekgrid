@@ -4,7 +4,5 @@ title: SleekGrid Home
 
 ### Classic Samples (to check backwards compatibility)
 
-{% assign classic_examples_pages = site.pages | where: "dir", "/examples/classic/" %}
-
-{% for p in classic_examples_pages %}
-- [{{ p.title }}]({{ site.baseurl }}{{ p.url | replace: ".html", "" }}){% endfor %}
+- [Example 1: Basic grid](examples/classic/example1-simple)
+- [Example 2: Formatters](examples/classic/example2-formatters)
