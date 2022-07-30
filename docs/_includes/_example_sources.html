@@ -1,9 +1,9 @@
 <div class="example-sources">
     <h3>View Source:</h3>
     <ul>
-        <li><a href="{{ site.srcurl.docs }}{{ page.url }}" target="_sourcewindow">{{ page.url }}</a></li>
+        <li><a href="{{ site.srcurl.docs }}/{{ page.path }}?plain=1" target="_sourcewindow">{{ page.path }}</a></li>
         {% for s in page.sources %}
-        <li><a href="{{ site.srcurl.docs }}{{ page.dir }}{{s}}" target="_sourcewindow"> {{ s }}</a></li>
+        <li><a href="{{ site.srcurl.docs }}/{{ page.path }}{{s}}?plain=1" target="_sourcewindow"> {{ s }}</a></li>
         {% endfor %}
     </ul>
 </div>
