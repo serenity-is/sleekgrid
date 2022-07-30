@@ -1,5 +1,5 @@
 .percent-complete-bar {
     display: inline-block;
-    height: 10px;
-    border-radius: 5px;
+    height: 0.7em;
+    border-radius: 0.35em;
 }

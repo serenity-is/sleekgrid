@@ -2,17 +2,16 @@
 title: 'Example 2: Formatters'
 
 demonstrates:
-    - width, minWidth, maxWidth, resizable, cssClass column attributes
-    - custom column formatters
-    - 'an extended formatter returning an object { html or text, addClasses, toolTip } rather than a string,
-    allowing adding classes to the cell. You can also optionally use toolTip to fill the "title" attribute'
+- width, minWidth, maxWidth, resizable, cssClass column attributes
+- custom column formatters
+- 'an extended formatter returning an object { html or text, addClasses, toolTip } rather than a string,
+allowing adding classes to the cell. You can also optionally use toolTip to fill the "title" attribute'
 
 requires_jqueryui: true
 
 requires_scripts:
-    - slick.editors.js
-    - slick.formatters.js
-
+- slick.editors.js
+- slick.formatters.js
 ---
 
 <style>
@@ -91,18 +90,18 @@ requires_scripts:
         enableCellNavigation: true
     };
 
+    for (var i = 0; i < 5; i++) {
+        var d = (data[i] = {});
+
+        d["title"] = "Task " + i;
+        d["duration"] = "5 days";
+        d["percentComplete"] = Math.min(100, Math.round(Math.random() * 110));
+        d["start"] = "01/01/2022";
+        d["finish"] = "01/05/2022";
+        d["effortDriven"] = (i % 4 == 0);
+    }
+
     $(function () {
-        for (var i = 0; i < 5; i++) {
-            var d = (data[i] = {});
-
-            d["title"] = "Task " + i;
-            d["duration"] = "5 days";
-            d["percentComplete"] = Math.min(100, Math.round(Math.random() * 110));
-            d["start"] = "01/01/2022";
-            d["finish"] = "01/05/2022";
-            d["effortDriven"] = (i % 4 == 0);
-        }
-
         grid = new Slick.Grid("#myGrid", data, columns, options);
-    })
+    });
 </script>

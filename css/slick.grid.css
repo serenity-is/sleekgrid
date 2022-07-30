@@ -6,14 +6,14 @@ classes should alter those!
 */
 
 :root {
+  --slick-editable-bg: #ffffff;
   --slick-header-bg: #f7f7f5;
-  --slick-header-border: #d6d7d6;
-  --slick-line-height: 20px;
+  --slick-header-border: #e6d7d6;
   --slick-cell-border: #d6d7d6;
   --slick-row-bg: #ffffff;
   --slick-row-odd-bg: #f9f9f9;
-  --slick-cell-padding-v: 4px;
-  --slick-cell-padding-h: 6px;
+  --slick-padding-v: 4px;
+  --slick-padding-h: 6px;
 }
 
 .slick-container {
@@ -53,7 +53,6 @@ classes should alter those!
 .slick-footerrow {
   overflow: hidden;
   position: relative;
-  line-height: var(--slick-line-height);
 }
 
 .slick-header {
@@ -74,7 +73,6 @@ classes should alter those!
   white-space: nowrap;
   cursor: default;
   overflow: hidden;
-  line-height: var(--slick-line-height);
   background-color: var(--slick-header-bg);
 }
 
@@ -94,7 +92,7 @@ classes should alter those!
 .slick-header-column,
 .slick-footerrow-column,
 .slick-cell {
-  padding: var(--slick-cell-padding-v) var(--slick-cell-padding-h);
+  padding: var(--slick-padding-v) var(--slick-padding-h);
 }
 
 .slick-cell.active {
@@ -110,7 +108,6 @@ classes should alter those!
   overflow: hidden;
   text-overflow: ellipsis;
   border-right: 1px solid var(--slick-header-border);
-  line-height: var(--slick-line-height);
 }
 
 .slick-sort-indicator {
@@ -169,11 +166,9 @@ classes should alter those!
   border-right: 1px solid var(--slick-cell-border);
   border-bottom: 1px solid var(--slick-cell-border);
   overflow: hidden;
-  -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
   vertical-align: middle;
   z-index: 1;
-  padding: var(--slick-cell-padding-v) var(--slick-cell-padding-h);
   margin: 0;
   white-space: nowrap;
   cursor: default;
@@ -200,8 +195,8 @@ classes should alter those!
 .slick-cell.editable {
   z-index: 11;
   overflow: visible;
-  background: white;
-  border-color: black;
+  background: var(--slick-editable-bg);
+  box-shadow: -1px -1px 2px 1px rgba(0, 0, 0, 0.1);
 }
 
 .slick-cell:focus {
@@ -236,3 +231,13 @@ classes should alter those!
   border: 2px dashed black;
 }
 
+.slick-cell>.editor-text {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  margin: 0;
+  background: transparent;
+  outline: 0;
+  padding: 0;
+  line-height: var(--bs-body);
+}

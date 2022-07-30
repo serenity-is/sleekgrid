@@ -1516,6 +1516,7 @@ export class Grid<TItem = any> {
         el.dataset.uid = this._uid;
         var rowHeight = (this._options.rowHeight - this._cellHeightDiff);
         var rules = [
+            "." + this._uid + " { --slick-cell-height: " + this._options.rowHeight + "px; }",
             "." + this._uid + " .slick-group-header-column { " + this._rtlS + ": 1000px; }",
             "." + this._uid + " .slick-header-column { " + this._rtlS + ": 1000px; }",
             "." + this._uid + " .slick-top-panel { height:" + this._options.topPanelHeight + "px; }",
@@ -1523,7 +1524,7 @@ export class Grid<TItem = any> {
             "." + this._uid + " .slick-headerrow-columns { height:" + this._options.headerRowHeight + "px; }",
             "." + this._uid + " .slick-cell { height:" + rowHeight + "px; }",
             "." + this._uid + " .slick-row { height:" + this._options.rowHeight + "px; }",
-            "." + this._uid + " .slick-footerrow-columns { height:" + this._options.footerRowHeight + "px; }"
+            "." + this._uid + " .slick-footerrow-columns { height:" + this._options.footerRowHeight + "px; }",
         ];
 
         var cols = this._cols;
@@ -2475,7 +2476,7 @@ export class Grid<TItem = any> {
             return;
         }
 
-        if (fmtResult.html !== null)
+        if (fmtResult.html != null)
             cellNode.innerHTML = fmtResult.html;
         else
             cellNode.innerText = fmtResult.text;
