@@ -2650,18 +2650,12 @@ export class Grid<TItem = any> {
         // The top pane includes the top panel, the header row and the footer row
         this._paneTopH += this._topPanelH + this._headerRowH + this._footerRowH;
 
-        if (this.hasFrozenColumns() && this._options.autoHeight) {
-            this._paneTopH += this._scrollDims.height;
-        }
-
         // The top viewport does not contain the top panel, the header row or the footer row
         this._viewportTopH = this._paneTopH - this._topPanelH - this._headerRowH - this._footerRowH;
 
         if (this._options.autoHeight) {
-            if (this.hasFrozenColumns()) {
-                this._container.style.height = (this._paneTopH + this._groupingPanelH +
-                    parseFloat(getComputedStyle(this._headerColsL.parentElement).height)) + 'px';
-            }
+            this._container.style.height = (this._paneTopH + this._groupingPanelH +
+                parseFloat(getComputedStyle(this._headerColsL.parentElement).height)) + 'px';
         }
 
         this._paneTopL.style.top = (this._groupingPanelH + (parseFloat(getComputedStyle(this._paneHeaderL).height) || this._headerRowH)) + "px";
@@ -3283,6 +3277,9 @@ export class Grid<TItem = any> {
     }
 
     private handleMouseWheel(e: JQueryEventObject, delta: number, deltaX: number, deltaY: number): void {
+        if (this._ignoreScrollUntil >= new Date().getTime())
+            return;
+
         deltaX = (typeof deltaX == "undefined" ? (e as any).originalEvent.deltaX : deltaX) || 0;
         deltaY = (typeof deltaY == "undefined" ? (e as any).originalEvent.deltaY : deltaY) || 0;
         this._scrollTop = Math.max(0, this._scrollContainerY.scrollTop - (deltaY * this._options.rowHeight));
@@ -3293,6 +3290,9 @@ export class Grid<TItem = any> {
     }
 
     private handleScroll(): boolean {
+        if (this._ignoreScrollUntil >= new Date().getTime())
+            return;
+
         this._scrollTop = this._scrollContainerY.scrollTop;
         this._scrollLeft = this._scrollContainerX.scrollLeft;
         return this._handleScroll(false);
