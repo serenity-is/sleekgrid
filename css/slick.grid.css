@@ -195,6 +195,11 @@ classes should alter those!
   box-shadow: -1px -1px 2px 1px rgba(0, 0, 0, 0.1);
 }
 
+.slick-cell.invalid {
+  background-color: #ff00001f;
+  box-shadow: 0 0 0px 1px rgb(255 0 0 / 50%);
+}
+
 .slick-cell:focus {
   outline: none;
 }
