@@ -4,9 +4,13 @@
     border-radius: 0.35em;
 }
 
+input.editor-text.hasDatepicker {
+  width: calc(100% - 18px) !important;
+}
+
 input.editor-percentcomplete {
   display: inline-block;
-  width: 100%;
+  width: calc(100% - 19px) !important;
   height: 100%;
   border: 0;
   margin: 0;

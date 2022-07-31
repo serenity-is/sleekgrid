@@ -145,6 +145,7 @@ export class Grid<TItem = any> {
     readonly onClick = new Event<ArgsCell, JQueryMouseEventObject>();
     readonly onColumnsReordered = new Event<ArgsGrid>();
     readonly onColumnsResized = new Event<ArgsGrid>();
+    readonly onCompositeEditorChange = new Event<ArgsGrid>();
     readonly onContextMenu = new Event<ArgsGrid, JQueryEventObject>();
     readonly onDblClick = new Event<ArgsCell, JQueryMouseEventObject>();
     readonly onDrag = new Event<ArgsGrid, JQueryEventObject>();
@@ -4751,6 +4752,18 @@ export class Grid<TItem = any> {
 
         this.scrollCellIntoView(row, cell, false);
         this.setActiveCellInternal(this.getCellNode(row, cell), false);
+    }
+
+    setActiveRow(row: number, cell: number, suppressScrollIntoView?: boolean) {
+        if (!this._initialized)
+            return;
+
+        if (row > this.getDataLength() || row < 0 || cell >= this._cols.length || cell < 0)
+          return;
+
+        this._activeRow = row;
+        if (!suppressScrollIntoView)
+            this.scrollCellIntoView(row, cell || 0, false);
     }
 
     private canCellBeActive(row: number, cell: number): boolean {
