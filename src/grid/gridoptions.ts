@@ -39,8 +39,8 @@ export interface GridOptions<TItem = any> {
     forceSyncScrolling?: boolean;
     formatterFactory?: FormatterFactory;
     frozenBottom?: boolean;
-    frozenColumn?: number;
-    frozenRow?: number;
+    frozenColumns?: number;
+    frozenRows?: number;
     fullWidthRows?: boolean;
     groupingPanel?: boolean,
     groupingPanelHeight?: number;
@@ -97,8 +97,6 @@ export const gridDefaults: GridOptions = {
     forceFitColumns: false,
     forceSyncScrolling: false,
     formatterFactory: null,
-    frozenBottom: false,
-    frozenRow: -1,
     fullWidthRows: false,
     groupingPanel: false,
     groupingPanelHeight: 30,

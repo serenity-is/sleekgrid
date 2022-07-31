@@ -6,26 +6,25 @@ let maxSupportedCssHeight: number;  // browser's breaking point
 let scrollbarDimensions: { width: number, height: number };
 
 export function adjustFrozenColumnCompat(columns: Column[], options: GridOptions) {
-    if (options?.frozenColumn == null) {
-        delete options.frozenColumn;
+    if (options?.frozenColumns == null) {
+        delete options.frozenColumns;
         return;
     }
 
-    var toFreeze = options.frozenColumn + 1;
-    options.frozenColumn = -1;
+    var toFreeze = options.frozenColumns;
+    options.frozenColumns = 0;
     var i = 0;
     while (i < columns.length) {
         var col = columns[i++];
         if (toFreeze > 0 && col.visible !== false) {
             col.frozen = true;
-            options.frozenColumn++;
+            options.frozenColumns++;
             toFreeze--;
         }
         else if (col.frozen !== undefined)
             delete col.frozen;
     }
 }
-
 
 export function disableSelection(target: HTMLElement) {
     if (target) {

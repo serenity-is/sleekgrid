@@ -23,7 +23,7 @@ function container() {
     return document.body.appendChild(document.createElement('div'));
 }
 
-describe('options.frozenColumn', () => {
+describe('options.frozenColumns', () => {
 
     it('is ignored when undefined', () => {
         const grid = new Grid(container(), [], threeCols(), {
@@ -38,7 +38,7 @@ describe('options.frozenColumn', () => {
     it('is ignored when null', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumn: null
+            frozenColumns: null
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -49,7 +49,7 @@ describe('options.frozenColumn', () => {
     it('is ignored when less than zero', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumn: -1
+            frozenColumns: -1
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -57,10 +57,21 @@ describe('options.frozenColumn', () => {
         expect(grid.getColumns()[0].frozen).toBeUndefined();
     });
 
-    it('sets first column to frozen when 0 and all cols are visible', () => {
+    it('is ignored when than zero', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumn: 0
+            frozenColumns: 0
+        });
+
+        expect(grid.getInitialColumns().length).toBe(3);
+        expect(grid.getColumns().length).toBe(3);
+        expect(grid.getColumns()[0].frozen).toBeUndefined();
+    });
+
+    it('sets first column to frozen when 1 and all cols are visible', () => {
+        const grid = new Grid(container(), [], threeCols(), {
+            enableColumnReorder: false,
+            frozenColumns: 1
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -68,12 +79,12 @@ describe('options.frozenColumn', () => {
         expect(grid.getColumns()[0].frozen).toBe(true);
     });
 
-    it('sets the first visible column to frozen when 0', () => {
+    it('sets the first visible column to frozen when 1', () => {
         var cols = threeCols();
         cols[0].visible = false;
         const grid = new Grid(container(), [], cols , {
             enableColumnReorder: false,
-            frozenColumn: 0
+            frozenColumns: 1
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -83,10 +94,10 @@ describe('options.frozenColumn', () => {
         expect(grid.getColumns()[1].frozen).toBeUndefined();
     });
 
-    it('sets first two columns to frozen when 1 and all cols are visible', () => {
+    it('sets first two columns to frozen when 2 and all cols are visible', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumn: 1
+            frozenColumns: 2
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -95,12 +106,12 @@ describe('options.frozenColumn', () => {
         expect(grid.getColumns()[1].frozen).toBe(true);
     });
 
-    it('sets the first two visible column to frozen when 1', () => {
+    it('sets the first two visible column to frozen when 2', () => {
         var cols = threeCols();
         cols[0].visible = false;
         const grid = new Grid(container(), [], cols , {
             enableColumnReorder: false,
-            frozenColumn: 1
+            frozenColumns: 2
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -114,17 +125,17 @@ describe('options.frozenColumn', () => {
     it('null gets deleted from options after processing', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumn: null
+            frozenColumns: null
         });
 
-        expect(grid.getOptions().frozenColumn).toBeUndefined();
+        expect(grid.getOptions().frozenColumns).toBeUndefined();
     });
 
     it('sets pane visibilities properly', () => {
         const div = container();
         const grid = new Grid(div, [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumn: 1
+            frozenColumns: 2
         });
 
         const paneTopLeft = div.querySelector(`.${slickPaneTop}.${slickPaneRight}`) as HTMLDivElement;
