@@ -47,7 +47,7 @@ export class Grid<TItem = any> {
     private _hPostRender: number = null;
     private _hPostRenderCleanup: number = null;
     private _hRender: number = null;
-    private _ignoreScrollUntil: number = 0;
+    private _ignoreScrollEvents = 0;
     private _initColById: { [key: string]: number };
     private _initCols: Column<TItem>[];
     private _initialized = false;
@@ -3257,7 +3257,7 @@ export class Grid<TItem = any> {
     }
 
     private handleHeaderRowScroll = (): void => {
-        if (this._ignoreScrollUntil >= new Date().getTime())
+        if (this._ignoreScrollEvents > 0)
             return;
 
         var scrollLeft = (this.hasFrozenColumns ? this._headerRowColsR.parentElement.scrollLeft : this._headerRowColsL.parentElement.scrollLeft);
@@ -3267,7 +3267,7 @@ export class Grid<TItem = any> {
     }
 
     private handleFooterRowScroll = (): void => {
-        if (this._ignoreScrollUntil >= new Date().getTime())
+        if (this._ignoreScrollEvents > 0)
             return;
 
         var scrollLeft = (this.hasFrozenColumns ? this._footerRowColsR.parentElement.scrollLeft : this._footerRowColsL.parentElement.scrollLeft);
@@ -3277,7 +3277,7 @@ export class Grid<TItem = any> {
     }
 
     private handleMouseWheel(e: JQueryEventObject, delta: number, deltaX: number, deltaY: number): void {
-        if (this._ignoreScrollUntil >= new Date().getTime())
+        if (this._ignoreScrollEvents > 0)
             return;
 
         deltaX = (typeof deltaX == "undefined" ? (e as any).originalEvent.deltaX : deltaX) || 0;
@@ -3290,7 +3290,7 @@ export class Grid<TItem = any> {
     }
 
     private handleScroll(): boolean {
-        if (this._ignoreScrollUntil >= new Date().getTime())
+        if (this._ignoreScrollEvents > 0)
             return;
 
         this._scrollTop = this._scrollContainerY.scrollTop;
@@ -3299,6 +3299,9 @@ export class Grid<TItem = any> {
     }
 
     private _handleScroll(isMouseWheel?: boolean): boolean {
+        if (this._ignoreScrollEvents > 0)
+            return;
+
         var maxScrollDistanceY = this._scrollContainerY.scrollHeight - this._scrollContainerY.clientHeight;
         var maxScrollDistanceX = this._scrollContainerY.scrollWidth - this._scrollContainerY.clientWidth;
 
@@ -3317,87 +3320,93 @@ export class Grid<TItem = any> {
 
         var vScrollDist = Math.abs(this._scrollTop - this._scrollTopPrev);
         var hScrollDist = Math.abs(this._scrollLeft - this._scrollLeftPrev);
+        var anyDist = hScrollDist || vScrollDist;
 
-        if (hScrollDist || vScrollDist)
-            this._ignoreScrollUntil = new Date().getTime() + 100;
+        if (anyDist)
+            this._ignoreScrollEvents++;
 
-        if (hScrollDist) {
-            this._scrollLeftPrev = this._scrollLeft;
+        try {
+            if (hScrollDist) {
+                this._scrollLeftPrev = this._scrollLeft;
 
-            this._scrollContainerX.scrollLeft = this._scrollLeft;
+                this._scrollContainerX.scrollLeft = this._scrollLeft;
 
-            if (this.hasFrozenColumns()) {
-                this._headerColsR.parentElement.scrollLeft = this._scrollLeft;
-                this._topPanelR.parentElement.scrollLeft = this._scrollLeft;
-                this._headerRowColsR.parentElement.scrollLeft = this._scrollLeft;
-                this._footerRowColsR.parentElement.scrollLeft = this._scrollLeft;
-                if (this.hasFrozenRows()) {
-                    this._viewportTopR.scrollLeft = this._scrollLeft;
-                }
-            } else {
-                this._headerColsL.parentElement.scrollLeft = this._scrollLeft;
-                this._topPanelL.parentElement.scrollLeft = this._scrollLeft;
-                this._headerRowColsL.parentElement.scrollLeft = this._scrollLeft;
-                this._footerRowColsL.parentElement.scrollLeft = this._scrollLeft;
-                if (this.hasFrozenRows()) {
-                    this._viewportTopL.scrollLeft = this._scrollLeft;
-                }
-            }
-        }
-
-        if (vScrollDist) {
-            this._vScrollDir = this._scrollTopPrev < this._scrollTop ? 1 : -1;
-            this._scrollTopPrev = this._scrollTop;
-
-            if (isMouseWheel) {
-                this._scrollContainerY.scrollTop = this._scrollTop;
-            }
-
-            if (this.hasFrozenColumns()) {
-                if (this.hasFrozenRows() && !this._options.frozenBottom) {
-                    this._viewportBottomL.scrollTop = this._scrollTop;
+                if (this.hasFrozenColumns()) {
+                    this._headerColsR.parentElement.scrollLeft = this._scrollLeft;
+                    this._topPanelR.parentElement.scrollLeft = this._scrollLeft;
+                    this._headerRowColsR.parentElement.scrollLeft = this._scrollLeft;
+                    this._footerRowColsR.parentElement.scrollLeft = this._scrollLeft;
+                    if (this.hasFrozenRows()) {
+                        this._viewportTopR.scrollLeft = this._scrollLeft;
+                    }
                 } else {
-                    this._viewportTopL.scrollTop = this._scrollTop;
+                    this._headerColsL.parentElement.scrollLeft = this._scrollLeft;
+                    this._topPanelL.parentElement.scrollLeft = this._scrollLeft;
+                    this._headerRowColsL.parentElement.scrollLeft = this._scrollLeft;
+                    this._footerRowColsL.parentElement.scrollLeft = this._scrollLeft;
+                    if (this.hasFrozenRows()) {
+                        this._viewportTopL.scrollLeft = this._scrollLeft;
+                    }
                 }
             }
 
-            // switch virtual pages if needed
-            if (vScrollDist < this._viewportH) {
-                this.scrollTo(this._scrollTop + this._pageOffset);
-            } else {
-                var oldOffset = this._pageOffset;
-                if (this._realScrollHeight == this._viewportH) {
-                    this._page = 0;
+            if (vScrollDist) {
+                this._vScrollDir = this._scrollTopPrev < this._scrollTop ? 1 : -1;
+                this._scrollTopPrev = this._scrollTop;
+
+                if (isMouseWheel) {
+                    this._scrollContainerY.scrollTop = this._scrollTop;
+                }
+
+                if (this.hasFrozenColumns()) {
+                    if (this.hasFrozenRows() && !this._options.frozenBottom) {
+                        this._viewportBottomL.scrollTop = this._scrollTop;
+                    } else {
+                        this._viewportTopL.scrollTop = this._scrollTop;
+                    }
+                }
+
+                // switch virtual pages if needed
+                if (vScrollDist < this._viewportH) {
+                    this.scrollTo(this._scrollTop + this._pageOffset);
                 } else {
-                    this._page = Math.min(this._numberOfPages - 1, Math.floor(this._scrollTop * ((this._virtualHeight - this._viewportH) / (this._realScrollHeight - this._viewportH)) * (1 / this._pageHeight)));
-                }
-                this._pageOffset = Math.round(this._page * this._jumpinessCoefficient);
-                if (oldOffset != this._pageOffset) {
-                    this.invalidateAllRows();
+                    var oldOffset = this._pageOffset;
+                    if (this._realScrollHeight == this._viewportH) {
+                        this._page = 0;
+                    } else {
+                        this._page = Math.min(this._numberOfPages - 1, Math.floor(this._scrollTop * ((this._virtualHeight - this._viewportH) / (this._realScrollHeight - this._viewportH)) * (1 / this._pageHeight)));
+                    }
+                    this._pageOffset = Math.round(this._page * this._jumpinessCoefficient);
+                    if (oldOffset != this._pageOffset) {
+                        this.invalidateAllRows();
+                    }
                 }
             }
+
+            if (anyDist) {
+                if (this._hRender) {
+                    clearTimeout(this._hRender);
+                }
+
+                if (Math.abs(this._scrollTopRendered - this._scrollTop) > 20 ||
+                    Math.abs(this._scrollLeftRendered - this._scrollLeft) > 20) {
+                    if (this._options.forceSyncScrolling || (
+                        Math.abs(this._scrollTopRendered - this._scrollTop) < this._viewportH &&
+                        Math.abs(this._scrollLeftRendered - this._scrollLeft) < this._viewportW)) {
+                        this.render();
+                    } else {
+                        this._hRender = setTimeout(this.render.bind(this), 50);
+                    }
+
+                    this.trigger(this.onViewportChanged);
+                }
+            }
+
+            this.trigger(this.onScroll, { scrollLeft: this._scrollLeft, scrollTop: this._scrollTop });
+        } finally {
+            if (anyDist)
+                this._ignoreScrollEvents--;
         }
-
-        if (hScrollDist || vScrollDist) {
-            if (this._hRender) {
-                clearTimeout(this._hRender);
-            }
-
-            if (Math.abs(this._scrollTopRendered - this._scrollTop) > 20 ||
-                Math.abs(this._scrollLeftRendered - this._scrollLeft) > 20) {
-                if (this._options.forceSyncScrolling || (
-                    Math.abs(this._scrollTopRendered - this._scrollTop) < this._viewportH &&
-                    Math.abs(this._scrollLeftRendered - this._scrollLeft) < this._viewportW)) {
-                    this.render();
-                } else {
-                    this._hRender = setTimeout(this.render.bind(this), 50);
-                }
-
-                this.trigger(this.onViewportChanged);
-            }
-        }
-
-        this.trigger(this.onScroll, { scrollLeft: this._scrollLeft, scrollTop: this._scrollTop });
 
         return !!(hScrollDist || vScrollDist);
     }
