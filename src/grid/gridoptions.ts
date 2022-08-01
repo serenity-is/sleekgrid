@@ -2,6 +2,7 @@ import type { Column } from "./column";
 import { EditorLock, GlobalEditorLock } from "../core/editlock";
 import type { EditCommand, EditorFactory } from "./editor";
 import { ColumnFormatter, FormatterFactory, defaultFormatter } from "./formatting";
+import { LayoutEngine as LayoutEngine } from "./layouts/layout";
 
 export interface GridOptions<TItem = any> {
     addNewRowCssClass?: string;
@@ -46,12 +47,14 @@ export interface GridOptions<TItem = any> {
     groupingPanelHeight?: number;
     headerRowHeight?: number;
     leaveSpaceForNewRows?: boolean;
+    layoutEngine?: LayoutEngine;
     minBuffer?: number;
     multiColumnSort?: boolean;
     multiSelect?: boolean;
     preHeaderPanelHeight?: number;
     renderAllCells?: boolean;
     rowHeight?: number;
+    rtl?: boolean;
     selectedCellCssClass?: string;
     showCellSelection?: boolean;
     showColumnHeader?: boolean;

@@ -2,16 +2,15 @@ import { attrEncode, htmlEncode, EditController, EditorLock, Event, IEventData, 
 import { Column, columnDefaults, ColumnMetadata, ColumnSort, ItemMetadata } from "./column";
 import { EditCommand, Editor } from "./editor";
 import type { CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
-import { addUiStateHover, adjustFrozenColumnCompat, CachedRow, disableSelection, getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, H, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest, spacerDiv } from "./internal";
-import { IPlugin, Position, RowCell, SelectionModel, ViewRange } from "./types";
+import { addUiStateHover, CachedRow, disableSelection, getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, H, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest, spacerDiv } from "./internal";
+import { IPlugin, Position, RowCell, SelectionModel, ViewportSize, ViewRange } from "./types";
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { gridDefaults, GridOptions } from "./gridoptions";
-import { Layout } from "./layout";
+import { LayoutEngine } from "./layouts/layout";
+import { basicLayout } from "./layouts/basic";
 
 
 export class Grid<TItem = any> {
-    private _hasJQuery = typeof jQuery !== "undefined";
-
     private _absoluteColMinWidth: number;
     private _activeCanvasNode: HTMLElement;
     private _activeCell: number;
@@ -19,8 +18,6 @@ export class Grid<TItem = any> {
     private _activePosX: number;
     private _activeRow: number;
     private _activeViewportNode: HTMLElement;
-    private _actualFrozenRow: number = -1;
-    private _canvasWidth: number;
     private _cellCssClasses: CellStylesHash = {};
     private _cellHeightDiff: number = 0;
     private _cellWidthDiff: number = 0;
@@ -35,11 +32,9 @@ export class Grid<TItem = any> {
     private _data: any;
     private _editController: EditController;
     private _frozenCols: number;
-    private _footerRowH: number = 0;
-    private _groupingPanelH: number = 0;
     private _frozenRows: number;
+    private _hasJQuery = typeof jQuery !== "undefined";
     private _headerColumnWidthDiff: number = 0;
-    private _headerRowH: number = 0;
     private _hEditorLoader: number = null;
     private _hPostRender: number = null;
     private _hPostRenderCleanup: number = null;
@@ -49,7 +44,7 @@ export class Grid<TItem = any> {
     private _initCols: Column<TItem>[];
     private _initialized = false;
     private _jumpinessCoefficient: number;
-    private _layout: Layout;
+    private _layout: LayoutEngine;
     private _numberOfPages: number;
     private _numVisibleRows: number = 0;
     private _options: GridOptions<TItem>;
@@ -66,9 +61,6 @@ export class Grid<TItem = any> {
     private _postProcessToRow: number = null;
     private _realScrollHeight: number;
     private _rowsCache: { [key: number]: CachedRow } = {};
-    private _rtl = false;
-    private _rtlE = 'right';
-    private _rtlS = 'left';
     private _scrollDims: { width: number, height: number };
     private _scrollLeft: number = 0;
     private _scrollLeftPrev: number = 0;
@@ -83,14 +75,19 @@ export class Grid<TItem = any> {
     private _styleNode: HTMLStyleElement;
     private _stylesheet: any;
     private _tabbingDirection: number = 1;
-    private _topPanelH: number = 0;
     private _uid: string = "sleekgrid_" + Math.round(1000000 * Math.random());
-    private _uisd: string;
-    private _viewportH: number;
     private _viewportHasHScroll: boolean;
     private _viewportHasVScroll: boolean;
     private _viewportTopH: number = 0;
-    private _viewportW: number;
+    private _viewportSize: ViewportSize = {
+         width: 0, 
+         height: 0, 
+         topPanelHeight: 0, 
+         headerHeight: 0,
+         headerRowHeight: 0, 
+         footerRowHeight: 0, 
+         groupingPanelHeight: 0
+    };
     private _virtualHeight: number;
     private _vScrollDir: number = 1;
 
@@ -99,8 +96,6 @@ export class Grid<TItem = any> {
     private _focusSink1: HTMLDivElement;
     private _focusSink2: HTMLDivElement;
     private _groupingPanel: HTMLDivElement;
-    private _scrollContainerX: HTMLDivElement;
-    private _scrollContainerY: HTMLDivElement;
 
     readonly onActiveCellChanged = new Event<ArgsCell>();
     readonly onActiveCellPositionChanged = new Event<ArgsGrid>();
@@ -142,14 +137,7 @@ export class Grid<TItem = any> {
     constructor(container: JQuery | HTMLElement, data: any, columns: Column<TItem>[], options: GridOptions<TItem>) {
 
         this._data = data;
-
-        // settings
-
-
         this._colDefaults = Object.assign({}, columnDefaults);
-
-        //////////////////////////////////////////////////////////////////////////////////////////////
-        // Initialization
 
         if (this._hasJQuery && container instanceof jQuery)
             this._container = container[0];
@@ -164,13 +152,6 @@ export class Grid<TItem = any> {
 
         this._container.classList.add('slick-container');
 
-        this._rtl = document.body.classList.contains('rtl') || (typeof getComputedStyle != "undefined" &&
-            getComputedStyle(this._container).direction == 'rtl');
-        if (this._rtl) {
-            this._rtlS = 'right';
-            this._rtlE = 'left';
-        }
-
         if (options?.createPreHeaderPanel) {
             // for compat, as draggable grouping plugin expects preHeaderPanel for grouping
             if (options.groupingPanel == null)
@@ -183,12 +164,27 @@ export class Grid<TItem = any> {
 
         options = Object.assign({}, gridDefaults, options);
         this._options = options;
+        this._options.rtl = this._options.rtl ?? 
+            (document.body.classList.contains('rtl') || (typeof getComputedStyle != "undefined" &&
+                getComputedStyle(this._container).direction == 'rtl'));
+        
         this.validateAndEnforceOptions();
         this._colDefaults.width = options.defaultColumnWidth;
 
-        adjustFrozenColumnCompat(columns, this._options);
+        this._layout = options.layoutEngine ?? basicLayout();
+        this._layout.init({
+            bindAncestorScroll: this.bindAncestorScroll.bind(this),
+            getAvailableWidth: this.getAvailableWidth.bind(this),
+            getColumnCssRules: this.getColumnCssRules.bind(this),
+            getColumns: this.getColumns.bind(this),
+            getOptions: this.getOptions.bind(this),
+            getScrollDims: this.getScrollBarDimensions.bind(this),
+            getScrollLeft: () => this._scrollLeft,
+            getScrollTop: () => this._scrollTop,
+            getViewportSize: () => this._viewportSize
+        });
+
         this.setInitialCols(columns);
-        this.adjustFrozenRowOption();
 
         this._editController = {
             "commitCurrentEdit": this.commitCurrentEdit.bind(this),
@@ -230,8 +226,6 @@ export class Grid<TItem = any> {
             }
         }
 
-        this._uisd = this._options.useLegacyUI ? ' ui-state-default' : '';
-        this._layout = (this._frozenCols > 0 || this._frozenRows) > 0 ? this.frozenLayout() : this.basicLayout();
         this._container.append(this._focusSink2 = this._focusSink1.cloneNode() as HTMLDivElement);
 
         if (options.viewportClass)
@@ -244,14 +238,18 @@ export class Grid<TItem = any> {
         this.bindToData();
     }
 
+    private bindAncestorScroll(elem: HTMLElement) {
+        elem.addEventListener('scroll', this.handleActiveCellPositionChange);
+        this._boundAncestorScroll.push(elem);
+    }
+
     init(): void {
         if (this._initialized)
             return;
 
         this._initialized = true;
 
-        this.getViewportWidth();
-        this.getViewportHeight();
+        this.calcViewportSize();
 
         // header columns and cells may have different padding/border skewing width calculations (box-sizing, hello?)
         // calculate the diff so we can set consistent sizes
@@ -469,11 +467,7 @@ export class Grid<TItem = any> {
     }
 
     private getAvailableWidth() {
-        return this._viewportHasVScroll ? this._viewportW - this._scrollDims.width : this._viewportW;
-    }
-
-    private getCanvasWidth(): number {
-        return this._layout.calcCanvasWidth();
+        return this._viewportHasVScroll ? this._viewportSize.width - this._scrollDims.width : this._viewportSize.width;
     }
 
     private updateCanvasWidth(forceColumnWidthsUpdate?: boolean): void {
@@ -839,11 +833,11 @@ export class Grid<TItem = any> {
         var columnScrollTimer: number = null;
 
         var scrollColumnsRight = () => {
-            this._scrollContainerX.scrollLeft = this._scrollContainerX.scrollLeft + 10;
+            this._layout.getScrollContainerX().scrollLeft = this._layout.getScrollContainerX().scrollLeft + 10;
         }
 
         var scrollColumnsLeft = () => {
-            this._scrollContainerX.scrollLeft = this._scrollContainerX.scrollLeft - 10;
+            this._layout.getScrollContainerX().scrollLeft = this._layout.getScrollContainerX().scrollLeft - 10;
         }
 
         var canDragScroll: boolean;
@@ -863,7 +857,7 @@ export class Grid<TItem = any> {
                 ui.placeholder.outerHeight(ui.helper.outerHeight());
                 ui.placeholder.outerWidth(ui.helper.outerWidth());
                 canDragScroll = !this.hasFrozenColumns() ||
-                    (ui.placeholder.offset()[this._rtlS] + Math.round(ui.placeholder.width())) > $(this._scrollContainerX).offset()[this._rtlS];
+                    (ui.placeholder.offset()[this._options.rtl ? 'left' : 'right'] + Math.round(ui.placeholder.width())) > $(this._layout.getScrollContainerX()).offset()[this._options.rtl ? 'left' : 'right'];
                 $(ui.helper).addClass("slick-header-column-active");
             },
             beforeStop: (_: any, ui: any) => {
@@ -884,7 +878,7 @@ export class Grid<TItem = any> {
                         columnScrollTimer = setInterval(
                             scrollColumnsRight, 100);
                     }
-                } else if (canDragScroll && (e.originalEvent as any).pageX < $(this._scrollContainerX).offset().left) {
+                } else if (canDragScroll && (e.originalEvent as any).pageX < $(this._layout.getScrollContainerX()).offset().left) {
                     if (!(columnScrollTimer)) {
                         columnScrollTimer = setInterval(
                             scrollColumnsLeft, 100);
@@ -1167,18 +1161,6 @@ export class Grid<TItem = any> {
         return delta;
     }
 
-    private adjustFrozenRowOption(): void {
-        if (this._options.autoHeight) {
-            this._frozenRows = 0;
-            return;
-        }
-
-        this._frozenRows = (this._options.frozenRows > 0 && this._options.frozenRows <= this._numVisibleRows) ? this._options.frozenRows : 0;
-
-        if (this._frozenRows) {
-            this._actualFrozenRow = (this._options.frozenBottom) ? (this.getDataLength() - this._frozenRows) : (this._frozenRows);
-        }
-    }
 
     private setOverflow(): void {
         this._layout.setOverflow();
@@ -1217,8 +1199,8 @@ export class Grid<TItem = any> {
         var rowHeight = (this._options.rowHeight - this._cellHeightDiff);
         var rules = [
             "." + this._uid + " { --slick-cell-height: " + this._options.rowHeight + "px; }",
-            "." + this._uid + " .slick-group-header-column { " + this._rtlS + ": 1000px; }",
-            "." + this._uid + " .slick-header-column { " + this._rtlS + ": 1000px; }",
+            "." + this._uid + " .slick-group-header-column { " + (this._options.rtl ? 'left' : 'right') + ": 1000px; }",
+            "." + this._uid + " .slick-header-column { " + (this._options.rtl ? 'left' : 'right') + ": 1000px; }",
             "." + this._uid + " .slick-top-panel { height:" + this._options.topPanelHeight + "px; }",
             "." + this._uid + " .slick-grouping-panel { height:" + this._options.groupingPanelHeight + "px; }",
             "." + this._uid + " .slick-headerrow-columns { height:" + this._options.headerRowHeight + "px; }",
@@ -1273,7 +1255,7 @@ export class Grid<TItem = any> {
             }
         }
 
-        return this._rtl ? {
+        return this._options.rtl ? {
             "right": this._columnCssRulesL[idx],
             "left": this._columnCssRulesR[idx]
         } : {
@@ -1357,7 +1339,7 @@ export class Grid<TItem = any> {
             shrinkLeeway = 0,
             total = 0,
             prevTotal,
-            availWidth = this._viewportHasVScroll ? this._viewportW - this._scrollDims.width : this._viewportW,
+            availWidth = this._viewportHasVScroll ? this._viewportSize.width - this._scrollDims.width : this._viewportSize.width,
             cols = this._cols;
 
         for (i = 0; i < cols.length; i++) {
@@ -1560,7 +1542,6 @@ export class Grid<TItem = any> {
 
         var defs = this._colDefaults;
         var initColById = {};
-        var frozenColumns: Column[] = [];
         var viewCols: Column[] = [];
         var viewColById: { [key: string]: number } = {};
         var i: number, m: Column, k: string;
@@ -1581,15 +1562,11 @@ export class Grid<TItem = any> {
             }
 
             initColById[m.id] = i;
-
-            if (m.visible !== false) {
-                (m.frozen ? frozenColumns : viewCols).push(m);
-            }
+            if (m.visible !== false)
+                viewCols.push(m);
         }
 
-        this._frozenCols = frozenColumns.length;
-        if (frozenColumns.length > 0)
-            viewCols = frozenColumns.concat(viewCols);
+        viewCols = this._layout.reorderViewColumns(viewCols);
 
         for (i = 0; i < viewCols.length; i++) {
             m = viewCols[i];
@@ -1645,21 +1622,14 @@ export class Grid<TItem = any> {
 
         this._options = $.extend(this._options, args);
         this.validateAndEnforceOptions();
-        this.adjustFrozenRowOption();
+        this._layout.afterSetOptions(args);
 
-        this.getViewports().forEach(vp => vp.style.overflowY = this._options.autoHeight ? "hidden" : "auto");
+        if (args.columns && !suppressColumnSet) {
+            this.setColumns(args.columns ?? this._initCols);
+        }
 
         if (!suppressSetOverflow) {
             this.setOverflow();
-        }
-
-        if (args.columns && !suppressColumnSet) {
-            adjustFrozenColumnCompat(args.columns, this._options);
-            this.setColumns(args.columns ?? this._initCols);
-        }
-        else if (args.frozenColumns != null) {
-            adjustFrozenColumnCompat(this._initCols, this._options);
-            this.setColumns(this._initCols);
         }
 
         this._layout.setScroller();
@@ -1846,7 +1816,7 @@ export class Grid<TItem = any> {
 
     private scrollTo(y: number): void {
         y = Math.max(y, 0);
-        y = Math.min(y, this._virtualHeight - Math.round($(this._scrollContainerY).height()) + ((this._viewportHasHScroll || this.hasFrozenColumns()) ? this._scrollDims.height : 0));
+        y = Math.min(y, this._virtualHeight - Math.round($(this._layout.getScrollContainerY()).height()) + ((this._viewportHasHScroll || this.hasFrozenColumns()) ? this._scrollDims.height : 0));
 
         var oldOffset = this._pageOffset;
 
@@ -1866,7 +1836,7 @@ export class Grid<TItem = any> {
             this._scrollTopRendered = (this._scrollTop = this._scrollTopPrev = newScrollTop);
 
             this._layout.handleScrollV();
-            this._scrollContainerY.scrollTop = newScrollTop;
+            this._layout.getScrollContainerY().scrollTop = newScrollTop;
 
             this.trigger(this.onViewportChanged);
         }
@@ -2044,22 +2014,11 @@ export class Grid<TItem = any> {
     private cleanupRows(rangeToKeep: ViewRange): void {
         var i: number;
         for (var x in this._rowsCache) {
-            var removeFrozenRow = true;
             i = parseInt(x, 10);
-            if (this.hasFrozenRows()
-                && ((this._options.frozenBottom && i >= this._actualFrozenRow) // Frozen bottom rows
-                    || (!this._options.frozenBottom && i <= this._actualFrozenRow) // Frozen top rows
-                )
-            ) {
-                removeFrozenRow = false;
-            }
-
-            if (i !== this._activeRow
-                && (i < rangeToKeep.top || i > rangeToKeep.bottom)
-                && (removeFrozenRow)) {
+            if (i !== this._activeRow && (i < rangeToKeep.top || i > rangeToKeep.bottom) 
+                && this._layout.canCleanupRow(i))
                 this.removeRowFromCache(i);
             }
-        }
 
         this._options.enableAsyncPostRenderCleanup && this.startPostProcessingCleanup();
     }
@@ -2256,38 +2215,34 @@ export class Grid<TItem = any> {
         this.invalidatePostProcessingResults(row);
     }
 
-    private getViewportHeight(): number {
+    private calcViewportSize(): void {
         const layout = this._layout;
-        this._groupingPanelH = (this._options.groupingPanel && this._options.showGroupingPanel) ? (this._options.groupingPanelHeight + this.getVBoxDelta(this._groupingPanel)) : 0
-        this._topPanelH = this._options.showTopPanel ? (this._options.topPanelHeight + this.getVBoxDelta(layout.getTopPanelFor(0).parentElement)) : 0;
-        this._headerRowH = this._options.showHeaderRow ? (this._options.headerRowHeight + this.getVBoxDelta(layout.getHeaderRowColsFor(0).parentElement)) : 0;
-        this._footerRowH = this._options.showFooterRow ? (this._options.footerRowHeight + this.getVBoxDelta(layout.getFooterRowColsFor(0).parentElement)) : 0;
-
-        var headerH = (this._options.showColumnHeader) ? (parseFloat(getComputedStyle(layout.getHeaderColsFor(0).parentElement).height) + this.getVBoxDelta(layout.getHeaderColsFor(0).parentElement)) : 0;
+        const vs = this._viewportSize;
+        vs.width = parseFloat(getComputedStyle(this._container).width);
+        vs.groupingPanelHeight = (this._options.groupingPanel && this._options.showGroupingPanel) ? (this._options.groupingPanelHeight + this.getVBoxDelta(this._groupingPanel)) : 0
+        vs.topPanelHeight = this._options.showTopPanel ? (this._options.topPanelHeight + this.getVBoxDelta(layout.getTopPanelFor(0).parentElement)) : 0;
+        vs.headerRowHeight = this._options.showHeaderRow ? (this._options.headerRowHeight + this.getVBoxDelta(layout.getHeaderRowColsFor(0).parentElement)) : 0;
+        vs.footerRowHeight = this._options.showFooterRow ? (this._options.footerRowHeight + this.getVBoxDelta(layout.getFooterRowColsFor(0).parentElement)) : 0;
+        vs.headerHeight = (this._options.showColumnHeader) ? (parseFloat(getComputedStyle(layout.getHeaderColsFor(0).parentElement).height) + this.getVBoxDelta(layout.getHeaderColsFor(0).parentElement)) : 0;
 
         if (this._options.autoHeight) {
-            this._viewportH = this._options.rowHeight * this.getDataLengthIncludingAddNew();
-            if (this.getCanvasWidth() > this._viewportW)
-                this._viewportH += this._scrollDims.height;
+            vs.height = this._options.rowHeight * this.getDataLengthIncludingAddNew();
+            if (this._layout.calcCanvasWidth() > vs.width)
+                vs.height += this._scrollDims.height;
         } else {
 
             var style = getComputedStyle(this._container);
-            this._viewportH = parseFloat(style.height)
+            vs.height = parseFloat(style.height)
                 - parseFloat(style.paddingTop)
                 - parseFloat(style.paddingBottom)
-                - headerH
-                - this._topPanelH
-                - this._headerRowH
-                - this._footerRowH
-                - this._groupingPanelH;
+                - vs.headerHeight
+                - vs.topPanelHeight
+                - vs.headerRowHeight
+                - vs.footerRowHeight
+                - vs.groupingPanelHeight;
         }
 
-        this._numVisibleRows = Math.ceil(this._viewportH / this._options.rowHeight);
-        return this._viewportH;
-    }
-
-    private getViewportWidth(): void {
-        this._viewportW = parseFloat(getComputedStyle(this._container).width);
+        this._numVisibleRows = Math.ceil(vs.height / this._options.rowHeight);
     }
 
     resizeCanvas = (): void => {
@@ -2295,9 +2250,7 @@ export class Grid<TItem = any> {
             return;
         }
 
-        this.getViewportWidth();
-        this.getViewportHeight();
-
+        this.calcViewportSize();
         this._layout.resizeCanvas();
 
         if (!this._scrollDims || !this._scrollDims.width) {
@@ -2326,7 +2279,8 @@ export class Grid<TItem = any> {
         }
 
         var dataLengthIncludingAddNew = this.getDataLengthIncludingAddNew();
-        var oldH = (this.hasFrozenRows() && !this._options.frozenBottom) ? Math.round(parseFloat(getComputedStyle(this._canvasBottomL).height)) : Math.round(parseFloat(getComputedStyle(this._canvasTopL).height));
+        var scrollCanvas = this._layout.getScrollCanvasY();
+        var oldH = Math.round(parseFloat(getComputedStyle(scrollCanvas).height));
 
         var numberOfRows;
         if (this.hasFrozenRows()) {
@@ -2335,7 +2289,7 @@ export class Grid<TItem = any> {
             numberOfRows = dataLengthIncludingAddNew + (this._options.leaveSpaceForNewRows ? this._numVisibleRows - 1 : 0);
         }
 
-        var tempViewportH = Math.round(parseFloat(getComputedStyle(this._scrollContainerY).height));
+        var tempViewportH = Math.round(parseFloat(getComputedStyle(this._layout.getScrollContainerY()).height));
         var oldViewportHasVScroll = this._viewportHasVScroll;
         // with autoHeight, we do not need to accommodate the vertical scroll bar
         this._viewportHasVScroll = !this._options.autoHeight && (numberOfRows * this._options.rowHeight > tempViewportH);
@@ -2374,18 +2328,8 @@ export class Grid<TItem = any> {
         }
 
         if (this._realScrollHeight !== oldH) {
-            if (this.hasFrozenRows() && !this._options.frozenBottom) {
-                this._canvasBottomL.style.height = this._realScrollHeight + 'px';
-
-                if (this.hasFrozenColumns()) {
-                    this._canvasBottomR.style.height = this._realScrollHeight + 'px';
-                }
-            } else {
-                this._canvasTopL.style.height = this._realScrollHeight + 'px'
-                this._canvasTopR.style.height = this._realScrollHeight + 'px'
-            }
-
-            this._scrollTop = this._scrollContainerY.scrollTop;
+            this._layout.realScrollHeightChange(this._realScrollHeight);
+            this._scrollTop = this._layout.getScrollContainerY().scrollTop;
         }
 
         var oldScrollTopInRange = (this._scrollTop + this._pageOffset <= this._virtualHeight - tempViewportH);
@@ -2409,7 +2353,7 @@ export class Grid<TItem = any> {
         }
         this.updateCanvasWidth(false);
     }
-
+   
     /**
      * @param viewportTop optional viewport top
      * @param viewportLeft optional viewport left
@@ -2429,15 +2373,15 @@ export class Grid<TItem = any> {
 
         return {
             top: this.getRowFromPosition(viewportTop),
-            bottom: this.getRowFromPosition(viewportTop + this._viewportH) + 1,
+            bottom: this.getRowFromPosition(viewportTop + this._viewportSize.height) + 1,
             leftPx: viewportLeft,
-            rightPx: viewportLeft + this._viewportW
+            rightPx: viewportLeft + this._viewportSize.width
         };
     }
 
     getRenderedRange(viewportTop?: number, viewportLeft?: number): ViewRange {
         var range = this.getVisibleRange(viewportTop, viewportLeft);
-        var buffer = Math.round(this._viewportH / this._options.rowHeight);
+        var buffer = Math.round(this._viewportSize.height / this._options.rowHeight);
         var minBuffer = this._options.minBuffer || 3;
 
         if (this._vScrollDir == -1) {
@@ -2456,14 +2400,14 @@ export class Grid<TItem = any> {
 
         if (this._options.renderAllCells) {
             range.leftPx = 0;
-            range.rightPx = this._canvasWidth;
+            range.rightPx = this._layout.getCanvasWidth();
         }
         else {
-            range.leftPx -= this._viewportW;
-            range.rightPx += this._viewportW;
+            range.leftPx -= this._viewportSize.width;
+            range.rightPx += this._viewportSize.width;
 
             range.leftPx = Math.max(0, range.leftPx);
-            range.rightPx = Math.min(this._canvasWidth, range.rightPx);
+            range.rightPx = Math.min(this._layout.getCanvasWidth(), range.rightPx);
         }
 
         return range;
@@ -2489,15 +2433,9 @@ export class Grid<TItem = any> {
 
     private cleanUpCells(range: ViewRange, row: number): void {
         // Ignore frozen rows
-        if (this.hasFrozenRows()
-            && ((this._options.frozenBottom && row > this._actualFrozenRow) // Frozen bottom rows
-                || (row <= this._actualFrozenRow)  // Frozen top rows
-            )
-        ) {
+        if (!this._layout.canCleanupRow(row))
             return;
-        }
 
-        var totalCellsRemoved = 0;
         var cacheEntry = this._rowsCache[row];
 
         // Remove cells outside the range.
@@ -2539,7 +2477,6 @@ export class Grid<TItem = any> {
             if (this._postProcessedRows[row]) {
                 delete this._postProcessedRows[row][cellToRemove];
             }
-            totalCellsRemoved++;
         }
     }
 
@@ -2853,8 +2790,8 @@ export class Grid<TItem = any> {
             return;
 
         var scrollLeft = (this.hasFrozenColumns ? this._headerRowColsR.parentElement.scrollLeft : this._headerRowColsL.parentElement.scrollLeft);
-        if (scrollLeft != this._scrollContainerX.scrollLeft) {
-            this._scrollContainerX.scrollLeft = scrollLeft;
+        if (scrollLeft != this._layout.getScrollContainerX().scrollLeft) {
+            this._layout.getScrollContainerX().scrollLeft = scrollLeft;
         }
     }
 
@@ -2863,30 +2800,30 @@ export class Grid<TItem = any> {
             return;
 
         var scrollLeft = (this.hasFrozenColumns ? this._footerRowColsR.parentElement.scrollLeft : this._footerRowColsL.parentElement.scrollLeft);
-        if (scrollLeft != this._scrollContainerX.scrollLeft) {
-            this._scrollContainerX.scrollLeft = scrollLeft;
+        if (scrollLeft != this._layout.getScrollContainerX().scrollLeft) {
+            this._layout.getScrollContainerX().scrollLeft = scrollLeft;
         }
     }
 
     private handleMouseWheel(e: JQueryEventObject, delta: number, deltaX: number, deltaY: number): void {
         deltaX = (typeof deltaX == "undefined" ? (e as any).originalEvent.deltaX : deltaX) || 0;
         deltaY = (typeof deltaY == "undefined" ? (e as any).originalEvent.deltaY : deltaY) || 0;
-        this._scrollTop = Math.max(0, this._scrollContainerY.scrollTop - (deltaY * this._options.rowHeight));
-        this._scrollLeft = this._scrollContainerX.scrollLeft + (deltaX * 10);
+        this._scrollTop = Math.max(0, this._layout.getScrollContainerY().scrollTop - (deltaY * this._options.rowHeight));
+        this._scrollLeft = this._layout.getScrollContainerX().scrollLeft + (deltaX * 10);
         var handled = this._handleScroll(true);
         if (handled)
             e.preventDefault();
     }
 
     private handleScroll(): boolean {
-        this._scrollTop = this._scrollContainerY.scrollTop;
-        this._scrollLeft = this._scrollContainerX.scrollLeft;
+        this._scrollTop = this._layout.getScrollContainerY().scrollTop;
+        this._scrollLeft = this._layout.getScrollContainerX().scrollLeft;
         return this._handleScroll(false);
     }
 
     private _handleScroll(isMouseWheel?: boolean): boolean {
-        var maxScrollDistanceY = this._scrollContainerY.scrollHeight - this._scrollContainerY.clientHeight;
-        var maxScrollDistanceX = this._scrollContainerY.scrollWidth - this._scrollContainerY.clientWidth;
+        var maxScrollDistanceY = this._layout.getScrollContainerY().scrollHeight - this._layout.getScrollContainerY().clientHeight;
+        var maxScrollDistanceX = this._layout.getScrollContainerY().scrollWidth - this._layout.getScrollContainerY().clientWidth;
 
         // Protect against erroneous clientHeight/Width greater than scrollHeight/Width.
         // Sometimes seen in Chrome.
@@ -2910,7 +2847,7 @@ export class Grid<TItem = any> {
         if (hScrollDist) {
             this._scrollLeftPrev = this._scrollLeft;
 
-            this._scrollContainerX.scrollLeft = this._scrollLeft;
+            this._layout.getScrollContainerX().scrollLeft = this._scrollLeft;
 
             this._layout.handleScrollH();
         }
@@ -2920,20 +2857,20 @@ export class Grid<TItem = any> {
             this._scrollTopPrev = this._scrollTop;
 
             if (isMouseWheel) {
-                this._scrollContainerY.scrollTop = this._scrollTop;
+                this._layout.getScrollContainerY().scrollTop = this._scrollTop;
             }
 
             this._layout.handleScrollV;
 
             // switch virtual pages if needed
-            if (vScrollDist < this._viewportH) {
+            if (vScrollDist < this._viewportSize.height) {
                 this.scrollTo(this._scrollTop + this._pageOffset);
             } else {
                 var oldOffset = this._pageOffset;
-                if (this._realScrollHeight == this._viewportH) {
+                if (this._realScrollHeight == this._viewportSize.height) {
                     this._page = 0;
                 } else {
-                    this._page = Math.min(this._numberOfPages - 1, Math.floor(this._scrollTop * ((this._virtualHeight - this._viewportH) / (this._realScrollHeight - this._viewportH)) * (1 / this._pageHeight)));
+                    this._page = Math.min(this._numberOfPages - 1, Math.floor(this._scrollTop * ((this._virtualHeight - this._viewportSize.height) / (this._realScrollHeight - this._viewportSize.height)) * (1 / this._pageHeight)));
                 }
                 this._pageOffset = Math.round(this._page * this._jumpinessCoefficient);
                 if (oldOffset != this._pageOffset) {
@@ -2950,8 +2887,8 @@ export class Grid<TItem = any> {
             if (Math.abs(this._scrollTopRendered - this._scrollTop) > 20 ||
                 Math.abs(this._scrollLeftRendered - this._scrollLeft) > 20) {
                 if (this._options.forceSyncScrolling || (
-                    Math.abs(this._scrollTopRendered - this._scrollTop) < this._viewportH &&
-                    Math.abs(this._scrollLeftRendered - this._scrollLeft) < this._viewportW)) {
+                    Math.abs(this._scrollTopRendered - this._scrollTop) < this._viewportSize.height &&
+                    Math.abs(this._scrollLeftRendered - this._scrollLeft) < this._viewportSize.width)) {
                     this.render();
                 } else {
                     this._hRender = setTimeout(this.render.bind(this), 50);
@@ -3525,18 +3462,18 @@ export class Grid<TItem = any> {
 
     internalScrollColumnIntoView(left: number, right: number): void {
 
-        var scrollRight = this._scrollLeft + parseFloat(getComputedStyle(this._scrollContainerX).width) -
+        var scrollRight = this._scrollLeft + parseFloat(getComputedStyle(this._layout.getScrollContainerX()).width) -
             (this._viewportHasVScroll ? this._scrollDims.width : 0);
 
         var target;
         if (left < this._scrollLeft)
             target = left;
         else if (right > scrollRight)
-            target = Math.min(left, right - this._scrollContainerX.clientWidth);
+            target = Math.min(left, right - this._layout.getScrollContainerX().clientWidth);
         else
             return;
 
-        this._scrollContainerX.scrollLeft = target;
+        this._layout.getScrollContainerX().scrollLeft = target;
         this.handleScroll();
         this.render();
     }
@@ -3852,7 +3789,7 @@ export class Grid<TItem = any> {
             (!this._options.frozenBottom && row > this._actualFrozenRow - 1) ||
             (this._options.frozenBottom && row < this._actualFrozenRow - 1)) {
 
-            var viewportScrollH = Math.round(parseFloat(getComputedStyle(this._scrollContainerY).height));
+            var viewportScrollH = Math.round(parseFloat(getComputedStyle(this._layout.getScrollContainerY()).height));
 
             var rowNumber = (this.hasFrozenRows() && !this._options.frozenBottom ? row - this._frozenRows + 1 : row);
 
@@ -4505,789 +4442,4 @@ export class Grid<TItem = any> {
         this._selectionModel.setSelectedRanges(this.rowsToRanges(rows));
     }
 
-    private frozenLayout(): Layout {
-        var _canvasWidthL: number;
-        var _canvasWidthR: number;
-        var _headersWidthL: number;
-        var _headersWidthR: number;
-        var _paneBottomH: number = 0;
-        var _paneTopH: number = 0;
-
-        var _canvasBottomL: HTMLDivElement;
-        var _canvasBottomR: HTMLDivElement;
-        var _canvasTopL: HTMLDivElement;
-        var _canvasTopR: HTMLDivElement;
-        var _headerColsL: HTMLDivElement;
-        var _headerColsR: HTMLDivElement;
-        var _headerRowColsL: HTMLDivElement;
-        var _headerRowColsR: HTMLDivElement;
-        var _headerRowSpacerL: HTMLDivElement;
-        var _headerRowSpacerR: HTMLDivElement;
-        var _footerRowColsL: HTMLDivElement;
-        var _footerRowColsR: HTMLDivElement;
-        var _footerRowSpacerL: HTMLDivElement;
-        var _footerRowSpacerR: HTMLDivElement;
-        var _paneBottomL: HTMLDivElement;
-        var _paneBottomR: HTMLDivElement;
-        var _paneHeaderL: HTMLDivElement;
-        var _paneHeaderR: HTMLDivElement;
-        var _paneTopL: HTMLDivElement;
-        var _paneTopR: HTMLDivElement;
-        var _topPanelL: HTMLDivElement;
-        var _topPanelR: HTMLDivElement;
-        var _viewportBottomL: HTMLDivElement;
-        var _viewportBottomR: HTMLDivElement;
-        var _viewportTopL: HTMLDivElement;
-        var _viewportTopR: HTMLDivElement;
-
-        const calcCanvasWidth = () => {
-            var cols = this._cols, i = cols.length, frozenCols = this._frozenCols;
-
-            _canvasWidthL = _canvasWidthR = 0;
-
-            while (i--) {
-                if (frozenCols > 0 && i >= frozenCols) {
-                    _canvasWidthR += cols[i].width;
-                } else {
-                    _canvasWidthL += cols[i].width;
-                }
-            }
-
-            var totalRowWidth = _canvasWidthL + _canvasWidthR;
-            return this._options.fullWidthRows ? Math.max(totalRowWidth, this.getAvailableWidth()) : totalRowWidth;
-        }
-
-        const spacerW = calcCanvasWidth() + this._scrollDims.width + 'px';
-        const uisd = this._uisd;
-        var options = this._options;
-
-        // -- PANE HEADER LEFT
-        _headerColsL = H('div', { class: 'slick-header-columns slick-header-columns-left', style: this._rtlS + ':-1000px' });
-        _paneHeaderL = H('div', { class: "slick-pane slick-pane-header slick-pane-left", tabIndex: '0' },
-            H('div', { class: 'slick-header slick-header-left' + uisd, style: !this._options.showColumnHeader && 'display: none' }, _headerColsL));
-
-        // -- PANE HEADER RIGHT
-        _headerColsR = H('div', { class: 'slick-header-columns slick-header-columns-right', style: this._rtlS + ':-1000px' });
-        _paneHeaderR = H('div', { class: "slick-pane slick-pane-header slick-pane-right", tabIndex: '0' },
-            H('div', { class: 'slick-header slick-header-right' + uisd, style: !this._options.showColumnHeader && 'display: none' }, _headerColsR));
-
-        // -- PANE TOP LEFT (headerrow left + top panel left + viewport top left + footer row right)
-        _headerRowColsL = H('div', { class: 'slick-headerrow-columns slick-headerrow-columns-left' });
-        _headerRowSpacerL = spacerDiv(spacerW);
-        var headerRowL = H('div', { class: 'slick-headerrow' + uisd, style: !options.showHeaderRow && 'display: none' }, _headerRowColsL, _headerRowSpacerL);
-
-        _topPanelL = H('div', { class: 'slick-top-panel', style: 'width: 10000px' })
-        var topPanelLS = H('div', { class: 'slick-top-panel-scroller' + uisd, style: !options.showTopPanel && 'display: none' }, _topPanelL);
-
-        _canvasTopL = H('div', { class: "grid-canvas grid-canvas-top grid-canvas-left", tabIndex: "0", hideFocus: '' });
-        _viewportTopL = H('div', { class: "slick-viewport slick-viewport-top slick-viewport-left", tabIndex: "0", hideFocus: '' }, _canvasTopL);
-
-        _footerRowColsL = H('div', { class: 'slick-footerrow-columns slick-footerrow-columns-left' });
-        _footerRowSpacerL = spacerDiv(spacerW);
-        var footerRowL = H('div', { class: 'slick-footerrow' + uisd, style: !options.showFooterRow && 'display: none' }, _footerRowColsL, _footerRowSpacerL);
-
-        _paneTopL = H('div', { class: "slick-pane slick-pane-top slick-pane-left", tabIndex: "0" }, headerRowL, topPanelLS, _viewportTopL, footerRowL);
-
-        // -- PANE TOP RIGHT (headerrow right + top panel right + viewport top right + footer row right)
-        _headerRowColsR = H('div', { class: 'slick-headerrow-columns slick-headerrow-columns-right' });
-        _headerRowSpacerR = spacerDiv(spacerW);
-        var headerRowR = H('div', { class: 'slick-headerrow' + uisd, style: !options.showHeaderRow && 'display: none' }, _headerRowColsR, _headerRowSpacerR);
-
-        _topPanelR = H('div', { class: 'slick-top-panel', style: 'width: 10000px' });
-        var topPanelRS = H('div', { class: 'slick-top-panel-scroller' + uisd, style: !options.showTopPanel && 'display: none' }, _topPanelR);
-
-        _canvasTopR = H('div', { class: "grid-canvas grid-canvas-top grid-canvas-right", tabIndex: "0", hideFocus: '' })
-        _viewportTopR = H('div', { class: "slick-viewport slick-viewport-top slick-viewport-right", tabIndex: "0", hideFocus: '' }, _canvasTopR);
-
-        _footerRowColsR = H('div', { class: 'slick-footerrow-columns slick-footerrow-columns-right' });
-        _footerRowSpacerR = H('div', { style: 'display:block;height:1px;position:absolute;top:0;left:0;', width: spacerW });
-        var footerRowR = H('div', { class: 'slick-footer-row' + uisd, style: !options.showFooterRow && 'display: none' }, _footerRowColsR, _footerRowSpacerR);
-
-        _paneTopR = H('div', { class: "slick-pane slick-pane-top slick-pane-right", tabIndex: "0" }, headerRowR, topPanelRS, _viewportTopR, footerRowR);
-
-        // -- PANE BOTTOM LEFT
-        _canvasBottomL = H('div', { class: "grid-canvas grid-canvas-bottom grid-canvas-left", tabIndex: "0", hideFocus: '' });
-        _viewportBottomL = H('div', { class: "slick-viewport slick-viewport-bottom slick-viewport-left", tabIndex: "0", hideFocus: '' }, _canvasBottomL);
-        _paneBottomL = H('div', { class: "slick-pane slick-pane-bottom slick-pane-left", tabIndex: "0" }, _viewportBottomL);
-
-        _canvasBottomR = H('div', { class: "grid-canvas grid-canvas-bottom grid-canvas-right", tabIndex: "0", hideFocus: '' });
-        _viewportBottomR = H('div', { class: "slick-viewport slick-viewport-bottom slick-viewport-right", tabIndex: "0", hideFocus: '' });
-        _paneBottomR = H('div', { class: "slick-pane slick-pane-bottom slick-pane-right", tabIndex: "0" }, _viewportBottomR);
-
-        // disable all text selection in header (including input and textarea)
-        disableSelection(_headerColsL);
-        disableSelection(_headerColsR);
-
-        function getHeaderCols() {
-            return [_headerColsL, _headerColsR];
-        }
-
-        function getHeaderRowCols() {
-            return [_headerRowColsL, _headerRowColsR];
-        }
-
-        function getFooterRowCols() {
-            return [_footerRowColsL, _footerRowColsR];
-        }
-
-        const getCanvasNodeFor = (row: number, cell: number) => {
-            if (row == null && cell == null)
-                return _canvasTopL;
-
-            var rightSide = cell >= this._frozenCols;
-
-            if (this._frozenRows > 0 && (row >= this._actualFrozenRow + (this._options.frozenBottom ? 0 : 1)))
-                return rightSide ? _canvasBottomR : _canvasBottomL;
-
-            return rightSide ? _canvasTopR : _canvasTopL;
-        }
-
-        const getCanvasWidthFor = (cell: number) => {
-            return cell >= this._frozenCols ? _canvasWidthR : _canvasWidthL;
-        }
-
-        function getCanvasNodes() {
-            return [_canvasTopL, _canvasTopR, _canvasBottomL, _canvasBottomR];
-        }
-
-        function getViewportNodeFor(row: number, cell: number) {
-            if (row == null && cell == null)
-                return _canvasTopL;
-
-            var rightSide = cell >= this._frozenCols;
-
-            if (this._frozenRows > 0 && (row >= this._actualFrozenRow + (this._options.frozenBottom ? 0 : 1)))
-                return rightSide ? _canvasBottomR : _canvasBottomL;
-
-            return rightSide ? _canvasTopR : _canvasTopL;
-        }
-
-        function getViewportNodes() {
-            return [_viewportTopL, _viewportTopR, _viewportBottomL, _viewportBottomR];
-        }
-
-        const updateCanvasWidth = () => {
-            var oldCanvasWidth = this._canvasWidth;
-            var oldCanvasWidthL = _canvasWidthL;
-            var oldCanvasWidthR = _canvasWidthR;
-            var widthChanged;
-            this._canvasWidth = this.getCanvasWidth();
-            var scrollWidth = this._scrollDims.width;
-
-            widthChanged = this._canvasWidth !== oldCanvasWidth || _canvasWidthL !== oldCanvasWidthL || _canvasWidthR !== oldCanvasWidthR;
-
-            if (widthChanged || this.hasFrozenColumns() || this.hasFrozenRows()) {
-                var canvasWidthL = _canvasWidthL + 'px'
-                var canvasWidthR = _canvasWidthR + 'px';
-
-                _canvasTopL.style.width = canvasWidthL;
-
-                calcHeaderWidths();
-
-                if (this._groupingPanel) {
-                    this._groupingPanel.style.width = this._canvasWidth + 'px';
-                }
-
-                if (this.hasFrozenColumns()) {
-                    var viewportMinus = (this._viewportW - _canvasWidthL) + 'px';
-
-                    _canvasTopR.style.width = canvasWidthR;
-                    _paneHeaderL.style.width = canvasWidthL;
-                    _paneHeaderR.style[this._rtlS] = canvasWidthL;
-                    _paneHeaderR.style.width = viewportMinus;
-
-                    _paneTopL.style.width = canvasWidthL;
-                    _paneTopR.style[this._rtlS] = canvasWidthL;
-                    _paneTopR.style.width = viewportMinus;
-
-                    _headerRowColsL.style.width = canvasWidthL;
-                    _headerRowColsL.parentElement.style.width = canvasWidthL;
-                    _headerRowColsR.style.width = canvasWidthR;
-                    _headerRowColsR.parentElement.style.width = viewportMinus;
-
-                    _footerRowColsL.style.width = canvasWidthL;
-                    _footerRowColsL.parentElement.style.width = canvasWidthL;
-                    _footerRowColsR.style.width = canvasWidthR;
-                    _footerRowColsR.parentElement.style.width = viewportMinus;
-
-                    _viewportTopL.style.width = canvasWidthL;
-                    _viewportTopR.style.width = viewportMinus;
-
-                    if (this.hasFrozenRows()) {
-                        _paneBottomL.style.width = canvasWidthL;
-                        _paneBottomR.style[this._rtlS] = canvasWidthL;
-
-                        _viewportBottomL.style.width = canvasWidthL;
-                        _viewportBottomR.style.width = viewportMinus;
-
-                        _canvasBottomL.style.width = canvasWidthL;
-                        _canvasBottomR.style.width = canvasWidthR;
-                    }
-                } else {
-                    _paneHeaderL.style.width = '100%';
-                    _paneTopL.style.width = '100%';
-                    _headerRowColsL.parentElement.style.width = '100%';
-                    _headerRowColsL.style.width = this._canvasWidth + 'px';
-                    _footerRowColsL.parentElement.style.width = '100%';
-                    _footerRowColsL.style.width = this._canvasWidth + 'px';
-                    _viewportTopL.style.width = '100%';
-
-                    if (this.hasFrozenRows()) {
-                        _viewportBottomL.style.width = '100%';
-                        _canvasBottomL.style.width = canvasWidthL;
-                    }
-                }
-
-                this._viewportHasHScroll = (this._canvasWidth > this._viewportW - scrollWidth);
-            }
-
-            var w = (this._canvasWidth + (this._viewportHasVScroll ? scrollWidth : 0)) + 'px';
-
-            _headerRowSpacerL.style.width = w;
-            _headerRowSpacerR.style.width = w;
-            _footerRowSpacerL.style.width = w;
-            _footerRowSpacerR.style.width = w;
-
-            return widthChanged;
-        }
-
-        const getHeaderColumn = (cell: number) => {
-            return (this._frozenCols > 0 && cell >= this._frozenCols ?
-                _headerColsR.children.item(cell - this._frozenCols) : _headerColsL.children.item(cell)) as HTMLDivElement;
-        }
-
-        const getHeaderRowColumn = (cell: number) => {
-            var target: HTMLDivElement, frozenCols = this._frozenCols;
-
-            if (frozenCols <= 0 || cell < frozenCols) {
-                target = _headerRowColsL;
-            }
-            else {
-                target = _headerRowColsR;
-                cell -= frozenCols;
-            }
-
-            return target.childNodes.item(cell) as HTMLDivElement;
-        }
-
-        const getFooterRowColumn = (cell: number) => {
-            var target: HTMLDivElement, frozenCols = this._frozenCols;
-
-            if (frozenCols <= 0 || cell < frozenCols) {
-                target = _footerRowColsL;
-            }
-            else {
-                target = _footerRowColsR;
-                cell -= frozenCols;
-            }
-
-            return target.childNodes.item(cell) as HTMLDivElement;
-        }
-
-        const getHeaderRowColsFor = (cell: number) => {
-            const frozenCols = this._frozenCols;
-            return frozenCols > 0 && cell >= frozenCols ? _headerRowColsR : _headerRowColsL;
-        }
-
-        const getFooterRowColsFor = (cell: number) => {
-            const frozenCols = this._frozenCols;
-            return frozenCols > 0 && cell >= frozenCols ? _footerRowColsR : _footerRowColsL;
-        }
-
-        const calcHeaderWidths = () => {
-            _headersWidthL = _headersWidthR = 0;
-
-            var scrollWidth = this._scrollDims.width;
-            var cols = this._cols, frozenCols = this._frozenCols;
-            for (var i = 0, ii = cols.length; i < ii; i++) {
-                var width = cols[i].width;
-
-                if (frozenCols > 0 && i >= frozenCols) {
-                    _headersWidthR += width;
-                } else {
-                    _headersWidthL += width;
-                }
-            }
-
-            if (frozenCols > 0) {
-                _headersWidthL = _headersWidthL + 1000;
-
-                _headersWidthR = Math.max(_headersWidthR, this._viewportW) + _headersWidthL;
-                _headersWidthR += scrollWidth;
-            } else {
-                _headersWidthL += scrollWidth;
-                _headersWidthL = Math.max(_headersWidthL, this._viewportW) + 1000;
-            }
-
-            _headerColsL.style.width = _headersWidthL + 'px';
-            _headerColsR.style.width = _headersWidthR + 'px';
-        }
-
-        const getHeaderColsFor = (cell: number) => {
-            const frozenCols = this._frozenCols;
-            return frozenCols > 0 && cell >= frozenCols ? _headerColsR : _headerColsL;
-        }
-
-        const handleScrollH = () => {
-            if (this.hasFrozenColumns()) {
-                _headerColsR.parentElement.scrollLeft = this._scrollLeft;
-                _topPanelR.parentElement.scrollLeft = this._scrollLeft;
-                _headerRowColsR.parentElement.scrollLeft = this._scrollLeft;
-                _footerRowColsR.parentElement.scrollLeft = this._scrollLeft;
-                if (this.hasFrozenRows()) {
-                    _viewportTopR.scrollLeft = this._scrollLeft;
-                }
-            } else {
-                _headerColsL.parentElement.scrollLeft = this._scrollLeft;
-                _topPanelL.parentElement.scrollLeft = this._scrollLeft;
-                _headerRowColsL.parentElement.scrollLeft = this._scrollLeft;
-                _footerRowColsL.parentElement.scrollLeft = this._scrollLeft;
-                if (this.hasFrozenRows()) {
-                    _viewportTopL.scrollLeft = this._scrollLeft;
-                }
-            }
-        }
-
-        const handleScrollV = () => {
-            if (this.hasFrozenColumns()) {
-                if (this.hasFrozenRows() && !this._options.frozenBottom) {
-                    _viewportBottomL.scrollTop = this._scrollTop;
-                } else {
-                    _viewportTopL.scrollTop = this._scrollTop;
-                }
-            }
-        }
-
-        const setScroller = () => {
-            if (this.hasFrozenColumns()) {
-                if (this.hasFrozenRows()) {
-                    if (this._options.frozenBottom) {
-                        this._scrollContainerX = _viewportBottomR;
-                        this._scrollContainerY = _viewportTopR;
-                    } else {
-                        this._scrollContainerX = this._scrollContainerY = _viewportBottomR;
-                    }
-                } else {
-                    this._scrollContainerX = this._scrollContainerY = _viewportTopR;
-                }
-            } else {
-                if (this.hasFrozenRows()) {
-                    if (this._options.frozenBottom) {
-                        this._scrollContainerX = _viewportBottomL;
-                        this._scrollContainerY = _viewportTopL;
-                    } else {
-                        this._scrollContainerX = this._scrollContainerY = _viewportBottomL;
-                    }
-                } else {
-                    this._scrollContainerX = this._scrollContainerY = _viewportTopL;
-                }
-            }
-        }
-
-        const setPaneVisibility = () => {
-            _paneHeaderR.style.display = _paneTopR.style.display = this.hasFrozenColumns() ? '' : 'none';
-            _paneBottomL.style.display = this.hasFrozenRows() ? '' : 'none';
-            _paneBottomR.style.display = this.hasFrozenRows() && this.hasFrozenColumns() ? '' : 'none';
-        }
-
-        const setOverflow = () => {
-            var frozenRows = this.hasFrozenRows();
-            var frozenCols = this.hasFrozenColumns();
-            var alwaysHS = this._options.alwaysAllowHorizontalScroll;
-            var alwaysVS = this._options.alwaysShowVerticalScroll;
-
-            _viewportTopL.style.overflowX = _viewportTopR.style.overflowX = (frozenRows && !alwaysHS) ? 'hidden' : (frozenCols ? 'scroll' : 'auto');
-            _viewportTopL.style.overflowY = _viewportBottomL.style.overflowY = (!frozenCols && alwaysVS) ? 'scroll' :
-                (frozenCols ? 'hidden' : (frozenRows ? 'scroll' : (this._options.autoHeight ? 'hidden' : 'auto')));
-            _viewportTopR.style.overflowY = (alwaysVS || frozenRows) ? 'scroll' : (this._options.autoHeight ? 'hidden' : 'auto');
-            _viewportBottomL.style.overflowX = _viewportBottomR.style.overflowX = (frozenCols && !alwaysHS) ? 'scroll' : 'auto';
-            _viewportBottomR.style.overflowY = (alwaysVS) ? 'scroll' : 'auto';
-        }
-
-        const bindAncestorScrollEvents = () => {
-            var elem: HTMLElement = (this.hasFrozenRows() && !this._options.frozenBottom) ? _canvasBottomL : _canvasTopL;
-            while ((elem = elem.parentNode as HTMLElement) != document.body && elem != null) {
-                // bind to scroll containers only
-                if (elem == _viewportTopL || elem.scrollWidth != elem.clientWidth || elem.scrollHeight != elem.clientHeight) {
-                    elem.addEventListener('scroll', this.handleActiveCellPositionChange);
-                    this._boundAncestorScroll.push(elem);
-                }
-            }
-        }
-
-        const afterHeaderColumnDrag = () => {
-            const oldCanvasWidthL = _canvasWidthL;
-            calcCanvasWidth();
-            if (this.hasFrozenColumns() &&  _canvasWidthL != oldCanvasWidthL) {
-                _headerColsL.style.width = _canvasWidthL + 1000 + 'px';
-                _paneHeaderR.style[this._rtlS] = _canvasWidthL + 'px';
-            }
-        }
-
-        const applyColumnWidths = () => {
-            var x = 0, w, rule, cols = this._cols, frozenCols = this._frozenCols;
-            for (var i = 0; i < cols.length; i++) {
-                if (frozenCols == i)
-                    x = 0;
-                w = cols[i].width;
-                rule = this.getColumnCssRules(i);
-                rule[this._rtlS].style[this._rtlS] = x + "px";
-                rule[this._rtlE].style[this._rtlE] = (((frozenCols > 0 && i >= frozenCols) ? _canvasWidthR : _canvasWidthL) - x - w) + "px";
-                x += w;
-            }
-        }
-
-        const getTopPanelFor = (cell: number) => {
-            return this._frozenCols > 0 && cell >= this._frozenCols ? _topPanelR : _topPanelL;
-        }
-
-        const getTopPanelNodes = () => [_topPanelL, _topPanelR];
-
-        const resizeCanvas = () => {
-            _paneTopH = 0
-            _paneBottomH = 0
-            this._viewportTopH = 0
-
-            // Account for Frozen Rows
-            if (this.hasFrozenRows()) {
-                const frozenRowsHeight = this._frozenRows * this._options.rowHeight;
-                if (this._options.frozenBottom) {
-                    this._paneTopH = this._viewportH - frozenRowsHeight;
-                    this._paneBottomH = frozenRowsHeight + this._scrollDims.height;
-                } else {
-                    this._paneTopH = frozenRowsHeight;
-                    this._paneBottomH = this._viewportH - frozenRowsHeight;
-                }
-            } else {
-                this._paneTopH = this._viewportH;
-            }
-
-            // The top pane includes the top panel, the header row and the footer row
-            this._paneTopH += this._topPanelH + this._headerRowH + this._footerRowH;
-
-            // The top viewport does not contain the top panel, the header row or the footer row
-            this._viewportTopH = this._paneTopH - this._topPanelH - this._headerRowH - this._footerRowH;
-
-            if (this._options.autoHeight) {
-                this._container.style.height = (this._paneTopH + this._groupingPanelH +
-                    parseFloat(getComputedStyle(this._headerColsL.parentElement).height)) + 'px';
-            }
-
-            this._paneTopL.style.top = (this._groupingPanelH + (parseFloat(getComputedStyle(this._paneHeaderL).height) || this._headerRowH)) + "px";
-            this._paneTopL.style.height = this._paneTopH + 'px';
-
-            var paneBottomTop = this._paneTopL.offsetTop + this._paneTopH;
-
-            if (this._options.autoHeight) {
-                this._viewportTopL.style.height = '';
-            }
-            else {
-                this._viewportTopL.style.height = this._viewportTopH + 'px'
-            }
-
-            if (this.hasFrozenColumns()) {
-                this._paneTopR.style.top = this._paneTopL.style.top;
-                this._paneTopR.style.height = this._paneTopL.style.height;
-
-                this._viewportTopR.style.height = this._viewportTopL.style.height;
-
-                if (this.hasFrozenRows()) {
-                    this._paneBottomL.style.top = this._paneBottomR.style.top = paneBottomTop + 'px';
-                    this._paneBottomL.style.height = this._paneBottomR.style.height = this._viewportBottomR.style.height = this._paneBottomH + 'px';
-                }
-            } else {
-                if (this.hasFrozenRows()) {
-                    this._paneBottomL.style.width = '100%';
-                    this._paneBottomL.style.height = this._paneBottomH + 'px';
-                    this._paneBottomL.style.top = paneBottomTop + 'px';
-                }
-            }
-
-            if (this.hasFrozenRows()) {
-                this._viewportBottomL.style.height = this._paneBottomH + 'px';
-                const frozenRowsHeight = this._frozenRows * this._options.rowHeight;
-                if (this._options.frozenBottom) {
-                    this._canvasBottomL.style.height = frozenRowsHeight + 'px';
-
-                    if (this.hasFrozenColumns()) {
-                        this._canvasBottomR.style.height = frozenRowsHeight + 'px';
-                    }
-                } else {
-                    this._canvasTopL.style.height = frozenRowsHeight + 'px';
-
-                    if (this.hasFrozenColumns()) {
-                        this._canvasTopR.style.height = frozenRowsHeight + 'px';
-                    }
-                }
-            } else {
-                this._viewportTopR.style.height = this._viewportTopH + 'px';
-            }
-        }
-
-        return {
-            afterHeaderColumnDrag,
-            applyColumnWidths,
-            bindAncestorScrollEvents,
-            calcCanvasWidth,
-            calcHeaderWidths,
-            getCanvasWidthFor,
-            getCanvasNodeFor,
-            getCanvasNodes,
-            getFooterRowCols,
-            getFooterRowColsFor,
-            getFooterRowColumn,
-            getHeaderCols,
-            getHeaderColsFor,
-            getHeaderColumn,
-            getHeaderRowCols,
-            getHeaderRowColsFor,
-            getHeaderRowColumn,
-            getTopPanelFor,
-            getTopPanelNodes,
-            getViewportNodeFor,
-            getViewportNodes,
-            handleScrollH,
-            handleScrollV,
-            setPaneVisibility,
-            setScroller,
-            setOverflow,
-            updateCanvasWidth,
-        }
-    }
-
-    private basicLayout(): Layout {
-        var _canvasWidthL: number;
-        var _headersWidthL: number;
-
-        var _canvasTopL: HTMLDivElement;
-        var _headerColsL: HTMLDivElement;
-        var _headerRowColsL: HTMLDivElement;
-        var _headerRowSpacerL: HTMLDivElement;
-        var _footerRowColsL: HTMLDivElement;
-        var _footerRowSpacerL: HTMLDivElement;
-        var _paneHeaderL: HTMLDivElement;
-        var _paneTopL: HTMLDivElement;
-        var _topPanelL: HTMLDivElement;
-        var _viewportTopL: HTMLDivElement;
-
-        const calcCanvasWidth = () => {
-            var cols = this._cols, i = cols.length;
-
-            _canvasWidthL = 0;
-
-            while (i--) {
-                _canvasWidthL += cols[i].width;
-            }
-
-            return this._options.fullWidthRows ? Math.max(_canvasWidthL, this.getAvailableWidth()) : _canvasWidthL;
-        }
-
-        const calcHeaderWidths = () => {
-            _headersWidthL = 0;
-
-            var scrollWidth = this._scrollDims.width;
-            var cols = this._cols;
-            for (var i = 0, ii = cols.length; i < ii; i++) {
-                _headersWidthL +=  cols[i].width;
-            }
-
-            _headersWidthL += scrollWidth;
-            _headersWidthL = Math.max(_headersWidthL, this._viewportW) + 1000;
-            _headerColsL.style.width = _headersWidthL + 'px';
-        }
-
-        const spacerW = calcCanvasWidth() + this._scrollDims.width + 'px';
-        const uisd = this._uisd;
-        var options = this._options;
-
-        _headerColsL = H('div', { class: 'slick-header-columns', style: this._rtlS + ':-1000px' });
-        _paneHeaderL = H('div', { class: "slick-pane slick-pane-header", tabIndex: '0' },
-            H('div', { class: 'slick-header' + uisd, style: !this._options.showColumnHeader && 'display: none' }, _headerColsL));
-
-        _headerRowColsL = H('div', { class: 'slick-headerrow-columns' });
-        _headerRowSpacerL = spacerDiv(spacerW);
-        var headerRowL = H('div', { class: 'slick-headerrow' + uisd, style: !options.showHeaderRow && 'display: none' }, _headerColsL, _headerRowSpacerL);
-
-        _topPanelL = H('div', { class: 'slick-top-panel', style: 'width: 10000px' })
-        var topPanelLS = H('div', { class: 'slick-top-panel-scroller' + uisd, style: !options.showTopPanel && 'display: none' }, _topPanelL);
-
-        _canvasTopL = H('div', { class: "grid-canvas", tabIndex: "0", hideFocus: '' })
-        _viewportTopL = H('div', { class: "slick-viewport", tabIndex: "0", hideFocus: '' }, _canvasTopL);
-
-        _footerRowColsL = H('div', { class: 'slick-footerrow-columns' });
-        _footerRowSpacerL = spacerDiv(spacerW);
-        var footerRowL = H('div', { class: 'slick-footerrow' + uisd, style: !options.showFooterRow && 'display: none' }, _footerRowColsL, _footerRowSpacerL);
-
-        _paneTopL = H('div', { class: "slick-pane", tabIndex: "0" }, headerRowL, topPanelLS, _viewportTopL, footerRowL);
-
-        function getHeaderCols() {
-            return [_headerColsL];
-        }
-
-        function getHeaderRowCols() {
-            return [_headerRowColsL];
-        }
-
-        function getHeaderColumn(cell: number) {
-            return _headerColsL.children.item(cell) as HTMLDivElement;
-        }
-
-        function getFooterRowCols() {
-            return [_footerRowColsL];
-        }
-
-        function getCanvasNodeFor() {
-            return _canvasTopL;
-        }
-
-        function getCanvasNodes() {
-            return [_canvasTopL];
-        }
-
-        function getCanvasWidthFor() {
-            return _canvasWidthL;
-        }
-
-        function getViewportNodeFor() {
-            return _viewportTopL;
-        }
-
-        function getViewportNodes() {
-            return [_viewportTopL];
-        }
-
-        const updateCanvasWidth = () => {
-            var oldCanvasWidth = this._canvasWidth;
-            var widthChanged;
-            this._canvasWidth = this.getCanvasWidth();
-            var scrollWidth = this._scrollDims.width;
-
-            widthChanged = this._canvasWidth !== oldCanvasWidth;
-
-            if (widthChanged) {
-                var canvasWidthL = this._canvasWidth + 'px'
-
-                _canvasTopL.style.width = canvasWidthL;
-
-                calcHeaderWidths();
-
-                if (this._groupingPanel) {
-                    this._groupingPanel.style.width = canvasWidthL;
-                }
-
-                _paneHeaderL.style.width = '100%';
-                _paneTopL.style.width = '100%';
-                _headerRowColsL.parentElement.style.width = '100%';
-                _headerRowColsL.style.width = this._canvasWidth + 'px';
-                _footerRowColsL.parentElement.style.width = '100%';
-                _footerRowColsL.style.width = this._canvasWidth + 'px';
-                _viewportTopL.style.width = '100%';
-
-                this._viewportHasHScroll = (this._canvasWidth > this._viewportW - scrollWidth);
-            }
-
-            var w = (this._canvasWidth + (this._viewportHasVScroll ? scrollWidth : 0)) + 'px';
-
-            _headerRowSpacerL.style.width = w;
-            _footerRowSpacerL.style.width = w;
-
-            return widthChanged;
-        }
-
-        function getHeaderRowColumn(cell: number) {
-            return _headerRowColsL.childNodes.item(cell) as HTMLDivElement;
-        }
-
-        function getFooterRowColumn(cell: number) {
-            return _footerRowColsL.childNodes.item(cell) as HTMLDivElement;
-        }
-
-        function getHeaderRowColsFor(cell: number) {
-            return _headerRowColsL;
-        }
-
-        function getFooterRowColsFor(cell: number) {
-            return _footerRowColsL;
-        }
-
-        function getHeaderColsFor(cell: number) {
-            return _headerColsL;
-        }
-
-        const handleScrollH = () => {
-            _headerColsL.parentElement.scrollLeft = this._scrollLeft;
-            _topPanelL.parentElement.scrollLeft = this._scrollLeft;
-            _headerRowColsL.parentElement.scrollLeft = this._scrollLeft;
-            _footerRowColsL.parentElement.scrollLeft = this._scrollLeft;
-        }
-
-        function noop() {
-        }
-
-        const setScroller = () => {
-            this._scrollContainerX = this._scrollContainerY = _viewportTopL;
-        }
-
-        const setOverflow = () => {
-            var alwaysVS = this._options.alwaysShowVerticalScroll;
-
-            _viewportTopL.style.overflowX = 'auto';
-            _viewportTopL.style.overflowY = alwaysVS ? 'scroll' : (this._options.autoHeight ? 'hidden' : 'auto');
-        }
-
-        const bindAncestorScrollEvents = () => {
-            var elem: HTMLElement = _canvasTopL;
-            while ((elem = elem.parentNode as HTMLElement) != document.body && elem != null) {
-                // bind to scroll containers only
-                if (elem == _viewportTopL || elem.scrollWidth != elem.clientWidth || elem.scrollHeight != elem.clientHeight) {
-                    elem.addEventListener('scroll', this.handleActiveCellPositionChange);
-                    this._boundAncestorScroll.push(elem);
-                }
-            }
-        }
-
-        const applyColumnWidths = () => {
-            var x = 0, w, rule, cols = this._cols;
-            for (var i = 0; i < cols.length; i++) {
-                w = cols[i].width;
-                rule = this.getColumnCssRules(i);
-                rule[this._rtlS].style[this._rtlS] = x + "px";
-                rule[this._rtlE].style[this._rtlE] = _canvasWidthL - x - w + "px";
-                x += w;
-            }
-        }
-
-        const getTopPanelNodes = () => [_topPanelL];
-        const getTopPanelFor = () => _topPanelL;
-
-        return {
-            afterHeaderColumnDrag: noop,
-            applyColumnWidths,
-            bindAncestorScrollEvents,
-            calcCanvasWidth,
-            calcHeaderWidths,
-            getCanvasNodeFor,
-            getCanvasNodes,
-            getCanvasWidthFor,
-            getHeaderCols,
-            getHeaderColsFor,
-            getHeaderColumn,
-            getHeaderRowCols,
-            getHeaderRowColsFor,
-            getHeaderRowColumn,
-            getFooterRowCols,
-            getFooterRowColsFor,
-            getFooterRowColumn,
-            getTopPanelFor,
-            getTopPanelNodes,
-            getViewportNodeFor,
-            getViewportNodes,
-            handleScrollH,
-            handleScrollV: noop,
-            setPaneVisibility: noop,
-            setScroller,
-            setOverflow,
-            updateCanvasWidth
-        }
-    }
 }

@@ -17,6 +17,16 @@ export interface Position {
     width?: number;
 }
 
+export interface ViewportSize {
+    height: number;
+    width: number;
+    headerHeight: number;
+    groupingPanelHeight: number;
+    topPanelHeight: number;
+    headerRowHeight: number;
+    footerRowHeight: number;
+}
+
 export interface RowCell {
     row: number;
     cell: number;
