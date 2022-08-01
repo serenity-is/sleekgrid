@@ -378,7 +378,19 @@ export class Grid<TItem = any> {
 
         this._container.addEventListener("resize", this.resizeCanvas);
 
-        viewports.forEach(vp => vp.addEventListener("scroll", this.handleScroll.bind(this)));
+        viewports.forEach(vp => {
+            var scrollTicking = false;
+            vp.addEventListener("scroll", () => {
+                if (!scrollTicking) {
+                    scrollTicking = true;
+
+                    window.requestAnimationFrame(() => {
+                        this.handleScroll();
+                        scrollTicking = false;
+                    });
+                }                
+            });
+        });
 
         if (this._hasJQuery && ($.fn as any).mousewheel && (this.hasFrozenColumns() || this.hasFrozenRows())) {
             $(viewports).on("mousewheel", this.handleMouseWheel.bind(this));
