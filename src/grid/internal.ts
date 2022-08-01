@@ -38,7 +38,7 @@ export function getMaxSupportedCssHeight(): number {
     return maxSupportedCssHeight ?? ((navigator.userAgent.toLowerCase().match(/gecko\//) ? 4000000 : 32000000));
 }
 
-export function getScrollBarDimensions(recalc?: boolean) {
+export function getScrollBarDimensions(recalc?: boolean): { width: number; height: number; } {
     if (!scrollbarDimensions || recalc) {
         var c = document.body.appendChild(H('div', {
             style: 'position:absolute;top:-10000px;left:-10000px;width:100px;height:100px;overflow: scroll;border:0'
@@ -129,6 +129,10 @@ export function simpleArrayEquals(arr1: number[], arr2: number[]) {
     }
 
     return result;
+}
+
+export function spacerDiv(width: string): HTMLDivElement {
+    return H('div', { style: 'display:block;height:1px;position:absolute;top:0;left:0;', width });
 }
 
 export function addUiStateHover() {
