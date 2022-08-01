@@ -281,7 +281,19 @@ export class Grid<TItem = any> {
 
         this._container.addEventListener("resize", this.resizeCanvas);
 
-        viewports.forEach(vp => vp.addEventListener("scroll", this.handleScroll.bind(this)));
+        viewports.forEach(vp => {
+            var scrollTicking = false;
+            vp.addEventListener("scroll", () => {
+                if (!scrollTicking) {
+                    scrollTicking = true;
+
+                    window.requestAnimationFrame(() => {
+                        this.handleScroll();
+                        scrollTicking = false;
+                    });
+                }                
+            });
+        });
 
         if (this._hasJQuery && ($.fn as any).mousewheel && (this.hasFrozenColumns() || this.hasFrozenRows())) {
             $(viewports).on("mousewheel", this.handleMouseWheel.bind(this));
@@ -2857,9 +2869,6 @@ export class Grid<TItem = any> {
     }
 
     private handleMouseWheel(e: JQueryEventObject, delta: number, deltaX: number, deltaY: number): void {
-        if (this._ignoreScrollUntil >= new Date().getTime())
-            return;
-
         deltaX = (typeof deltaX == "undefined" ? (e as any).originalEvent.deltaX : deltaX) || 0;
         deltaY = (typeof deltaY == "undefined" ? (e as any).originalEvent.deltaY : deltaY) || 0;
         this._scrollTop = Math.max(0, this._scrollContainerY.scrollTop - (deltaY * this._options.rowHeight));
@@ -2870,9 +2879,6 @@ export class Grid<TItem = any> {
     }
 
     private handleScroll(): boolean {
-        if (this._ignoreScrollUntil >= new Date().getTime())
-            return;
-
         this._scrollTop = this._scrollContainerY.scrollTop;
         this._scrollLeft = this._scrollContainerX.scrollLeft;
         return this._handleScroll(false);
