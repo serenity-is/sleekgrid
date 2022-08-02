@@ -1,5 +1,6 @@
 ﻿import { Column } from "src/grid/column";
 import { Grid } from "src/grid/grid";
+import { FrozenLayout } from "src/layouts/frozenlayout";
 
 const slickPaneRight = "slick-pane-right";
 const slickPaneLeft = "slick-pane-left";
@@ -27,7 +28,8 @@ describe('options.frozenColumns', () => {
 
     it('is ignored when undefined', () => {
         const grid = new Grid(container(), [], threeCols(), {
-            enableColumnReorder: false
+            enableColumnReorder: false,
+            layoutEngine: new FrozenLayout()
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -38,7 +40,8 @@ describe('options.frozenColumns', () => {
     it('is ignored when null', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumns: null
+            frozenColumns: null,
+            layoutEngine: new FrozenLayout()
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -49,7 +52,8 @@ describe('options.frozenColumns', () => {
     it('is ignored when less than zero', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumns: -1
+            frozenColumns: -1,
+            layoutEngine: new FrozenLayout()
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -60,7 +64,8 @@ describe('options.frozenColumns', () => {
     it('is ignored when than zero', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumns: 0
+            frozenColumns: 0,
+            layoutEngine: new FrozenLayout()
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -71,7 +76,8 @@ describe('options.frozenColumns', () => {
     it('sets first column to frozen when 1 and all cols are visible', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumns: 1
+            frozenColumns: 1,
+            layoutEngine: new FrozenLayout()
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -84,7 +90,8 @@ describe('options.frozenColumns', () => {
         cols[0].visible = false;
         const grid = new Grid(container(), [], cols , {
             enableColumnReorder: false,
-            frozenColumns: 1
+            frozenColumns: 1,
+            layoutEngine: new FrozenLayout()
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -97,7 +104,8 @@ describe('options.frozenColumns', () => {
     it('sets first two columns to frozen when 2 and all cols are visible', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumns: 2
+            frozenColumns: 2,
+            layoutEngine: new FrozenLayout()
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -111,7 +119,8 @@ describe('options.frozenColumns', () => {
         cols[0].visible = false;
         const grid = new Grid(container(), [], cols , {
             enableColumnReorder: false,
-            frozenColumns: 2
+            frozenColumns: 2,
+            layoutEngine: new FrozenLayout()
         });
 
         expect(grid.getInitialColumns().length).toBe(3);
@@ -125,7 +134,8 @@ describe('options.frozenColumns', () => {
     it('null gets deleted from options after processing', () => {
         const grid = new Grid(container(), [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumns: null
+            frozenColumns: null,
+            layoutEngine: new FrozenLayout()
         });
 
         expect(grid.getOptions().frozenColumns).toBeUndefined();
@@ -135,7 +145,8 @@ describe('options.frozenColumns', () => {
         const div = container();
         const grid = new Grid(div, [], threeCols(), {
             enableColumnReorder: false,
-            frozenColumns: 2
+            frozenColumns: 2,
+            layoutEngine: new FrozenLayout()
         });
 
         const paneTopLeft = div.querySelector(`.${slickPaneTop}.${slickPaneRight}`) as HTMLDivElement;
