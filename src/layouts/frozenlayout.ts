@@ -1,10 +1,7 @@
-import { Column } from "../column";
-import { GridOptions } from "../gridoptions";
-import { CachedRow, disableSelection, H, spacerDiv } from "../internal";
-import { ViewRange } from "../types";
-import { LayoutHost, LayoutEngine } from "./layout";
+import { disableSelection, H, spacerDiv } from "../core/index";
+import { Column, gridDefaults, GridOptions, LayoutEngine, LayoutHost, ViewRange } from "../grid/index";
 
-export function frozenLayout(): LayoutEngine {
+export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
     var canvasWidth: number;
     var canvasWidthL: number;
     var canvasWidthR: number;
@@ -45,15 +42,15 @@ export function frozenLayout(): LayoutEngine {
     var viewportTopL: HTMLDivElement;
     var viewportTopR: HTMLDivElement;
 
-    function appendCachedRow(row: number, item: CachedRow): void {
+    function appendCachedRow(row: number, rowNodeL: HTMLDivElement, rowNodeR: HTMLDivElement): void {
         var bottom = frozenRows && row >= frozenRowIdx + (frozenBottom ? 0 : 1);
         if (bottom) {
-            item.rowNodeL && canvasBottomL.appendChild(item.rowNodeL);
-            frozenCols && item.rowNodeR && canvasBottomR.appendChild(item.rowNodeR);
+            rowNodeL && canvasBottomL.appendChild(rowNodeL);
+            frozenCols && rowNodeR && canvasBottomR.appendChild(rowNodeR);
         }
         else {
-            item.rowNodeL && canvasTopL.appendChild(item.rowNodeL);
-            frozenCols && item.rowNodeR && canvasTopR.appendChild(item.rowNodeR);
+            rowNodeL && canvasTopL.appendChild(rowNodeL);
+            frozenCols && rowNodeR && canvasTopR.appendChild(rowNodeR);
         }
     }
 
@@ -71,8 +68,7 @@ export function frozenLayout(): LayoutEngine {
         }
 
         var totalRowWidth = canvasWidthL + canvasWidthR;
-        canvasWidth = host.getOptions().fullWidthRows ? Math.max(totalRowWidth, host.getAvailableWidth()) : totalRowWidth;
-        return canvasWidth;
+        return host.getOptions().fullWidthRows ? Math.max(totalRowWidth, host.getAvailableWidth()) : totalRowWidth;
     }
 
     var host: LayoutHost;
@@ -135,6 +131,14 @@ export function frozenLayout(): LayoutEngine {
         canvasBottomR = H('div', { class: "grid-canvas grid-canvas-bottom grid-canvas-right", tabIndex: "0", hideFocus: '' });
         viewportBottomR = H('div', { class: "slick-viewport slick-viewport-bottom slick-viewport-right", tabIndex: "0", hideFocus: '' });
         paneBottomR = H('div', { class: "slick-pane slick-pane-bottom slick-pane-right", tabIndex: "0" }, viewportBottomR);
+
+        host.getContainerNode().append(
+            paneHeaderL,
+            paneHeaderR,
+            paneTopL,
+            paneTopR,
+            paneBottomL,
+            paneBottomR);
 
         // disable all text selection in header (including input and textarea)
         disableSelection(headerColsL);
@@ -204,7 +208,7 @@ export function frozenLayout(): LayoutEngine {
         var oldCanvasWidthL = canvasWidthL;
         var oldCanvasWidthR = canvasWidthR;
         var widthChanged;
-        calcCanvasWidth();
+        canvasWidth = calcCanvasWidth();
         var scrollWidth = host.getScrollDims().width;
 
         widthChanged = canvasWidth !== oldCanvasWidth || canvasWidthL !== oldCanvasWidthL || canvasWidthR !== oldCanvasWidthR;
@@ -445,7 +449,7 @@ export function frozenLayout(): LayoutEngine {
 
     const afterHeaderColumnDrag = () => {
         const oldCanvasWidthL = canvasWidthL;
-        calcCanvasWidth();
+        canvasWidth = calcCanvasWidth();
         if (frozenCols &&  canvasWidthL != oldCanvasWidthL) {
             headerColsL.style.width = canvasWidthL + 1000 + 'px';
             paneHeaderR.style[host.getOptions().rtl ? 'right' : 'left'] = canvasWidthL + 'px';
@@ -555,11 +559,11 @@ export function frozenLayout(): LayoutEngine {
         }
     }
 
-    function reorderViewColumns(viewCols: Column[]): Column[] {
+    function reorderViewColumns(viewCols: Column[], options?: GridOptions): Column[] {
 
-        const options = host.getOptions();
+        options = options || host?.getOptions();
         if (options?.frozenColumns == null) {
-            delete options.frozenColumns;
+            delete options?.frozenColumns;
         }
         else {
             var toFreeze = options.frozenColumns;
@@ -578,8 +582,11 @@ export function frozenLayout(): LayoutEngine {
         }
 
         var frozenColumns = viewCols.filter(x => x.frozen);
-        if (frozenColumns.length)
+        frozenCols = frozenColumns.length;
+        if (frozenCols)
             return frozenColumns.concat(viewCols.filter(x => !x.frozen));
+
+        return viewCols;
     }
 
     function afterSetOptions(arg: GridOptions) {
@@ -757,4 +764,4 @@ export function frozenLayout(): LayoutEngine {
         setOverflow,
         updateCanvasWidth
     }
-}
+} as any;

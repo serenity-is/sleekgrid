@@ -1,7 +1,7 @@
-import { Column } from "../column";
-import { GridOptions } from "../gridoptions";
-import { CachedRow } from "../internal";
-import { RowCell, ViewportInfo, ViewRange } from "../types";
+import { Column } from "./column";
+import { GridOptions } from "./gridoptions";
+import { CachedRow } from "./internal";
+import { RowCell, ViewportInfo, ViewRange } from "./types";
 
 export interface LayoutHost {
     bindAncestorScroll(el: Element): void;
@@ -22,7 +22,7 @@ export interface LayoutHost {
 }
 
 export interface LayoutEngine {
-    appendCachedRow(row: number, item: CachedRow): void;
+    appendCachedRow(row: number, rowNodeL: HTMLDivElement, rowNodeR: HTMLDivElement): void;
     afterHeaderColumnDrag(): void;
     afterSetOptions(args: GridOptions): void;
     applyColumnWidths(): void;
@@ -61,7 +61,8 @@ export interface LayoutEngine {
     init(host: LayoutHost): void;
     layoutName: string;
     realScrollHeightChange(): void;
-    reorderViewColumns(viewCols: Column[]): Column[];
+    /** this might be called before init, chicken egg situation */
+    reorderViewColumns(viewCols: Column[], options?: GridOptions): Column[];
     resizeCanvas(): void;
     setPaneVisibility(): void;
     setScroller(): void;

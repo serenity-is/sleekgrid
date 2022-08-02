@@ -1,5 +1,5 @@
-import { Column } from "../column";
-import { CachedRow, H, spacerDiv } from "../internal";
+import { H, spacerDiv } from "../core/index";
+import { Column } from "./column";
 import { LayoutEngine, LayoutHost } from "./layout";
 
 export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
@@ -42,8 +42,8 @@ export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
         host.getContainerNode().append(headerColsS, headerRow, topPanelS, viewport, footerRow);
     }
 
-    function appendCachedRow(_: number, item: CachedRow): void {
-        item.rowNodeL && canvas.appendChild(item.rowNodeL);
+    function appendCachedRow(_: number, rowNode: HTMLDivElement): void {
+        rowNode && canvas.appendChild(rowNode);
     }
 
     function applyColumnWidths() {

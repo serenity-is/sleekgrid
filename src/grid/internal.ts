@@ -1,17 +1,9 @@
+import { H } from "../core/index";
 import type { Column } from "./column";
-import type { GridOptions } from "./gridoptions";
 
 // shared across all grids on the page
 let maxSupportedCssHeight: number;  // browser's breaking point
 let scrollbarDimensions: { width: number, height: number };
-
-export function disableSelection(target: HTMLElement) {
-    if (target) {
-        target.setAttribute('unselectable', 'on');
-        target.style.userSelect = "none";
-        target.addEventListener('selectstart', () => false);
-    }
-}
 
 export function getMaxSupportedCssHeight(): number {
     return maxSupportedCssHeight ?? ((navigator.userAgent.toLowerCase().match(/gecko\//) ? 4000000 : 32000000));
@@ -29,23 +21,6 @@ export function getScrollBarDimensions(recalc?: boolean): { width: number; heigh
         c.remove();
     }
     return scrollbarDimensions;
-}
-
-export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { [key: string]: (string | boolean) }, ...children: Node[]): HTMLElementTagNameMap[K] {
-    var el = document.createElement(tag);
-    var k: string, v: (string | boolean), c: Node;
-    if (attr) {
-        for (k in attr) {
-            v = attr[k];
-            if (v != null && v !== false)
-                el.setAttribute(k, v === true ? '' : v);
-        }
-    }
-    if (children) {
-        for (c of children)
-            el.appendChild(c);
-    }
-    return el;
 }
 
 export function simpleArrayEquals(arr1: number[], arr2: number[]) {
@@ -108,10 +83,6 @@ export function simpleArrayEquals(arr1: number[], arr2: number[]) {
     }
 
     return result;
-}
-
-export function spacerDiv(width: string): HTMLDivElement {
-    return H('div', { style: 'display:block;height:1px;position:absolute;top:0;left:0;', width });
 }
 
 export function addUiStateHover() {

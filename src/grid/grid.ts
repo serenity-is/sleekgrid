@@ -1,13 +1,13 @@
-import { attrEncode, htmlEncode, EditController, EditorLock, Event, IEventData, EventData, keyCode, GroupTotals, NonDataRow, preClickClassName, Range } from "../core/index";
-import { Column, columnDefaults, ColumnMetadata, ColumnSort, ItemMetadata } from "./column";
+import { attrEncode, disableSelection, H, htmlEncode, EditController, EditorLock, Event, IEventData, EventData, keyCode, GroupTotals, NonDataRow, preClickClassName, Range } from "../core/index";
+import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
 import { EditCommand, Editor } from "./editor";
 import type { CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
-import { addUiStateHover, CachedRow, disableSelection, getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, H, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest, spacerDiv } from "./internal";
+import { addUiStateHover, CachedRow,  getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
 import { IPlugin, Position, RowCell, SelectionModel, ViewportInfo, ViewRange } from "./types";
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { gridDefaults, GridOptions } from "./gridoptions";
-import { LayoutEngine } from "./layouts/layout";
-import { BasicLayout } from "./layouts/basic";
+import { LayoutEngine } from "./layout";
+import { BasicLayout } from "./basiclayout";
 
 
 export class Grid<TItem = any> {
@@ -1559,7 +1559,7 @@ export class Grid<TItem = any> {
                 viewCols.push(m);
         }
 
-        viewCols = this._layout.reorderViewColumns(viewCols);
+        viewCols = this._layout.reorderViewColumns(viewCols, this._options);
 
         for (i = 0; i < viewCols.length; i++) {
             m = viewCols[i];
@@ -2625,7 +2625,7 @@ export class Grid<TItem = any> {
             var item = this._rowsCache[row];
             item.rowNodeL = l.firstElementChild as HTMLDivElement;
             item.rowNodeR = r.firstElementChild as HTMLDivElement;
-            layout.appendCachedRow(row, item);
+            layout.appendCachedRow(row, item.rowNodeL, item.rowNodeR);
         }
 
         if (needToReselectCell) {
