@@ -200,6 +200,131 @@ export function simpleArrayEquals(arr1: number[], arr2: number[]) {
     return result;
 }
 
+export function calcMinMaxPageXOnDragStart(cols: Column[], colIdx: number, pageX: number, forceFit: boolean, absoluteColMinWidth: number): { maxPageX: number; minPageX: number; } {
+    var shrinkLeewayOnRight = null, stretchLeewayOnRight = null, j: number, c: Column;
+    if (forceFit) {
+        shrinkLeewayOnRight = 0;
+        stretchLeewayOnRight = 0;
+        // colums on right affect maxPageX/minPageX
+        for (j = colIdx + 1; j < cols.length; j++) {
+            c = cols[j];
+            if (c.resizable) {
+                if (stretchLeewayOnRight != null) {
+                    if (c.maxWidth) {
+                        stretchLeewayOnRight += c.maxWidth - c.previousWidth;
+                    } else {
+                        stretchLeewayOnRight = null;
+                    }
+                }
+                shrinkLeewayOnRight += c.previousWidth - Math.max(c.minWidth || 0, absoluteColMinWidth);
+            }
+        }
+    }
+    var shrinkLeewayOnLeft = 0, stretchLeewayOnLeft = 0;
+    for (j = 0; j <= colIdx; j++) {
+        // columns on left only affect minPageX
+        c = cols[j];
+        if (c.resizable) {
+            if (stretchLeewayOnLeft != null) {
+                if (c.maxWidth) {
+                    stretchLeewayOnLeft += c.maxWidth - c.previousWidth;
+                } else {
+                    stretchLeewayOnLeft = null;
+                }
+            }
+            shrinkLeewayOnLeft += c.previousWidth - Math.max(c.minWidth || 0, absoluteColMinWidth);
+        }
+    }
+    if (shrinkLeewayOnRight === null) {
+        shrinkLeewayOnRight = 100000;
+    }
+    if (shrinkLeewayOnLeft === null) {
+        shrinkLeewayOnLeft = 100000;
+    }
+    if (stretchLeewayOnRight === null) {
+        stretchLeewayOnRight = 100000;
+    }
+    if (stretchLeewayOnLeft === null) {
+        stretchLeewayOnLeft = 100000;
+    }
+
+    return {
+        maxPageX: pageX + Math.min(shrinkLeewayOnRight, stretchLeewayOnLeft),
+        minPageX: pageX - Math.min(shrinkLeewayOnLeft, stretchLeewayOnRight)
+    }
+}
+
+export function shrinkOrStretchColumn(cols: Column[], colIdx: number, d: number, forceFit: boolean, absoluteColMinWidth: number): void {
+    var c: Column, j: number, x: number, actualMinWidth: number;
+
+    if (d < 0) { // shrink column
+        x = d;
+
+        for (j = colIdx; j >= 0; j--) {
+            c = cols[j];
+            if (c.resizable) {
+                actualMinWidth = Math.max(c.minWidth || 0, absoluteColMinWidth);
+                if (x && c.previousWidth + x < actualMinWidth) {
+                    x += c.previousWidth - actualMinWidth;
+                    c.width = actualMinWidth;
+                } else {
+                    c.width = c.previousWidth + x;
+                    x = 0;
+                }
+            }
+        }
+
+        if (forceFit) {
+            x = -d;
+            for (j = colIdx + 1; j < cols.length; j++) {
+                c = cols[j];
+                if (c.resizable) {
+                    if (x && c.maxWidth && (c.maxWidth - c.previousWidth < x)) {
+                        x -= c.maxWidth - c.previousWidth;
+                        c.width = c.maxWidth;
+                    } else {
+                        c.width = c.previousWidth + x;
+                        x = 0;
+                    }
+                }
+            }
+        }
+    } else { // stretch column
+        x = d;
+
+        for (j = colIdx; j >= 0; j--) {
+            c = cols[j];
+            if (c.resizable) {
+                if (x && c.maxWidth && (c.maxWidth - c.previousWidth < x)) {
+                    x -= c.maxWidth - c.previousWidth;
+                    c.width = c.maxWidth;
+                } else {
+                    c.width = c.previousWidth + x;
+                    x = 0;
+                }
+            }
+        }
+
+        if (forceFit) {
+            x = -d;
+            for (j = colIdx + 1; j < cols.length; j++) {
+                c = cols[j];
+                if (c.resizable) {
+                    actualMinWidth = Math.max(c.minWidth || 0, absoluteColMinWidth);
+                    if (x && c.previousWidth + x < actualMinWidth) {
+                        x += c.previousWidth - actualMinWidth;
+                        c.width = actualMinWidth;
+
+                    } else {
+                        c.width = c.previousWidth + x;
+                        x = 0;
+                    }
+                }
+            }
+        }
+    }
+}
+
 export function addUiStateHover() {
     (this as HTMLElement)?.classList?.add("ui-state-hover");
 }
