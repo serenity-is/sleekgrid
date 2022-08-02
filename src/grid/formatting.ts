@@ -24,3 +24,52 @@ export function defaultFormatter(_r: number, _c: number, value: any) {
     return htmlEncode(value);
 }
 
+export function applyFormatterResultToCellNode(fmtResult: FormatterResult | string, cellNode: HTMLElement) {
+    var oldFmtCls = cellNode.dataset?.fmtcls as string;
+    if (oldFmtCls != null && oldFmtCls.length > 0) {
+        cellNode.classList.remove(...oldFmtCls.split(' '));
+        delete cellNode.dataset.fmtcls;
+    }
+
+    var oldFmtAtt = cellNode.dataset?.fmtatt as string;
+    if (oldFmtAtt != null && oldFmtAtt.length > 0) {
+        for (var k of oldFmtAtt.split(','))
+            cellNode.removeAttribute(k);
+        delete cellNode.dataset.fmtatt;
+    }
+
+    cellNode.removeAttribute('tooltip');
+
+    if (fmtResult == null) {
+        cellNode.innerHTML = '';
+        return;
+    }
+
+    if (typeof fmtResult === "string" || Object.prototype.toString.call(fmtResult) !== '[object Object]') {
+        cellNode.innerHTML = "" + fmtResult;
+        return;
+    }
+
+    if (fmtResult.html != null)
+        cellNode.innerHTML = fmtResult.html;
+    else
+        cellNode.textContent = fmtResult.text ?? '';
+
+    if (fmtResult.addClass?.length) {
+        cellNode.classList.add(...fmtResult.addClass.split(' '));
+        cellNode.dataset.fmtcls = fmtResult.addClass;
+    }
+
+    if (fmtResult.addAttrs != null) {
+        var keys = Object.keys(fmtResult.addAttrs);
+        if (keys.length) {
+            for (var k of keys) {
+                cellNode.setAttribute(k, fmtResult.addAttrs[k]);
+            }
+            cellNode.dataset.fmtatt = keys.join(',');
+        }
+    }
+
+    if (fmtResult.toolTip !== undefined)
+        cellNode.setAttribute('tooltip', fmtResult.toolTip ?? '');
+}

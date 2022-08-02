@@ -12,8 +12,11 @@
     <script src="{{ site.packageurl.jqueryui }}/dist/jquery-ui.min.js" crossorigin="anonymous"></script>
     <script src="{{ site.packageurl.sleekgrid }}/dist/compat/slick.core.js{%if site.local %}?v={% assign vf_ = site.static_files | where: "path", "/assets/local/dist/compat/slick.core.js" | first %}{{ vf_.modified_time | replace: "-", "" | replace: " ", "" | replace: ":", "" | replace: "+", "" }}{% endif %}"></script>
     <script src="{{ site.packageurl.sleekgrid }}/dist/compat/slick.grid.js{%if site.local %}?v={% assign vf_ = site.static_files | where: "path", "/assets/local/dist/compat/slick.grid.js" | first %}{{ vf_.modified_time | replace: "-", "" | replace: " ", "" | replace: ":", "" | replace: "+", "" }}{% endif %}"></script>
-    {% for x in page.requires_scripts %}
+    {% for x in page.requires_slick_scripts %}
     <script src="{{ site.packageurl.slickgrid }}/{{ x }}"></script>
+    {% endfor %}
+    {% for x in page.requires_scripts %}
+    <script src="{{ site.packageurl.sleekgrid }}/{{ x }}{%if site.local %}?v={%assign x_ = "/assets/local/" | append: x %}{% assign vf_ = site.static_files | where: "path", x_ | first %}{{ vf_.modified_time | replace: "-", "" | replace: " ", "" | replace: ":", "" | replace: "+", "" }}{% endif %}"></script>
     {% endfor %}
 </head>
 

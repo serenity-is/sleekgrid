@@ -26,7 +26,7 @@ export function globalExternals(filter, externals) {
     };
 }
 
-const compatDefaults = {
+export const compatDefaults = {
     bundle: true,
     target: 'es6',
     format: 'iife',
@@ -42,8 +42,7 @@ const compatDefaults = {
 export const compatCore = {
     ...compatDefaults,
     entryPoints: ['./src/core/index.ts'],
-    outfile: './dist/compat/slick.core.js',
-    sourcemap: true
+    outfile: './dist/compat/slick.core.js'
 }
 
 export const compatGrid = {
@@ -51,7 +50,16 @@ export const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["attrEncode", "Event", "EventData", "GlobalEditorLock", "htmlEncode", "keyCode", "NonDataRow", "preClickClassName", "Range"],
+        Slick: ["attrEncode", "disableSelection", "Event", "EventData", "GlobalEditorLock", "H", "htmlEncode", "keyCode", "NonDataRow", "preClickClassName", "spacerDiv", "Range"],
+    })]
+}
+
+export const compatLayoutsFrozen = {
+    ...compatDefaults,
+    entryPoints: ['./src/layouts/frozenlayout.ts'],
+    outfile: './dist/compat/layouts/slick.frozenlayout.js',
+    plugins: [globalExternals(/\.\.\/core/, {
+        Slick: ["disableSelection", "H", "spacerDiv"],
     })]
 }
 

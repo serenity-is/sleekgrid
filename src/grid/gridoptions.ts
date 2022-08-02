@@ -2,6 +2,7 @@ import type { Column } from "./column";
 import { EditorLock, GlobalEditorLock } from "../core/editlock";
 import type { EditCommand, EditorFactory } from "./editor";
 import { ColumnFormatter, FormatterFactory, defaultFormatter } from "./formatting";
+import { LayoutEngine as LayoutEngine } from "./layout";
 
 export interface GridOptions<TItem = any> {
     addNewRowCssClass?: string;
@@ -37,6 +38,7 @@ export interface GridOptions<TItem = any> {
     footerRowHeight?: number;
     forceFitColumns?: boolean;
     forceSyncScrolling?: boolean;
+    forceSyncScrollInterval?: number;
     formatterFactory?: FormatterFactory;
     frozenBottom?: boolean;
     frozenColumns?: number;
@@ -46,12 +48,14 @@ export interface GridOptions<TItem = any> {
     groupingPanelHeight?: number;
     headerRowHeight?: number;
     leaveSpaceForNewRows?: boolean;
+    layoutEngine?: LayoutEngine;
     minBuffer?: number;
     multiColumnSort?: boolean;
     multiSelect?: boolean;
     preHeaderPanelHeight?: number;
     renderAllCells?: boolean;
     rowHeight?: number;
+    rtl?: boolean;
     selectedCellCssClass?: string;
     showCellSelection?: boolean;
     showColumnHeader?: boolean;
@@ -96,6 +100,7 @@ export const gridDefaults: GridOptions = {
     footerRowHeight: 30,
     forceFitColumns: false,
     forceSyncScrolling: false,
+    forceSyncScrollInterval: 250,
     formatterFactory: null,
     fullWidthRows: false,
     groupingPanel: false,
