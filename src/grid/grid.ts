@@ -1,8 +1,8 @@
 import { attrEncode, disableSelection, H, htmlEncode, EditController, EditorLock, Event, IEventData, EventData, keyCode, GroupTotals, NonDataRow, preClickClassName, Range } from "../core/index";
 import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
 import { EditCommand, Editor } from "./editor";
-import type { CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
-import { absBox, addUiStateHover, CachedRow,  getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
+import { applyFormatterResultToCellNode, CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
+import { absBox, addUiStateHover, CachedRow,  getMaxSupportedCssHeight, getScrollBarDimensions, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
 import { IPlugin, Position, RowCell, SelectionModel, ViewportInfo, ViewRange } from "./types";
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { gridDefaults, GridOptions } from "./gridoptions";
@@ -2115,56 +2115,6 @@ export class Grid<TItem = any> {
         this.invalidateRows([row]);
     }
 
-    applyFormatResultToCellNode(fmtResult: FormatterResult | string, cellNode: HTMLElement) {
-        var oldFmtCls = cellNode.dataset?.fmtcls as string;
-        if (oldFmtCls != null && oldFmtCls.length > 0) {
-            cellNode.classList.remove(...oldFmtCls.split(' '));
-            delete cellNode.dataset.fmtcls;
-        }
-
-        var oldFmtAtt = cellNode.dataset?.fmtatt as string;
-        if (oldFmtAtt != null && oldFmtAtt.length > 0) {
-            for (var k of oldFmtAtt.split(','))
-                cellNode.removeAttribute(k);
-            delete cellNode.dataset.fmtatt;
-        }
-
-        cellNode.removeAttribute('tooltip');
-
-        if (fmtResult == null) {
-            cellNode.innerHTML = '';
-            return;
-        }
-
-        if (typeof fmtResult === "string" || Object.prototype.toString.call(fmtResult) !== '[object Object]') {
-            cellNode.innerHTML = "" + fmtResult;
-            return;
-        }
-
-        if (fmtResult.html != null)
-            cellNode.innerHTML = fmtResult.html;
-        else
-            cellNode.textContent = fmtResult.text ?? '';
-
-        if (fmtResult.addClass?.length) {
-            cellNode.classList.add(...fmtResult.addClass.split(' '));
-            cellNode.dataset.fmtcls = fmtResult.addClass;
-        }
-
-        if (fmtResult.addAttrs != null) {
-            var keys = Object.keys(fmtResult.addAttrs);
-            if (keys.length) {
-                for (var k of keys) {
-                    cellNode.setAttribute(k, fmtResult.addAttrs[k]);
-                }
-                cellNode.dataset.fmtatt = keys.join(',');
-            }
-        }
-
-        if (fmtResult.toolTip !== undefined)
-            cellNode.setAttribute('tooltip', fmtResult.toolTip ?? '');
-    }
-
     updateCell(row: number, cell: number): void {
         var cellNode = this.getCellNode(row, cell);
         if (!cellNode) {
@@ -2176,7 +2126,7 @@ export class Grid<TItem = any> {
             this._currentEditor.loadValue(d);
         } else {
             var fmtResult = d ? this.getFormatter(row, m)(row, cell, this.getDataItemValueForColumn(d, m), m, d) : "";
-            this.applyFormatResultToCellNode(fmtResult, cellNode);
+            applyFormatterResultToCellNode(fmtResult, cellNode);
             this.invalidatePostProcessingResults(row);
         }
     }
@@ -2206,7 +2156,7 @@ export class Grid<TItem = any> {
             }
             else {
                 fmtResult = d ? this.getFormatter(row, m)(row, columnIdx, this.getDataItemValueForColumn(d, m), m, d) : '';
-                this.applyFormatResultToCellNode(fmtResult, node);
+                applyFormatterResultToCellNode(fmtResult, node);
             }
         }
 
@@ -2485,7 +2435,6 @@ export class Grid<TItem = any> {
         var stringArray: string[] = [];
         var processedRows = [];
         var cellsAdded;
-        var totalCellsAdded = 0;
         var colspan;
         var cols = this._cols;
 
@@ -2540,7 +2489,6 @@ export class Grid<TItem = any> {
             }
 
             if (cellsAdded) {
-                totalCellsAdded += cellsAdded;
                 processedRows.push(row);
             }
         }
@@ -2921,7 +2869,13 @@ export class Grid<TItem = any> {
                     if (!addedRowHash || removedRowHash[columnId] != addedRowHash[columnId]) {
                         node = this.getCellNode(parseInt(row, 10), this.getColumnIndex(columnId));
                         if (node) {
-                            $(node).removeClass(removedRowHash[columnId]);
+                            const r = removedRowHash[columnId];
+                            if (r.length) {
+                                for (var x of r) {
+                                    if (x.length)
+                                        node.classList.remove(x);
+                                }
+                            }
                         }
                     }
                 }
@@ -2932,7 +2886,13 @@ export class Grid<TItem = any> {
                     if (!removedRowHash || removedRowHash[columnId] != addedRowHash[columnId]) {
                         node = this.getCellNode(parseInt(row, 10), this.getColumnIndex(columnId));
                         if (node) {
-                            $(node).addClass(addedRowHash[columnId]);
+                            const a = addedRowHash[columnId];
+                            if (a.length) {
+                                for (var x of a) {
+                                    if (x.length)
+                                        node.classList.add(x);
+                                }
+                            }
                         }
                     }
                 }
@@ -3499,7 +3459,7 @@ export class Grid<TItem = any> {
                 var column = this._cols[this._activeCell];
                 var fmtResult = d ? this.getFormatter(this._activeRow, column)(this._activeRow, this._activeCell,
                     this.getDataItemValueForColumn(d, column), column, d) : "";
-                this.applyFormatResultToCellNode(fmtResult, this._activeCellNode);
+                applyFormatterResultToCellNode(fmtResult, this._activeCellNode);
                 this.invalidatePostProcessingResults(this._activeRow);
             }
         }
