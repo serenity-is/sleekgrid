@@ -1,3 +1,4 @@
+# could use like {{ "style.css" | hash_assets }} and return style.css?v=abc123... but it does not work in github
 module Jekyll
     module CacheBust
       class CacheDigester
