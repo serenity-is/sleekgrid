@@ -3,7 +3,7 @@ import { Column, columnDefaults, ColumnMetadata, ColumnSort, ItemMetadata } from
 import { EditCommand, Editor } from "./editor";
 import type { CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
 import { addUiStateHover, CachedRow, disableSelection, getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, H, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest, spacerDiv } from "./internal";
-import { IPlugin, Position, RowCell, SelectionModel, ViewportSize, ViewRange } from "./types";
+import { IPlugin, Position, RowCell, SelectionModel, ViewportInfo, ViewRange } from "./types";
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { gridDefaults, GridOptions } from "./gridoptions";
 import { LayoutEngine } from "./layouts/layout";
@@ -31,8 +31,6 @@ export class Grid<TItem = any> {
     private _currentEditor: Editor = null;
     private _data: any;
     private _editController: EditController;
-    private _frozenCols: number;
-    private _frozenRows: number;
     private _hasJQuery = typeof jQuery !== "undefined";
     private _headerColumnWidthDiff: number = 0;
     private _hEditorLoader: number = null;
@@ -46,7 +44,6 @@ export class Grid<TItem = any> {
     private _jumpinessCoefficient: number;
     private _layout: LayoutEngine;
     private _numberOfPages: number;
-    private _numVisibleRows: number = 0;
     private _options: GridOptions<TItem>;
     private _page: number = 0;
     private _pageHeight: number;
@@ -59,7 +56,6 @@ export class Grid<TItem = any> {
     private _postProcessFromRow: number = null;
     private _postProcessGroupId: number = 0;
     private _postProcessToRow: number = null;
-    private _realScrollHeight: number;
     private _rowsCache: { [key: number]: CachedRow } = {};
     private _scrollDims: { width: number, height: number };
     private _scrollLeft: number = 0;
@@ -76,19 +72,7 @@ export class Grid<TItem = any> {
     private _stylesheet: any;
     private _tabbingDirection: number = 1;
     private _uid: string = "sleekgrid_" + Math.round(1000000 * Math.random());
-    private _viewportHasHScroll: boolean;
-    private _viewportHasVScroll: boolean;
-    private _viewportTopH: number = 0;
-    private _viewportSize: ViewportSize = {
-         width: 0, 
-         height: 0, 
-         topPanelHeight: 0, 
-         headerHeight: 0,
-         headerRowHeight: 0, 
-         footerRowHeight: 0, 
-         groupingPanelHeight: 0
-    };
-    private _virtualHeight: number;
+    private _viewportInfo: ViewportInfo = {} as any;
     private _vScrollDir: number = 1;
 
     private _boundAncestorScroll: HTMLElement[] = [];
@@ -164,27 +148,12 @@ export class Grid<TItem = any> {
 
         options = Object.assign({}, gridDefaults, options);
         this._options = options;
-        this._options.rtl = this._options.rtl ?? 
+        this._options.rtl = this._options.rtl ??
             (document.body.classList.contains('rtl') || (typeof getComputedStyle != "undefined" &&
                 getComputedStyle(this._container).direction == 'rtl'));
-        
+
         this.validateAndEnforceOptions();
         this._colDefaults.width = options.defaultColumnWidth;
-
-        this._layout = options.layoutEngine ?? basicLayout();
-        this._layout.init({
-            bindAncestorScroll: this.bindAncestorScroll.bind(this),
-            getAvailableWidth: this.getAvailableWidth.bind(this),
-            getColumnCssRules: this.getColumnCssRules.bind(this),
-            getColumns: this.getColumns.bind(this),
-            getOptions: this.getOptions.bind(this),
-            getScrollDims: this.getScrollBarDimensions.bind(this),
-            getScrollLeft: () => this._scrollLeft,
-            getScrollTop: () => this._scrollTop,
-            getViewportSize: () => this._viewportSize
-        });
-
-        this.setInitialCols(columns);
 
         this._editController = {
             "commitCurrentEdit": this.commitCurrentEdit.bind(this),
@@ -215,6 +184,11 @@ export class Grid<TItem = any> {
             tabIndex: '0'
         }));
 
+
+        this._layout = options.layoutEngine ?? basicLayout();
+        this.setInitialCols(columns);
+        this._scrollDims = getScrollBarDimensions();
+
         if (options.groupingPanel) {
             this._container.appendChild(this._groupingPanel = H('div', {
                 class: "slick-grouping-panel",
@@ -225,6 +199,24 @@ export class Grid<TItem = any> {
                 this._groupingPanel.appendChild(H('div', { class: 'slick-preheader-panel' }));
             }
         }
+
+        this._layout.init({
+            cleanUpAndRenderCells: this.cleanUpAndRenderCells.bind(this),
+            bindAncestorScroll: this.bindAncestorScroll.bind(this),
+            getAvailableWidth: this.getAvailableWidth.bind(this),
+            getCellFromPoint: this.getCellFromPoint.bind(this),
+            getColumnCssRules: this.getColumnCssRules.bind(this),
+            getColumns: this.getColumns.bind(this),
+            getContainerNode: this.getContainerNode.bind(this),
+            getDataLength: this.getDataLength.bind(this),
+            getOptions: this.getOptions.bind(this),
+            getRowFromNode: this.getRowFromNode.bind(this),
+            getScrollDims: this.getScrollBarDimensions.bind(this),
+            getScrollLeft: () => this._scrollLeft,
+            getScrollTop: () => this._scrollTop,
+            getViewportInfo: () => this._viewportInfo,
+            renderRows: this.renderRows.bind(this)
+        });
 
         this._container.append(this._focusSink2 = this._focusSink1.cloneNode() as HTMLDivElement);
 
@@ -289,7 +281,7 @@ export class Grid<TItem = any> {
                         this.handleScroll();
                         scrollTicking = false;
                     });
-                }                
+                }
             });
         });
 
@@ -351,11 +343,11 @@ export class Grid<TItem = any> {
     }
 
     private hasFrozenColumns(): boolean {
-        return this._frozenCols > 0;
+        return this._layout.getFrozenCols() > 0;
     }
 
     private hasFrozenRows(): boolean {
-        return this._frozenRows > 0;
+        return this._layout.getFrozenRows() > 0;
     }
 
     registerPlugin(plugin: IPlugin): void {
@@ -403,8 +395,8 @@ export class Grid<TItem = any> {
 
     getDisplayedScrollbarDimensions(): { width: number; height: number; } {
         return {
-            width: this._viewportHasVScroll ? this._scrollDims.width : 0,
-            height: this._viewportHasHScroll ? this._scrollDims.height : 0
+            width: this._viewportInfo.hasVScroll ? this._scrollDims.width : 0,
+            height: this._viewportInfo.hasHScroll ? this._scrollDims.height : 0
         };
     }
 
@@ -467,7 +459,7 @@ export class Grid<TItem = any> {
     }
 
     private getAvailableWidth() {
-        return this._viewportHasVScroll ? this._viewportSize.width - this._scrollDims.width : this._viewportSize.width;
+        return this._viewportInfo.hasVScroll ? this._viewportInfo.width - this._scrollDims.width : this._viewportInfo.width;
     }
 
     private updateCanvasWidth(forceColumnWidthsUpdate?: boolean): void {
@@ -595,7 +587,7 @@ export class Grid<TItem = any> {
                 frc.innerHTML = '';
         });
 
-        var cols = this._cols, frozenCols = this._frozenCols;
+        var cols = this._cols;
         for (var i = 0; i < cols.length; i++) {
             var m = cols[i];
 
@@ -697,7 +689,7 @@ export class Grid<TItem = any> {
 
         this._layout.calcHeaderWidths();
 
-        var cols = this._cols, frozenCols = this._frozenCols;
+        var cols = this._cols, frozenCols = this._layout.getFrozenCols();
         for (var i = 0; i < cols.length; i++) {
             var m = cols[i];
 
@@ -857,7 +849,7 @@ export class Grid<TItem = any> {
                 ui.placeholder.outerHeight(ui.helper.outerHeight());
                 ui.placeholder.outerWidth(ui.helper.outerWidth());
                 canDragScroll = !this.hasFrozenColumns() ||
-                    (ui.placeholder.offset()[this._options.rtl ? 'left' : 'right'] + Math.round(ui.placeholder.width())) > $(this._layout.getScrollContainerX()).offset()[this._options.rtl ? 'left' : 'right'];
+                    (ui.placeholder.offset()[this._options.rtl ? 'right' : 'left'] + Math.round(ui.placeholder.width())) > $(this._layout.getScrollContainerX()).offset()[this._options.rtl ? 'right' : 'left'];
                 $(ui.helper).addClass("slick-header-column-active");
             },
             beforeStop: (_: any, ui: any) => {
@@ -1199,8 +1191,8 @@ export class Grid<TItem = any> {
         var rowHeight = (this._options.rowHeight - this._cellHeightDiff);
         var rules = [
             "." + this._uid + " { --slick-cell-height: " + this._options.rowHeight + "px; }",
-            "." + this._uid + " .slick-group-header-column { " + (this._options.rtl ? 'left' : 'right') + ": 1000px; }",
-            "." + this._uid + " .slick-header-column { " + (this._options.rtl ? 'left' : 'right') + ": 1000px; }",
+            "." + this._uid + " .slick-group-header-column { " + (this._options.rtl ? 'right' : 'left') + ": 1000px; }",
+            "." + this._uid + " .slick-header-column { " + (this._options.rtl ? 'right' : 'left') + ": 1000px; }",
             "." + this._uid + " .slick-top-panel { height:" + this._options.topPanelHeight + "px; }",
             "." + this._uid + " .slick-grouping-panel { height:" + this._options.groupingPanelHeight + "px; }",
             "." + this._uid + " .slick-headerrow-columns { height:" + this._options.headerRowHeight + "px; }",
@@ -1339,7 +1331,8 @@ export class Grid<TItem = any> {
             shrinkLeeway = 0,
             total = 0,
             prevTotal,
-            availWidth = this._viewportHasVScroll ? this._viewportSize.width - this._scrollDims.width : this._viewportSize.width,
+            vpi = this._viewportInfo,
+            availWidth = vpi.hasVScroll ? vpi.width - this._scrollDims.width : vpi.width,
             cols = this._cols;
 
         for (i = 0; i < cols.length; i++) {
@@ -1527,7 +1520,7 @@ export class Grid<TItem = any> {
     private updateViewColLeftRight(): void {
         this._colLeft = [];
         this._colRight = [];
-        var x = 0, r: number, cols = this._cols, i: number, l: number = cols.length, frozenCols = this._frozenCols;
+        var x = 0, r: number, cols = this._cols, i: number, l: number = cols.length, frozenCols = this._layout.getFrozenCols();
         for (var i = 0; i < l; i++) {
             if (frozenCols === i)
                 x = 0;
@@ -1815,8 +1808,9 @@ export class Grid<TItem = any> {
     }
 
     private scrollTo(y: number): void {
+        const vpi = this._viewportInfo;
         y = Math.max(y, 0);
-        y = Math.min(y, this._virtualHeight - Math.round($(this._layout.getScrollContainerY()).height()) + ((this._viewportHasHScroll || this.hasFrozenColumns()) ? this._scrollDims.height : 0));
+        y = Math.min(y, vpi.virtualHeight - Math.round($(this._layout.getScrollContainerY()).height()) + ((vpi.hasHScroll || this.hasFrozenColumns()) ? this._scrollDims.height : 0));
 
         var oldOffset = this._pageOffset;
 
@@ -1881,7 +1875,7 @@ export class Grid<TItem = any> {
         var d = this.getDataItem(row);
         var dataLoading = row < dataLength && !d;
         var rowCss = "slick-row" +
-            (this.hasFrozenRows() && row < this._frozenRows ? ' frozen' : '') +
+            (this._layout.isFrozenRow(row) ? ' frozen' : '') +
             (dataLoading ? " loading" : "") +
             (row === this._activeRow ? " active" : "") +
             (row % 2 == 1 ? " odd" : " even");
@@ -1896,19 +1890,21 @@ export class Grid<TItem = any> {
             rowCss += " " + itemMetadata.cssClasses;
         }
 
-        var frozenRowOffset = this.getFrozenRowOffset(row);
+        var rowOffset = this._layout.getFrozenRowOffset(row);
 
         var rowHtml = "<div class='" + (this._options.useLegacyUI ? "ui-widget-content " : "") + rowCss + "' style='top:"
-            + (this.getRowTop(row) - frozenRowOffset)
+            + (this.getRowTop(row) - rowOffset)
             + "px'>";
 
         stringArrayL.push(rowHtml);
 
-        if (this.hasFrozenColumns()) {
+        const frozenCols = this._layout.getFrozenCols();
+
+        if (frozenCols) {
             stringArrayR.push(rowHtml);
         }
 
-        var colspan, m, cols = this._cols, frozenCols = this._frozenCols;
+        var colspan, m, cols = this._cols;
         for (var i = 0, ii = cols.length; i < ii; i++) {
             var columnData = null;
             m = cols[i];
@@ -1938,13 +1934,13 @@ export class Grid<TItem = any> {
 
         stringArrayL.push("</div>");
 
-        if (this.hasFrozenColumns()) {
+        if (frozenCols) {
             stringArrayR.push("</div>");
         }
     }
 
     private appendCellHtml(sb: string[], row: number, cell: number, colspan: number, item: TItem, metadata: any): void {
-        var cols = this._cols, frozenCols = this._frozenCols, m = cols[cell];
+        var cols = this._cols, frozenCols = this._layout.getFrozenCols(), m = cols[cell];
         var klass = "slick-cell l" + cell + " r" + Math.min(cols.length - 1, cell + colspan - 1) +
             (m.cssClass ? " " + m.cssClass : "");
 
@@ -2015,8 +2011,8 @@ export class Grid<TItem = any> {
         var i: number;
         for (var x in this._rowsCache) {
             i = parseInt(x, 10);
-            if (i !== this._activeRow && (i < rangeToKeep.top || i > rangeToKeep.bottom) 
-                && this._layout.canCleanupRow(i))
+            if (i !== this._activeRow && (i < rangeToKeep.top || i > rangeToKeep.bottom)
+                && !this._layout.isFrozenRow(i))
                 this.removeRowFromCache(i);
             }
 
@@ -2217,7 +2213,7 @@ export class Grid<TItem = any> {
 
     private calcViewportSize(): void {
         const layout = this._layout;
-        const vs = this._viewportSize;
+        const vs = this._viewportInfo;
         vs.width = parseFloat(getComputedStyle(this._container).width);
         vs.groupingPanelHeight = (this._options.groupingPanel && this._options.showGroupingPanel) ? (this._options.groupingPanelHeight + this.getVBoxDelta(this._groupingPanel)) : 0
         vs.topPanelHeight = this._options.showTopPanel ? (this._options.topPanelHeight + this.getVBoxDelta(layout.getTopPanelFor(0).parentElement)) : 0;
@@ -2242,7 +2238,7 @@ export class Grid<TItem = any> {
                 - vs.groupingPanelHeight;
         }
 
-        this._numVisibleRows = Math.ceil(vs.height / this._options.rowHeight);
+        vs.numVisibleRows = Math.ceil(vs.height / this._options.rowHeight);
     }
 
     resizeCanvas = (): void => {
@@ -2283,16 +2279,18 @@ export class Grid<TItem = any> {
         var oldH = Math.round(parseFloat(getComputedStyle(scrollCanvas).height));
 
         var numberOfRows;
-        if (this.hasFrozenRows()) {
-            numberOfRows = this.getDataLength() - this._frozenRows;
+        const frozenRows = this._layout.getFrozenRows();
+        if (frozenRows) {
+            numberOfRows = this.getDataLength() - frozenRows;
         } else {
-            numberOfRows = dataLengthIncludingAddNew + (this._options.leaveSpaceForNewRows ? this._numVisibleRows - 1 : 0);
+            numberOfRows = dataLengthIncludingAddNew + (this._options.leaveSpaceForNewRows ? this._viewportInfo.numVisibleRows - 1 : 0);
         }
 
         var tempViewportH = Math.round(parseFloat(getComputedStyle(this._layout.getScrollContainerY()).height));
-        var oldViewportHasVScroll = this._viewportHasVScroll;
+        const vpi = this._viewportInfo;
+        var oldViewportHasVScroll = vpi.hasVScroll;
         // with autoHeight, we do not need to accommodate the vertical scroll bar
-        this._viewportHasVScroll = !this._options.autoHeight && (numberOfRows * this._options.rowHeight > tempViewportH);
+        vpi.hasVScroll = !this._options.autoHeight && (numberOfRows * this._options.rowHeight > tempViewportH);
 
         this.makeActiveCellNormal();
 
@@ -2308,52 +2306,52 @@ export class Grid<TItem = any> {
 
         this._options.enableAsyncPostRenderCleanup && this.startPostProcessingCleanup();
 
-        this._virtualHeight = Math.max(this._options.rowHeight * numberOfRows, tempViewportH - this._scrollDims.height);
+        vpi.virtualHeight = Math.max(this._options.rowHeight * numberOfRows, tempViewportH - this._scrollDims.height);
 
         if (this._activeCellNode && this._activeRow > l) {
             this.resetActiveCell();
         }
 
-        if (this._virtualHeight < getMaxSupportedCssHeight()) {
+        if (vpi.virtualHeight < getMaxSupportedCssHeight()) {
             // just one page
-            this._realScrollHeight = this._pageHeight = this._virtualHeight;
+            vpi.realScrollHeight = this._pageHeight = vpi.virtualHeight;
             this._numberOfPages = 1;
             this._jumpinessCoefficient = 0;
         } else {
             // break into pages
-            this._realScrollHeight = getMaxSupportedCssHeight();
-            this._pageHeight = this._realScrollHeight / 100;
-            this._numberOfPages = Math.floor(this._virtualHeight / this._pageHeight);
-            this._jumpinessCoefficient = (this._virtualHeight - this._realScrollHeight) / (this._numberOfPages - 1);
+            vpi.realScrollHeight = getMaxSupportedCssHeight();
+            this._pageHeight = vpi.realScrollHeight / 100;
+            this._numberOfPages = Math.floor(vpi.virtualHeight / this._pageHeight);
+            this._jumpinessCoefficient = (vpi.virtualHeight - vpi.realScrollHeight) / (this._numberOfPages - 1);
         }
 
-        if (this._realScrollHeight !== oldH) {
-            this._layout.realScrollHeightChange(this._realScrollHeight);
+        if (vpi.realScrollHeight !== oldH) {
+            this._layout.realScrollHeightChange();
             this._scrollTop = this._layout.getScrollContainerY().scrollTop;
         }
 
-        var oldScrollTopInRange = (this._scrollTop + this._pageOffset <= this._virtualHeight - tempViewportH);
+        var oldScrollTopInRange = (this._scrollTop + this._pageOffset <= vpi.virtualHeight - tempViewportH);
 
-        if (this._virtualHeight == 0 || this._scrollTop == 0) {
+        if (vpi.virtualHeight == 0 || this._scrollTop == 0) {
             this._page = this._pageOffset = 0;
         } else if (oldScrollTopInRange) {
             // maintain virtual position
             this.scrollTo(this._scrollTop + this._pageOffset);
         } else {
             // scroll to bottom
-            this.scrollTo(this._virtualHeight - tempViewportH);
+            this.scrollTo(vpi.virtualHeight - tempViewportH);
         }
 
-        if (this._realScrollHeight != oldH && this._options.autoHeight) {
+        if (vpi.realScrollHeight != oldH && this._options.autoHeight) {
             this.resizeCanvas();
         }
 
-        if (this._options.forceFitColumns && oldViewportHasVScroll != this._viewportHasVScroll) {
+        if (this._options.forceFitColumns && oldViewportHasVScroll != vpi.hasVScroll) {
             this.autosizeColumns();
         }
         this.updateCanvasWidth(false);
     }
-   
+
     /**
      * @param viewportTop optional viewport top
      * @param viewportLeft optional viewport left
@@ -2373,15 +2371,15 @@ export class Grid<TItem = any> {
 
         return {
             top: this.getRowFromPosition(viewportTop),
-            bottom: this.getRowFromPosition(viewportTop + this._viewportSize.height) + 1,
+            bottom: this.getRowFromPosition(viewportTop + this._viewportInfo.height) + 1,
             leftPx: viewportLeft,
-            rightPx: viewportLeft + this._viewportSize.width
+            rightPx: viewportLeft + this._viewportInfo.width
         };
     }
 
     getRenderedRange(viewportTop?: number, viewportLeft?: number): ViewRange {
         var range = this.getVisibleRange(viewportTop, viewportLeft);
-        var buffer = Math.round(this._viewportSize.height / this._options.rowHeight);
+        var buffer = Math.round(this._viewportInfo.height / this._options.rowHeight);
         var minBuffer = this._options.minBuffer || 3;
 
         if (this._vScrollDir == -1) {
@@ -2403,8 +2401,8 @@ export class Grid<TItem = any> {
             range.rightPx = this._layout.getCanvasWidth();
         }
         else {
-            range.leftPx -= this._viewportSize.width;
-            range.rightPx += this._viewportSize.width;
+            range.leftPx -= this._viewportInfo.width;
+            range.rightPx += this._viewportInfo.width;
 
             range.leftPx = Math.max(0, range.leftPx);
             range.rightPx = Math.min(this._layout.getCanvasWidth(), range.rightPx);
@@ -2433,13 +2431,13 @@ export class Grid<TItem = any> {
 
     private cleanUpCells(range: ViewRange, row: number): void {
         // Ignore frozen rows
-        if (!this._layout.canCleanupRow(row))
+        if (this._layout.isFrozenRow(row))
             return;
 
         var cacheEntry = this._rowsCache[row];
 
         // Remove cells outside the range.
-        var cellsToRemove = [], frozenCols = this._frozenCols;
+        var cellsToRemove = [], frozenCols = this._layout.getFrozenCols();
         for (var x in cacheEntry.cellNodesByColumnIdx) {
             // I really hate it when people mess with Array.prototype.
             if (!cacheEntry.cellNodesByColumnIdx.hasOwnProperty(x)) {
@@ -2553,7 +2551,7 @@ export class Grid<TItem = any> {
         x.innerHTML = stringArray.join("");
 
         var processedRow;
-        var node: HTMLElement, frozenCols = this._frozenCols;
+        var node: HTMLElement, frozenCols = this._layout.getFrozenCols();
         while ((processedRow = processedRows.pop()) != null) {
             cacheEntry = this._rowsCache[processedRow];
             var columnIdx;
@@ -2579,9 +2577,11 @@ export class Grid<TItem = any> {
             dataLength = this.getDataLength();
 
         for (var i = range.top, ii = range.bottom; i <= ii; i++) {
+
             if (this._rowsCache[i] || (this.hasFrozenRows() && this._options.frozenBottom && i == dataLength)) {
                 continue;
             }
+
             rows.push(i);
 
             // Create an entry right away so that appendRowHtml() can
@@ -2619,23 +2619,13 @@ export class Grid<TItem = any> {
         l.innerHTML = stringArrayL.join("");
         r.innerHTML = stringArrayR.join("");
 
-        var frozenRows = this.hasFrozenRows(), actualFrozen = this._actualFrozenRow, frozenCols = this.hasFrozenColumns, frozenBottom = this._options.frozenBottom;
-        var ctl = this._canvasTopL, ctr = this._canvasTopR, cbl = this._canvasBottomL, cbr = this._canvasBottomR;
+        const layout = this._layout;
         for (var i = 0, ii = rows.length; i < ii; i++) {
             var row = rows[i];
             var item = this._rowsCache[row];
             item.rowNodeL = l.firstElementChild as HTMLDivElement;
             item.rowNodeR = r.firstElementChild as HTMLDivElement;
-
-            var bottom = frozenRows && row >= actualFrozen;
-            if (bottom) {
-                item.rowNodeL && cbl.appendChild(item.rowNodeL);
-                frozenCols && item.rowNodeR && cbr.appendChild(item.rowNodeR);
-            }
-            else {
-                item.rowNodeL && ctl.appendChild(item.rowNodeL);
-                frozenCols && item.rowNodeR && ctr.appendChild(item.rowNodeR);
-            }
+            layout.appendCachedRow(row, item);
         }
 
         if (needToReselectCell) {
@@ -2732,49 +2722,13 @@ export class Grid<TItem = any> {
 
         // add new rows & missing cells in existing rows
         if (this._scrollLeftRendered != this._scrollLeft) {
-
-            if (this.hasFrozenRows()) {
-
-                var renderedFrozenRows = Object.assign({}, rendered);
-
-                if (this._options.frozenBottom) {
-                    renderedFrozenRows.top = this._actualFrozenRow;
-                    renderedFrozenRows.bottom = this.getDataLength();
-                }
-                else {
-
-                    renderedFrozenRows.top = 0;
-                    renderedFrozenRows.bottom = this._actualFrozenRow;
-                }
-
-                this.cleanUpAndRenderCells(renderedFrozenRows);
-            }
-
+            this._layout.beforeCleanupAndRenderCells(rendered);
             this.cleanUpAndRenderCells(rendered);
         }
 
         // render missing rows
         this.renderRows(rendered);
-
-        // Render frozen rows
-        if (this.hasFrozenRows()) {
-            if (this._options.frozenBottom) {
-                this.renderRows({
-                    top: this._actualFrozenRow,
-                    bottom: this.getDataLength() - 1,
-                    leftPx: rendered.leftPx,
-                    rightPx: rendered.rightPx
-                });
-            }
-            else {
-                this.renderRows({
-                    top: 0,
-                    bottom: this._actualFrozenRow - 1,
-                    leftPx: rendered.leftPx,
-                    rightPx: rendered.rightPx
-                });
-            }
-        }
+        this._layout.afterRenderRows(rendered);
 
         this._postProcessFromRow = visible.top;
         this._postProcessToRow = Math.min(this.getDataLengthIncludingAddNew() - 1, visible.bottom);
@@ -2785,21 +2739,21 @@ export class Grid<TItem = any> {
         this._hRender = null;
     }
 
-    private handleHeaderRowScroll = (): void => {
+    private handleHeaderRowScroll = (e: IEventData): void => {
         if (this._ignoreScrollUntil >= new Date().getTime())
             return;
 
-        var scrollLeft = (this.hasFrozenColumns ? this._headerRowColsR.parentElement.scrollLeft : this._headerRowColsL.parentElement.scrollLeft);
+        var scrollLeft = (e.target as HTMLElement).scrollLeft;
         if (scrollLeft != this._layout.getScrollContainerX().scrollLeft) {
             this._layout.getScrollContainerX().scrollLeft = scrollLeft;
         }
     }
 
-    private handleFooterRowScroll = (): void => {
+    private handleFooterRowScroll = (e: IEventData): void => {
         if (this._ignoreScrollUntil >= new Date().getTime())
             return;
 
-        var scrollLeft = (this.hasFrozenColumns ? this._footerRowColsR.parentElement.scrollLeft : this._footerRowColsL.parentElement.scrollLeft);
+        var scrollLeft = (e.target as HTMLElement).scrollLeft;
         if (scrollLeft != this._layout.getScrollContainerX().scrollLeft) {
             this._layout.getScrollContainerX().scrollLeft = scrollLeft;
         }
@@ -2852,6 +2806,8 @@ export class Grid<TItem = any> {
             this._layout.handleScrollH();
         }
 
+        const vpi = this._viewportInfo;
+
         if (vScrollDist) {
             this._vScrollDir = this._scrollTopPrev < this._scrollTop ? 1 : -1;
             this._scrollTopPrev = this._scrollTop;
@@ -2863,14 +2819,14 @@ export class Grid<TItem = any> {
             this._layout.handleScrollV;
 
             // switch virtual pages if needed
-            if (vScrollDist < this._viewportSize.height) {
+            if (vScrollDist < this._viewportInfo.height) {
                 this.scrollTo(this._scrollTop + this._pageOffset);
             } else {
                 var oldOffset = this._pageOffset;
-                if (this._realScrollHeight == this._viewportSize.height) {
+                if (vpi.realScrollHeight == vpi.height) {
                     this._page = 0;
                 } else {
-                    this._page = Math.min(this._numberOfPages - 1, Math.floor(this._scrollTop * ((this._virtualHeight - this._viewportSize.height) / (this._realScrollHeight - this._viewportSize.height)) * (1 / this._pageHeight)));
+                    this._page = Math.min(this._numberOfPages - 1, Math.floor(this._scrollTop * ((vpi.virtualHeight - this._viewportInfo.height) / (vpi.realScrollHeight - this._viewportInfo.height)) * (1 / this._pageHeight)));
                 }
                 this._pageOffset = Math.round(this._page * this._jumpinessCoefficient);
                 if (oldOffset != this._pageOffset) {
@@ -2887,8 +2843,8 @@ export class Grid<TItem = any> {
             if (Math.abs(this._scrollTopRendered - this._scrollTop) > 20 ||
                 Math.abs(this._scrollLeftRendered - this._scrollLeft) > 20) {
                 if (this._options.forceSyncScrolling || (
-                    Math.abs(this._scrollTopRendered - this._scrollTop) < this._viewportSize.height &&
-                    Math.abs(this._scrollLeftRendered - this._scrollLeft) < this._viewportSize.width)) {
+                    Math.abs(this._scrollTopRendered - this._scrollTop) < this._viewportInfo.height &&
+                    Math.abs(this._scrollLeftRendered - this._scrollLeft) < this._viewportInfo.width)) {
                     this.render();
                 } else {
                     this._hRender = setTimeout(this.render.bind(this), 50);
@@ -3348,19 +3304,6 @@ export class Grid<TItem = any> {
         return null;
     }
 
-    private getFrozenRowOffset(row: number): any {
-        if (!this.hasFrozenRows() || row < this._actualFrozenRow)
-            return 0;
-
-        if (!this._options.frozenBottom)
-            return this._frozenRows * this._options.rowHeight;
-
-        if (this._realScrollHeight >= this._viewportTopH)
-            return this._realScrollHeight;
-
-        return this._actualFrozenRow * this._options.rowHeight;
-    }
-
     getCellFromEvent(e: any): { row: number; cell: number; } {
         var row, cell;
         var cellEl = (e.target as HTMLElement).closest(".slick-cell") as HTMLElement;
@@ -3368,22 +3311,7 @@ export class Grid<TItem = any> {
             return null;
         }
 
-        row = this.getRowFromNode(cellEl.parentNode as HTMLElement);
-
-        if (this.hasFrozenRows()) {
-
-            var bcr = cellEl.closest('.grid-canvas').getBoundingClientRect();
-
-            var rowOffset = 0;
-            var isBottom = cellEl.closest('.grid-canvas-bottom') != null;
-
-            if (isBottom) {
-                rowOffset = (this._options.frozenBottom) ? Math.round(parseFloat(getComputedStyle(this._canvasTopL).height)) : (this._frozenRows * this._options.rowHeight);
-            }
-
-            row = this.getCellFromPoint(e.clientX - bcr[this._rtlS] - document.body.scrollLeft, e.clientY - bcr.top + document.body.scrollTop + rowOffset + document.body.scrollTop).row;
-        }
-
+        row = this._layout.getRowFromCellNode(cellEl, e.clientX, e.clientY);
         cell = this.getCellFromNode(cellEl);
 
         if (row == null || cell == null) {
@@ -3401,9 +3329,9 @@ export class Grid<TItem = any> {
             return null;
         }
 
-        var frozenRowOffset = this.getFrozenRowOffset(row);
-        var cols = this._cols, frozenCols = this._frozenCols;
-        var y1 = this.getRowTop(row) - frozenRowOffset;
+        var rowOffset = this._layout.getFrozenRowOffset(row);
+        var cols = this._cols, frozenCols = this._layout.getFrozenCols();
+        var y1 = this.getRowTop(row) - rowOffset;
         var y2 = y1 + this._options.rowHeight - 1;
         var x1 = 0;
         for (var i = 0; i < cell; i++) {
@@ -3414,7 +3342,7 @@ export class Grid<TItem = any> {
         }
         var x2 = x1 + cols[cell].width;
 
-        return this._rtl ? {
+        return this._options.rtl ? {
             top: y1,
             right: x1,
             bottom: y2,
@@ -3449,7 +3377,7 @@ export class Grid<TItem = any> {
     scrollCellIntoView(row: number, cell: number, doPaging?: boolean): void {
         this.scrollRowIntoView(row, doPaging);
 
-        if (cell < this._frozenCols)
+        if (cell < this._layout.getFrozenCols())
             return;
 
         var colspan = this.getColspan(row, cell);
@@ -3463,7 +3391,7 @@ export class Grid<TItem = any> {
     internalScrollColumnIntoView(left: number, right: number): void {
 
         var scrollRight = this._scrollLeft + parseFloat(getComputedStyle(this._layout.getScrollContainerX()).width) -
-            (this._viewportHasVScroll ? this._scrollDims.width : 0);
+            (this._viewportInfo.hasVScroll ? this._scrollDims.width : 0);
 
         var target;
         if (left < this._scrollLeft)
@@ -3496,14 +3424,13 @@ export class Grid<TItem = any> {
 
             var rowOffset = Math.floor(this._activeCellNode.closest('.grid-canvas').getBoundingClientRect().top + document.body.scrollTop);
             var isBottom = this._activeCellNode.closest('.grid-canvas-bottom') != null;
-
             if (this.hasFrozenRows() && isBottom) {
                 rowOffset -= (this._options.frozenBottom)
-                    ? Math.round(parseFloat(getComputedStyle(this._canvasTopL).height))
-                    : this._frozenRows * this._options.rowHeight;
+                    ? Math.round(parseFloat(getComputedStyle(this._layout.getCanvasNodeFor(0, 0)).height))
+                    : this._layout.getFrozenRows() * this._options.rowHeight;
             }
 
-            var cell = this.getCellFromPoint(bcl[this._rtlS] + document.body.scrollLeft, Math.ceil(bcl.top + document.body.scrollTop) - rowOffset);
+            var cell = this.getCellFromPoint(bcl[this._options.rtl ? 'right' : 'left'] + document.body.scrollLeft, Math.ceil(bcl.top + document.body.scrollTop) - rowOffset);
 
             this._activeRow = cell.row;
             this._activeCell = this._activePosX = this.getCellFromNode(this._activeCellNode);
@@ -3785,19 +3712,17 @@ export class Grid<TItem = any> {
 
     scrollRowIntoView(row: number, doPaging?: boolean): void {
 
-        if (!this.hasFrozenRows() ||
-            (!this._options.frozenBottom && row > this._actualFrozenRow - 1) ||
-            (this._options.frozenBottom && row < this._actualFrozenRow - 1)) {
+        if (!this._layout.isFrozenRow(row)) {
 
             var viewportScrollH = Math.round(parseFloat(getComputedStyle(this._layout.getScrollContainerY()).height));
 
-            var rowNumber = (this.hasFrozenRows() && !this._options.frozenBottom ? row - this._frozenRows + 1 : row);
+            var rowNumber = (this.hasFrozenRows() && !this._options.frozenBottom ? row - this._layout.getFrozenRows() + 1 : row);
 
             // if frozen row on top subtract number of frozen row
             var rowAtTop = rowNumber * this._options.rowHeight;
             var rowAtBottom = (rowNumber + 1) * this._options.rowHeight
                 - viewportScrollH
-                + (this._viewportHasHScroll ? this._scrollDims.height : 0);
+                + (this._viewportInfo.hasHScroll ? this._scrollDims.height : 0);
 
             // need to page down?
             if ((rowNumber + 1) * this._options.rowHeight > this._scrollTop + viewportScrollH + this._pageOffset) {
@@ -3818,7 +3743,7 @@ export class Grid<TItem = any> {
     }
 
     private scrollPage(dir: number): void {
-        var deltaRows = dir * this._numVisibleRows;
+        var deltaRows = dir * this._viewportInfo.numVisibleRows;
         this.scrollTo((this.getRowFromPosition(this._scrollTop) + deltaRows) * this._options.rowHeight);
         this.render();
 
@@ -4191,8 +4116,9 @@ export class Grid<TItem = any> {
             end: 1
         };
 
-        tabbingDirections[this._rtlS] = -1;
-        tabbingDirections[this._rtlE] = 1;
+        const rtl = this._options.rtl;
+        tabbingDirections[rtl ? 'right' : 'left'] = -1;
+        tabbingDirections[rtl ? 'left' : 'right'] = 1;
 
         this._tabbingDirection = tabbingDirections[dir];
 
@@ -4205,8 +4131,8 @@ export class Grid<TItem = any> {
             end: this.gotoRowEnd
         };
 
-        stepFunctions[this._rtlS] = this.gotoLeft;
-        stepFunctions[this._rtlE] = this.gotoRight;
+        stepFunctions[rtl ? 'right' : 'left'] = this.gotoLeft;
+        stepFunctions[rtl ? 'left' : 'right'] = this.gotoRight;
 
         var stepFn = stepFunctions[dir].bind(this);
         var pos = stepFn(this._activeRow, this._activeCell, this._activePosX);
@@ -4217,9 +4143,7 @@ export class Grid<TItem = any> {
 
             var isAddNewRow = (pos.row == this.getDataLength());
 
-            if ((!this._options.frozenBottom && pos.row >= this._actualFrozenRow)
-                || (this._options.frozenBottom && pos.row < this._actualFrozenRow)
-            ) {
+            if (!this._layout.isFrozenRow(pos.row)) {
                 this.scrollCellIntoView(pos.row, pos.cell, !isAddNewRow);
             }
 
