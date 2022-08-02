@@ -78,9 +78,9 @@ export class Grid<TItem = any> {
 
     private _boundAncestorScroll: HTMLElement[] = [];
     private _container: HTMLElement;
-    private _focusSink1: HTMLDivElement;
-    private _focusSink2: HTMLDivElement;
-    private _groupingPanel: HTMLDivElement;
+    private _focusSink1: HTMLElement;
+    private _focusSink2: HTMLElement;
+    private _groupingPanel: HTMLElement;
 
     readonly onActiveCellChanged = new Event<ArgsCell>();
     readonly onActiveCellPositionChanged = new Event<ArgsGrid>();
@@ -219,7 +219,7 @@ export class Grid<TItem = any> {
             renderRows: this.renderRows.bind(this)
         });
 
-        this._container.append(this._focusSink2 = this._focusSink1.cloneNode() as HTMLDivElement);
+        this._container.append(this._focusSink2 = this._focusSink1.cloneNode() as HTMLElement);
 
         if (options.viewportClass)
             this.getViewports().forEach(vp => vp.classList.add(options.viewportClass,));
@@ -420,11 +420,11 @@ export class Grid<TItem = any> {
         return columnIdOrIdx;
     }
 
-    getCanvasNode(columnIdOrIdx?: string | number, row?: number): HTMLDivElement {
+    getCanvasNode(columnIdOrIdx?: string | number, row?: number): HTMLElement {
         return this._layout.getCanvasNodeFor(row || 0, this.colIdOrIdxToCell(columnIdOrIdx || 0));
     }
 
-    getCanvases(): JQuery | HTMLDivElement[] {
+    getCanvases(): JQuery | HTMLElement[] {
         var canvases = this._layout.getCanvasNodes();
         return this._hasJQuery ? $(canvases) : canvases;
     }
@@ -440,11 +440,11 @@ export class Grid<TItem = any> {
         }
     }
 
-    getViewportNode(columnIdOrIdx?: string | number, row?: number): HTMLDivElement {
+    getViewportNode(columnIdOrIdx?: string | number, row?: number): HTMLElement {
         return this._layout.getViewportNodeFor(row || 0, this.colIdOrIdxToCell(columnIdOrIdx || 0));
     }
 
-    private getViewports(): HTMLDivElement[] {
+    private getViewports(): HTMLElement[] {
         return this._layout.getViewportNodes();
     }
 
@@ -523,11 +523,11 @@ export class Grid<TItem = any> {
         });
     }
 
-    getHeader(): HTMLDivElement {
+    getHeader(): HTMLElement {
         return this._layout.getHeaderCols()[0];
     }
 
-    getHeaderColumn(columnIdOrIdx: string | number): HTMLDivElement {
+    getHeaderColumn(columnIdOrIdx: string | number): HTMLElement {
         var cell = this.colIdOrIdxToCell(columnIdOrIdx);
         if (cell == null)
             return null;
@@ -535,15 +535,15 @@ export class Grid<TItem = any> {
         return this._layout.getHeaderColumn(cell);
     }
 
-    getGroupingPanel(): HTMLDivElement {
+    getGroupingPanel(): HTMLElement {
         return this._groupingPanel;
     }
 
-    getPreHeaderPanel(): HTMLDivElement {
+    getPreHeaderPanel(): HTMLElement {
         return this._groupingPanel?.querySelector('.slick-preheader-panel');
     }
 
-    getHeaderRow(): HTMLDivElement {
+    getHeaderRow(): HTMLElement {
         return this._layout.getHeaderRowCols()[0];
     }
 
@@ -555,7 +555,7 @@ export class Grid<TItem = any> {
         return this._layout.getHeaderRowColumn(cell);
     }
 
-    getFooterRow(): HTMLDivElement {
+    getFooterRow(): HTMLElement {
         return this._layout.getFooterRowCols()[0];
     }
 
@@ -757,7 +757,7 @@ export class Grid<TItem = any> {
     private setupColumnSort(): void {
         this._layout.getHeaderCols().forEach(el => el.addEventListener("click", e => {
 
-            var tgt = e.target as HTMLElement;
+            var tgt = e.target as Element;
             if (tgt.classList.contains("slick-resizable-handle")) {
                 return;
             }
@@ -1705,7 +1705,7 @@ export class Grid<TItem = any> {
         }
     }
 
-    getTopPanel(): HTMLDivElement {
+    getTopPanel(): HTMLElement {
         return this._layout.getTopPanelFor(0);
     }
 
@@ -2624,8 +2624,8 @@ export class Grid<TItem = any> {
         for (var i = 0, ii = rows.length; i < ii; i++) {
             var row = rows[i];
             var item = this._rowsCache[row];
-            item.rowNodeL = l.firstElementChild as HTMLDivElement;
-            item.rowNodeR = r.firstElementChild as HTMLDivElement;
+            item.rowNodeL = l.firstElementChild as HTMLElement;
+            item.rowNodeR = r.firstElementChild as HTMLElement;
             layout.appendCachedRow(row, item.rowNodeL, item.rowNodeR);
         }
 
@@ -2824,7 +2824,7 @@ export class Grid<TItem = any> {
             if (Math.abs(this._scrollTopRendered - this._scrollTop) > 20 ||
                 Math.abs(this._scrollLeftRendered - this._scrollLeft) > 20) {
                 if (this._options.forceSyncScrolling ||
-                    (this._options.forceSyncScrollInterval && 
+                    (this._options.forceSyncScrollInterval &&
                         (this._lastRenderTime < new Date().getTime() - this._options.forceSyncScrollInterval))) {
                             this.render();
                 } else {
