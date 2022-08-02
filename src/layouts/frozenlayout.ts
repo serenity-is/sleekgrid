@@ -362,20 +362,21 @@ export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
     }
 
     const handleScrollH = () => {
+        const options = host.getOptions();
         const scrollLeft = host.getScrollLeft();
         if (frozenCols) {
-            headerColsR.parentElement.scrollLeft = scrollLeft;
-            topPanelR.parentElement.scrollLeft = scrollLeft;
-            headerRowColsR.parentElement.scrollLeft = scrollLeft;
-            footerRowColsR.parentElement.scrollLeft = scrollLeft;
+            options.showColumnHeader && (headerColsR.parentElement.scrollLeft = scrollLeft);
+            options.showTopPanel && (topPanelR.parentElement.scrollLeft = scrollLeft);
+            options.showHeaderRow && (headerRowColsR.parentElement.scrollLeft = scrollLeft);
+            options.showFooterRow && (footerRowColsR.parentElement.scrollLeft = scrollLeft);
             if (frozenRows) {
                 viewportTopR.scrollLeft = scrollLeft;
             }
         } else {
-            headerColsL.parentElement.scrollLeft = scrollLeft;
-            topPanelL.parentElement.scrollLeft = scrollLeft;
-            headerRowColsL.parentElement.scrollLeft = scrollLeft;
-            footerRowColsL.parentElement.scrollLeft = scrollLeft;
+            options.showColumnHeader && (headerColsL.parentElement.scrollLeft = scrollLeft);
+            options.showTopPanel && (topPanelL.parentElement.scrollLeft = scrollLeft);
+            options.showHeaderRow && (headerRowColsL.parentElement.scrollLeft = scrollLeft);
+            options.showFooterRow && (footerRowColsL.parentElement.scrollLeft = scrollLeft);
             if (frozenRows) {
                 viewportTopL.scrollLeft = scrollLeft;
             }
