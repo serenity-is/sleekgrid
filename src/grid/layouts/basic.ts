@@ -2,7 +2,7 @@ import { Column } from "../column";
 import { CachedRow, H, spacerDiv } from "../internal";
 import { LayoutEngine, LayoutHost } from "./layout";
 
-export function basicLayout(): LayoutEngine {
+export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
     var host: LayoutHost;
     var canvasWidth: number;
     var headersWidth: number;
@@ -146,7 +146,7 @@ export function basicLayout(): LayoutEngine {
     }
 
     function getRowFromCellNode(cellNode: HTMLElement): number {
-        return host.getRowFromNode(cellNode);
+        return host.getRowFromNode(cellNode.parentElement);
     }
 
     function getTopPanelFor() {
@@ -244,7 +244,7 @@ export function basicLayout(): LayoutEngine {
         return 0;
     }
 
-    return {
+    var intf: LayoutEngine = {
         afterHeaderColumnDrag: noop,
         afterRenderRows: noop,
         afterSetOptions: noop,
@@ -291,4 +291,6 @@ export function basicLayout(): LayoutEngine {
         setScroller: noop,
         updateCanvasWidth
     }
-}
+
+    return intf;
+} as any;

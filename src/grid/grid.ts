@@ -7,7 +7,7 @@ import { IPlugin, Position, RowCell, SelectionModel, ViewportInfo, ViewRange } f
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { gridDefaults, GridOptions } from "./gridoptions";
 import { LayoutEngine } from "./layouts/layout";
-import { basicLayout } from "./layouts/basic";
+import { BasicLayout } from "./layouts/basic";
 
 
 export class Grid<TItem = any> {
@@ -185,7 +185,7 @@ export class Grid<TItem = any> {
         }));
 
 
-        this._layout = options.layoutEngine ?? basicLayout();
+        this._layout = options.layoutEngine ?? new BasicLayout();
         this.setInitialCols(columns);
         this._scrollDims = getScrollBarDimensions();
 
@@ -713,7 +713,7 @@ export class Grid<TItem = any> {
 
             m.headerCssClass && header.classList.add(m.headerCssClass);
 
-            i < frozenCols && header.classList.add("frozen");
+            (i < frozenCols) && header.classList.add("frozen");
 
             headerTarget.appendChild(header);
 
