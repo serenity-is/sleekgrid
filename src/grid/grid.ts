@@ -1220,7 +1220,7 @@ export class Grid<TItem = any> {
         if (!this._initialized) { return; }
 
         var h: HTMLElement;
-        for (var i = 0, cols = this._cols, ii = cols.length, diff = this._headerColumnWidthDiff; i++; i < ii) {
+        for (var i = 0, cols = this._cols, colCount = cols.length, diff = this._headerColumnWidthDiff; i < colCount; i++) {
             h = this._layout.getHeaderColumn(i);
             if (h) {
                 var target = cols[i].width - diff;
