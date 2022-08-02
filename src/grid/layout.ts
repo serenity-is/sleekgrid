@@ -4,7 +4,7 @@ import { CachedRow } from "./internal";
 import { RowCell, ViewportInfo, ViewRange } from "./types";
 
 export interface LayoutHost {
-    bindAncestorScroll(el: Element): void;
+    bindAncestorScroll(el: HTMLElement): void;
     cleanUpAndRenderCells(range: ViewRange): void;
     getAvailableWidth(): number;
     getCellFromPoint(x: number, y: number): RowCell;
@@ -13,7 +13,7 @@ export interface LayoutHost {
     getContainerNode(): HTMLElement;
     getDataLength(): number;
     getOptions(): GridOptions;
-    getRowFromNode(rowNode: Element): number;
+    getRowFromNode(rowNode: HTMLElement): number;
     getScrollDims(): { width: number, height: number };
     getScrollLeft(): number;
     getScrollTop(): number;
@@ -22,7 +22,7 @@ export interface LayoutHost {
 }
 
 export interface LayoutEngine {
-    appendCachedRow(row: number, rowNodeL: HTMLDivElement, rowNodeR: HTMLDivElement): void;
+    appendCachedRow(row: number, rowNodeL: HTMLElement, rowNodeR: HTMLElement): void;
     afterHeaderColumnDrag(): void;
     afterSetOptions(args: GridOptions): void;
     applyColumnWidths(): void;
@@ -33,29 +33,29 @@ export interface LayoutEngine {
     calcHeaderWidths(): void;
     isFrozenRow(row: number): boolean;
     destroy(): void;
-    getCanvasNodeFor(cell: number, row: number): HTMLDivElement;
-    getCanvasNodes(): HTMLDivElement[];
+    getCanvasNodeFor(cell: number, row: number): HTMLElement;
+    getCanvasNodes(): HTMLElement[];
     getCanvasWidth(): number;
     getRowFromCellNode(cellNode: HTMLElement, clientX: number, clientY: number): number;
-    getFooterRowCols(): HTMLDivElement[];
-    getFooterRowColsFor(cell: number): HTMLDivElement;
-    getFooterRowColumn(cell: number): HTMLDivElement;
+    getFooterRowCols(): HTMLElement[];
+    getFooterRowColsFor(cell: number): HTMLElement;
+    getFooterRowColumn(cell: number): HTMLElement;
     getFrozenCols(): number;
     getFrozenRowOffset(row: number): number;
     getFrozenRows(): number;
-    getHeaderCols(): HTMLDivElement[];
-    getHeaderColsFor(cell: number): HTMLDivElement;
-    getHeaderColumn(cell: number): HTMLDivElement;
-    getHeaderRowCols(): HTMLDivElement[];
-    getHeaderRowColsFor(cell: number): HTMLDivElement;
-    getHeaderRowColumn(cell: number): HTMLDivElement;
-    getScrollCanvasY(): HTMLDivElement;
-    getScrollContainerX(): HTMLDivElement;
-    getScrollContainerY(): HTMLDivElement;
-    getTopPanelFor(arg0: number): HTMLDivElement;
-    getTopPanelNodes(): HTMLDivElement[];
-    getViewportNodeFor(cell: number, row: number): HTMLDivElement;
-    getViewportNodes(): HTMLDivElement[];
+    getHeaderCols(): HTMLElement[];
+    getHeaderColsFor(cell: number): HTMLElement;
+    getHeaderColumn(cell: number): HTMLElement;
+    getHeaderRowCols(): HTMLElement[];
+    getHeaderRowColsFor(cell: number): HTMLElement;
+    getHeaderRowColumn(cell: number): HTMLElement;
+    getScrollCanvasY(): HTMLElement;
+    getScrollContainerX(): HTMLElement;
+    getScrollContainerY(): HTMLElement;
+    getTopPanelFor(arg0: number): HTMLElement;
+    getTopPanelNodes(): HTMLElement[];
+    getViewportNodeFor(cell: number, row: number): HTMLElement;
+    getViewportNodes(): HTMLElement[];
     handleScrollH(): void;
     handleScrollV(): void;
     init(host: LayoutHost): void;

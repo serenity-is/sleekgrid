@@ -94,8 +94,8 @@ export function removeUiStateHover() {
 }
 
 export interface CachedRow {
-    rowNodeL: HTMLDivElement,
-    rowNodeR: HTMLDivElement,
+    rowNodeL: HTMLElement,
+    rowNodeR: HTMLElement,
     // ColSpans of rendered cells (by column idx).
     // Can also be used for checking whether a cell has been rendered.
     cellColSpans: number[],
@@ -119,7 +119,7 @@ export interface PostProcessCleanupEntry {
     groupId: number,
     cellNode?: HTMLElement,
     columnIdx?: number,
-    rowNodeL?: HTMLDivElement;
-    rowNodeR?: HTMLDivElement;
+    rowNodeL?: HTMLElement;
+    rowNodeR?: HTMLElement;
     rowIdx?: number;
 }
