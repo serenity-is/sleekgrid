@@ -2,7 +2,7 @@ import { attrEncode, disableSelection, H, htmlEncode, EditController, EditorLock
 import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
 import { EditCommand, Editor } from "./editor";
 import { applyFormatterResultToCellNode, CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
-import { absBox, addUiStateHover, CachedRow,  getMaxSupportedCssHeight, getScrollBarDimensions, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
+import { absBox, addUiStateHover, autosizeColumns, CachedRow,  getMaxSupportedCssHeight, getScrollBarDimensions, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
 import { IPlugin, Position, RowCell, SelectionModel, ViewportInfo, ViewRange } from "./types";
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { gridDefaults, GridOptions } from "./gridoptions";
@@ -1328,77 +1328,10 @@ export class Grid<TItem = any> {
     }
 
     autosizeColumns(): void {
-        var i, c,
-            widths = [],
-            shrinkLeeway = 0,
-            total = 0,
-            prevTotal,
-            vpi = this._viewportInfo,
-            availWidth = vpi.hasVScroll ? vpi.width - this._scrollDims.width : vpi.width,
-            cols = this._cols;
+        var vpi = this._viewportInfo,
+            availWidth = vpi.hasVScroll ? vpi.width - this._scrollDims.width : vpi.width;
 
-        for (i = 0; i < cols.length; i++) {
-            c = cols[i];
-            widths.push(c.width);
-            total += c.width;
-            if (c.resizable) {
-                shrinkLeeway += c.width - Math.max(c.minWidth, this._absoluteColMinWidth);
-            }
-        }
-
-        // shrink
-        prevTotal = total;
-        while (total > availWidth && shrinkLeeway) {
-            var shrinkProportion = (total - availWidth) / shrinkLeeway;
-            for (i = 0; i < cols.length && total > availWidth; i++) {
-                c = cols[i];
-                var width = widths[i];
-                if (!c.resizable || width <= c.minWidth || width <= this._absoluteColMinWidth) {
-                    continue;
-                }
-                var absMinWidth = Math.max(c.minWidth, this._absoluteColMinWidth);
-                var shrinkSize = Math.floor(shrinkProportion * (width - absMinWidth)) || 1;
-                shrinkSize = Math.min(shrinkSize, width - absMinWidth);
-                total -= shrinkSize;
-                shrinkLeeway -= shrinkSize;
-                widths[i] -= shrinkSize;
-            }
-            if (prevTotal <= total) {  // avoid infinite loop
-                break;
-            }
-            prevTotal = total;
-        }
-
-        // grow
-        prevTotal = total;
-        while (total < availWidth) {
-            var growProportion = availWidth / total;
-            for (i = 0; i < cols.length && total < availWidth; i++) {
-                c = cols[i];
-                var currentWidth = widths[i];
-                var growSize;
-
-                if (!c.resizable || c.maxWidth <= currentWidth) {
-                    growSize = 0;
-                } else {
-                    growSize = Math.min(Math.floor(growProportion * currentWidth) - currentWidth, (c.maxWidth - currentWidth) || 1000000) || 1;
-                }
-                total += growSize;
-                widths[i] += (total <= availWidth ? growSize : 0);
-            }
-            if (prevTotal >= total) {  // avoid infinite loop
-                break;
-            }
-            prevTotal = total;
-        }
-
-        var reRender = false;
-        for (i = 0; i < cols.length; i++) {
-            if (cols[i].rerenderOnResize && cols[i].width != widths[i]) {
-                reRender = true;
-            }
-            cols[i].width = widths[i];
-        }
+        var reRender = autosizeColumns(this._cols, availWidth, this._absoluteColMinWidth);
 
         this.applyColumnHeaderWidths();
         this.updateCanvasWidth(true);

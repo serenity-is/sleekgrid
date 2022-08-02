@@ -47,6 +47,79 @@ export function absBox(elem: HTMLElement): Position {
     return box;
 }
 
+export function autosizeColumns(cols: Column[], availWidth: number, absoluteColMinWidth: number): boolean {
+    var i, c,
+        widths = [],
+        shrinkLeeway = 0,
+        total = 0,
+        prevTotal;
+
+    for (i = 0; i < cols.length; i++) {
+        c = cols[i];
+        widths.push(c.width);
+        total += c.width;
+        if (c.resizable) {
+            shrinkLeeway += c.width - Math.max(c.minWidth, absoluteColMinWidth);
+        }
+    }
+
+    // shrink
+    prevTotal = total;
+    while (total > availWidth && shrinkLeeway) {
+        var shrinkProportion = (total - availWidth) / shrinkLeeway;
+        for (i = 0; i < cols.length && total > availWidth; i++) {
+            c = cols[i];
+            var width = widths[i];
+            if (!c.resizable || width <= c.minWidth || width <= absoluteColMinWidth) {
+                continue;
+            }
+            var absMinWidth = Math.max(c.minWidth, absoluteColMinWidth);
+            var shrinkSize = Math.floor(shrinkProportion * (width - absMinWidth)) || 1;
+            shrinkSize = Math.min(shrinkSize, width - absMinWidth);
+            total -= shrinkSize;
+            shrinkLeeway -= shrinkSize;
+            widths[i] -= shrinkSize;
+        }
+        if (prevTotal <= total) {  // avoid infinite loop
+            break;
+        }
+        prevTotal = total;
+    }
+
+    // grow
+    prevTotal = total;
+    while (total < availWidth) {
+        var growProportion = availWidth / total;
+        for (i = 0; i < cols.length && total < availWidth; i++) {
+            c = cols[i];
+            var currentWidth = widths[i];
+            var growSize;
+
+            if (!c.resizable || c.maxWidth <= currentWidth) {
+                growSize = 0;
+            } else {
+                growSize = Math.min(Math.floor(growProportion * currentWidth) - currentWidth, (c.maxWidth - currentWidth) || 1000000) || 1;
+            }
+            total += growSize;
+            widths[i] += (total <= availWidth ? growSize : 0);
+        }
+        if (prevTotal >= total) {  // avoid infinite loop
+            break;
+        }
+        prevTotal = total;
+    }
+
+    var reRender = false;
+    for (i = 0; i < cols.length; i++) {
+        if (cols[i].rerenderOnResize && cols[i].width != widths[i]) {
+            reRender = true;
+        }
+        cols[i].width = widths[i];
+    }
+
+    return reRender;
+}
+
 export function getMaxSupportedCssHeight(): number {
     return maxSupportedCssHeight ?? ((navigator.userAgent.toLowerCase().match(/gecko\//) ? 4000000 : 32000000));
 }
@@ -165,3 +238,4 @@ export interface PostProcessCleanupEntry {
     rowNodeR?: HTMLElement;
     rowIdx?: number;
 }
+
