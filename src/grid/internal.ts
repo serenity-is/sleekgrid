@@ -1,9 +1,51 @@
 import { H } from "../core/index";
 import type { Column } from "./column";
+import { Position } from "./types";
 
 // shared across all grids on the page
 let maxSupportedCssHeight: number;  // browser's breaking point
 let scrollbarDimensions: { width: number, height: number };
+
+export function absBox(elem: HTMLElement): Position {
+    var box: Position = {
+        top: elem.offsetTop,
+        left: elem.offsetLeft,
+        bottom: 0,
+        right: 0,
+        width: elem.offsetWidth,
+        height: elem.offsetHeight,
+        visible: true
+    };
+
+    box.bottom = box.top + box.height;
+    box.right = box.left + box.width;
+
+    // walk up the tree
+    var offsetParent = elem.offsetParent;
+    while ((elem = elem.parentNode as HTMLElement) != document.body) {
+        if (box.visible && elem.scrollHeight != elem.offsetHeight && getComputedStyle(elem).overflowY !== "visible") {
+            box.visible = box.bottom > elem.scrollTop && box.top < elem.scrollTop + elem.clientHeight;
+        }
+
+        if (box.visible && elem.scrollWidth != elem.offsetWidth && getComputedStyle(elem).overflowX != "visible") {
+            box.visible = box.right > elem.scrollLeft && box.left < elem.scrollLeft + elem.clientWidth;
+        }
+
+        box.left -= elem.scrollLeft;
+        box.top -= elem.scrollTop;
+
+        if (elem === offsetParent) {
+            box.left += elem.offsetLeft;
+            box.top += elem.offsetTop;
+            offsetParent = elem.offsetParent;
+        }
+
+        box.bottom = box.top + box.height;
+        box.right = box.left + box.width;
+    }
+
+    return box;
+}
 
 export function getMaxSupportedCssHeight(): number {
     return maxSupportedCssHeight ?? ((navigator.userAgent.toLowerCase().match(/gecko\//) ? 4000000 : 32000000));

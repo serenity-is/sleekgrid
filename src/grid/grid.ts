@@ -2,12 +2,13 @@ import { attrEncode, disableSelection, H, htmlEncode, EditController, EditorLock
 import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
 import { EditCommand, Editor } from "./editor";
 import type { CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
-import { addUiStateHover, CachedRow,  getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
+import { absBox, addUiStateHover, CachedRow,  getMaxSupportedCssHeight, getScrollBarDimensions, GoToResult, PostProcessCleanupEntry, removeUiStateHover, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
 import { IPlugin, Position, RowCell, SelectionModel, ViewportInfo, ViewRange } from "./types";
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { gridDefaults, GridOptions } from "./gridoptions";
 import { LayoutEngine } from "./layout";
 import { BasicLayout } from "./basiclayout";
+import { CellNavigator } from "./cellnavigator";
 
 
 export class Grid<TItem = any> {
@@ -21,6 +22,7 @@ export class Grid<TItem = any> {
     private _cellCssClasses: CellStylesHash = {};
     private _cellHeightDiff: number = 0;
     private _cellWidthDiff: number = 0;
+    private _cellNavigator: CellNavigator;
     private _colById: { [key: string]: number };
     private _colDefaults: Partial<Column>;
     private _colLeft: number[] = [];
@@ -184,7 +186,6 @@ export class Grid<TItem = any> {
             style: 'position:fixed;width:0!important;height:0!important;top:0;left:0;outline:0!important;',
             tabIndex: '0'
         }));
-
 
         this._layout = options.layoutEngine ?? new BasicLayout();
         this.setInitialCols(columns);
@@ -3555,8 +3556,8 @@ export class Grid<TItem = any> {
 
         this._currentEditor = new useEditor({
             grid: this,
-            gridPosition: this.absBox(this._container),
-            position: this.absBox(this._activeCellNode),
+            gridPosition: absBox(this._container),
+            position: absBox(this._activeCellNode),
             container: this._activeCellNode,
             column: columnDef,
             columnMetaData: columnMetadata,
@@ -3597,53 +3598,12 @@ export class Grid<TItem = any> {
         }
     }
 
-    private absBox(elem: HTMLElement): Position {
-        var box: Position = {
-            top: elem.offsetTop,
-            left: elem.offsetLeft,
-            bottom: 0,
-            right: 0,
-            width: elem.offsetWidth,
-            height: elem.offsetHeight,
-            visible: true
-        };
-
-        box.bottom = box.top + box.height;
-        box.right = box.left + box.width;
-
-        // walk up the tree
-        var offsetParent = elem.offsetParent;
-        while ((elem = elem.parentNode as HTMLElement) != document.body) {
-            if (box.visible && elem.scrollHeight != elem.offsetHeight && getComputedStyle(elem).overflowY !== "visible") {
-                box.visible = box.bottom > elem.scrollTop && box.top < elem.scrollTop + elem.clientHeight;
-            }
-
-            if (box.visible && elem.scrollWidth != elem.offsetWidth && getComputedStyle(elem).overflowX != "visible") {
-                box.visible = box.right > elem.scrollLeft && box.left < elem.scrollLeft + elem.clientWidth;
-            }
-
-            box.left -= elem.scrollLeft;
-            box.top -= elem.scrollTop;
-
-            if (elem === offsetParent) {
-                box.left += elem.offsetLeft;
-                box.top += elem.offsetTop;
-                offsetParent = elem.offsetParent;
-            }
-
-            box.bottom = box.top + box.height;
-            box.right = box.left + box.width;
-        }
-
-        return box;
-    }
-
     private getActiveCellPosition(): Position {
-        return this.absBox(this._activeCellNode);
+        return absBox(this._activeCellNode);
     }
 
     getGridPosition(): Position {
-        return this.absBox(this._container);
+        return absBox(this._container);
     }
 
     private handleActiveCellPositionChange = (): void => {
@@ -3823,221 +3783,6 @@ export class Grid<TItem = any> {
         return colspan;
     }
 
-    private findFirstFocusableCell(row: number): number {
-        var cell = 0;
-        var cols = this._cols;
-        while (cell < cols.length) {
-            if (this.canCellBeActive(row, cell)) {
-                return cell;
-            }
-            cell += this.getColspan(row, cell);
-        }
-        return null;
-    }
-
-    private findLastFocusableCell(row: number): number {
-        var cell = 0;
-        var lastFocusableCell = null;
-        var cols = this._cols;
-        while (cell < cols.length) {
-            if (this.canCellBeActive(row, cell)) {
-                lastFocusableCell = cell;
-            }
-            cell += this.getColspan(row, cell);
-        }
-        return lastFocusableCell;
-    }
-
-    private gotoRight(row?: number, cell?: number, posX?: number): GoToResult {
-        var cols = this._cols;
-        if (cell >= cols.length) {
-            return null;
-        }
-
-        do {
-            cell += this.getColspan(row, cell);
-        }
-        while (cell < cols.length && !this.canCellBeActive(row, cell));
-
-        if (cell < cols.length) {
-            return {
-                row: row,
-                cell: cell,
-                posX: cell
-            };
-        }
-        return null;
-    }
-
-    private gotoLeft(row?: number, cell?: number, posX?: number): GoToResult {
-        if (cell <= 0) {
-            return null;
-        }
-
-        var firstFocusableCell = this.findFirstFocusableCell(row);
-        if (firstFocusableCell === null || firstFocusableCell >= cell) {
-            return null;
-        }
-
-        var prev = {
-            row: row,
-            cell: firstFocusableCell,
-            posX: firstFocusableCell
-        };
-        var pos;
-        while (true) {
-            pos = this.gotoRight(prev.row, prev.cell, prev.posX);
-            if (!pos) {
-                return null;
-            }
-            if (pos.cell >= cell) {
-                return prev;
-            }
-            prev = pos;
-        }
-    }
-
-    private gotoDown(row?: number, cell?: number, posX?: number): GoToResult {
-        var prevCell;
-        var dataLengthIncludingAddNew = this.getDataLengthIncludingAddNew();
-        while (true) {
-            if (++row >= dataLengthIncludingAddNew) {
-                return null;
-            }
-
-            prevCell = cell = 0;
-            while (cell <= posX) {
-                prevCell = cell;
-                cell += this.getColspan(row, cell);
-            }
-
-            if (this.canCellBeActive(row, prevCell)) {
-                return {
-                    row: row,
-                    cell: prevCell,
-                    posX: posX
-                };
-            }
-        }
-    }
-
-    private gotoUp(row?: number, cell?: number, posX?: number): GoToResult {
-        var prevCell;
-        while (true) {
-            if (--row < 0) {
-                return null;
-            }
-
-            prevCell = cell = 0;
-            while (cell <= posX) {
-                prevCell = cell;
-                cell += this.getColspan(row, cell);
-            }
-
-            if (this.canCellBeActive(row, prevCell)) {
-                return {
-                    row: row,
-                    cell: prevCell,
-                    posX: posX
-                };
-            }
-        }
-    }
-
-    private gotoNext(row?: number, cell?: number, posX?: number): GoToResult {
-        if (row == null && cell == null) {
-            row = cell = posX = 0;
-            if (this.canCellBeActive(row, cell)) {
-                return {
-                    row: row,
-                    cell: cell,
-                    posX: cell
-                };
-            }
-        }
-
-        var pos = this.gotoRight(row, cell, posX);
-        if (pos) {
-            return pos;
-        }
-
-        var firstFocusableCell = null;
-        var dataLengthIncludingAddNew = this.getDataLengthIncludingAddNew();
-        while (++row < dataLengthIncludingAddNew) {
-            firstFocusableCell = this.findFirstFocusableCell(row);
-            if (firstFocusableCell != null) {
-                return {
-                    row: row,
-                    cell: firstFocusableCell,
-                    posX: firstFocusableCell
-                };
-            }
-        }
-        return null;
-    }
-
-    private gotoPrev(row?: number, cell?: number, posX?: number): { row: number; cell: number; posX: number; } {
-        var cols = this._cols;
-        if (row == null && cell == null) {
-            row = this.getDataLengthIncludingAddNew() - 1;
-            cell = posX = cols.length - 1;
-            if (this.canCellBeActive(row, cell)) {
-                return {
-                    row: row,
-                    cell: cell,
-                    posX: cell
-                };
-            }
-        }
-
-        var pos;
-        var lastSelectableCell;
-        while (!pos) {
-            pos = this.gotoLeft(row, cell, posX);
-            if (pos) {
-                break;
-            }
-            if (--row < 0) {
-                return null;
-            }
-
-            cell = 0;
-            lastSelectableCell = this.findLastFocusableCell(row);
-            if (lastSelectableCell != null) {
-                pos = {
-                    row: row,
-                    cell: lastSelectableCell,
-                    posX: lastSelectableCell
-                };
-            }
-        }
-        return pos;
-    }
-
-    private gotoRowStart(row: number) {
-        var newCell = this.findFirstFocusableCell(row);
-        if (newCell === null)
-            return null;
-
-        return {
-            row: row,
-            cell: newCell,
-            posX: newCell
-        };
-    }
-
-    private gotoRowEnd(row: number) {
-        var newCell = this.findLastFocusableCell(row);
-        if (newCell === null)
-            return null;
-
-        return {
-            row: row,
-            cell: newCell,
-            posX: newCell
-        };
-    }
-
     navigateRight(): boolean {
         return this.navigate("right");
     }
@@ -4086,37 +3831,21 @@ export class Grid<TItem = any> {
         if (!this.getEditorLock().commitCurrentEdit()) {
             return true;
         }
+
         this.setFocus();
 
-        var tabbingDirections = {
-            up: -1,
-            down: 1,
-            prev: -1,
-            next: 1,
-            home: -1,
-            end: 1
-        };
+        if (!this._cellNavigator) {
+            this._cellNavigator = new CellNavigator({
+                getColumnCount: () => this._cols.length,
+                getRowCount: () => this.getDataLengthIncludingAddNew(),
+                getColspan: this.getColspan.bind(this),
+                canCellBeActive: this.canCellBeActive.bind(this),
+                setTabbingDirection: dir => this._tabbingDirection = dir,
+                isRTL: () => this._options.rtl
+            });
+        }
 
-        const rtl = this._options.rtl;
-        tabbingDirections[rtl ? 'right' : 'left'] = -1;
-        tabbingDirections[rtl ? 'left' : 'right'] = 1;
-
-        this._tabbingDirection = tabbingDirections[dir];
-
-        var stepFunctions = {
-            up: this.gotoUp,
-            down: this.gotoDown,
-            prev: this.gotoPrev,
-            next: this.gotoNext,
-            home: this.gotoRowStart,
-            end: this.gotoRowEnd
-        };
-
-        stepFunctions[rtl ? 'right' : 'left'] = this.gotoLeft;
-        stepFunctions[rtl ? 'left' : 'right'] = this.gotoRight;
-
-        var stepFn = stepFunctions[dir].bind(this);
-        var pos = stepFn(this._activeRow, this._activeCell, this._activePosX);
+        var pos = this._cellNavigator.navigate(dir, this._activeRow, this._activeCell, this._activePosX);
         if (pos) {
             if (this.hasFrozenRows() && this._options.frozenBottom && pos.row == this.getDataLength()) {
                 return;
