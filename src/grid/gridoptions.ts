@@ -38,6 +38,7 @@ export interface GridOptions<TItem = any> {
     footerRowHeight?: number;
     forceFitColumns?: boolean;
     forceSyncScrolling?: boolean;
+    forceSyncScrollInterval?: number;
     formatterFactory?: FormatterFactory;
     frozenBottom?: boolean;
     frozenColumns?: number;
@@ -99,6 +100,7 @@ export const gridDefaults: GridOptions = {
     footerRowHeight: 30,
     forceFitColumns: false,
     forceSyncScrolling: false,
+    forceSyncScrollInterval: 250,
     formatterFactory: null,
     fullWidthRows: false,
     groupingPanel: false,

@@ -42,6 +42,7 @@ export class Grid<TItem = any> {
     private _initCols: Column<TItem>[];
     private _initialized = false;
     private _jumpinessCoefficient: number;
+    private _lastRenderTime: number;
     private _layout: LayoutEngine;
     private _numberOfPages: number;
     private _options: GridOptions<TItem>;
@@ -273,7 +274,7 @@ export class Grid<TItem = any> {
 
         viewports.forEach(vp => {
             var scrollTicking = false;
-            vp.addEventListener("scroll", () => {
+            vp.addEventListener("scroll", (e) => {
                 if (!scrollTicking) {
                     scrollTicking = true;
 
@@ -2712,7 +2713,7 @@ export class Grid<TItem = any> {
         }
     }
 
-    private render(): void {
+    private render = (): void => {
         if (!this._initialized) { return; }
         var visible = this.getVisibleRange();
         var rendered = this.getRenderedRange();
@@ -2736,6 +2737,7 @@ export class Grid<TItem = any> {
 
         this._scrollTopRendered = this._scrollTop;
         this._scrollLeftRendered = this._scrollLeft;
+        this._lastRenderTime = new Date().getTime();
         this._hRender = null;
     }
 
@@ -2764,33 +2766,12 @@ export class Grid<TItem = any> {
         deltaY = (typeof deltaY == "undefined" ? (e as any).originalEvent.deltaY : deltaY) || 0;
         this._scrollTop = Math.max(0, this._layout.getScrollContainerY().scrollTop - (deltaY * this._options.rowHeight));
         this._scrollLeft = this._layout.getScrollContainerX().scrollLeft + (deltaX * 10);
-        var handled = this._handleScroll(true);
-        if (handled)
-            e.preventDefault();
+        this.handleScroll(true);
     }
 
-    private handleScroll(): boolean {
+    private handleScroll(isMouseWheel?: boolean) {
         this._scrollTop = this._layout.getScrollContainerY().scrollTop;
         this._scrollLeft = this._layout.getScrollContainerX().scrollLeft;
-        return this._handleScroll(false);
-    }
-
-    private _handleScroll(isMouseWheel?: boolean): boolean {
-        var maxScrollDistanceY = this._layout.getScrollContainerY().scrollHeight - this._layout.getScrollContainerY().clientHeight;
-        var maxScrollDistanceX = this._layout.getScrollContainerY().scrollWidth - this._layout.getScrollContainerY().clientWidth;
-
-        // Protect against erroneous clientHeight/Width greater than scrollHeight/Width.
-        // Sometimes seen in Chrome.
-        maxScrollDistanceY = Math.max(0, maxScrollDistanceY);
-        maxScrollDistanceX = Math.max(0, maxScrollDistanceX);
-
-        // Ceiling the max scroll values
-        if (this._scrollTop > maxScrollDistanceY) {
-            this._scrollTop = maxScrollDistanceY;
-        }
-        if (this._scrollLeft > maxScrollDistanceX) {
-            this._scrollLeft = maxScrollDistanceX;
-        }
 
         var vScrollDist = Math.abs(this._scrollTop - this._scrollTopPrev);
         var hScrollDist = Math.abs(this._scrollLeft - this._scrollLeftPrev);
@@ -2812,11 +2793,11 @@ export class Grid<TItem = any> {
             this._vScrollDir = this._scrollTopPrev < this._scrollTop ? 1 : -1;
             this._scrollTopPrev = this._scrollTop;
 
-            if (isMouseWheel) {
+            if (isMouseWheel === true) {
                 this._layout.getScrollContainerY().scrollTop = this._scrollTop;
             }
 
-            this._layout.handleScrollV;
+            this._layout.handleScrollV();
 
             // switch virtual pages if needed
             if (vScrollDist < this._viewportInfo.height) {
@@ -2842,12 +2823,12 @@ export class Grid<TItem = any> {
 
             if (Math.abs(this._scrollTopRendered - this._scrollTop) > 20 ||
                 Math.abs(this._scrollLeftRendered - this._scrollLeft) > 20) {
-                if (this._options.forceSyncScrolling || (
-                    Math.abs(this._scrollTopRendered - this._scrollTop) < this._viewportInfo.height &&
-                    Math.abs(this._scrollLeftRendered - this._scrollLeft) < this._viewportInfo.width)) {
-                    this.render();
+                if (this._options.forceSyncScrolling ||
+                    (this._options.forceSyncScrollInterval && 
+                        (this._lastRenderTime < new Date().getTime() - this._options.forceSyncScrollInterval))) {
+                            this.render();
                 } else {
-                    this._hRender = setTimeout(this.render.bind(this), 50);
+                    this._hRender = setTimeout(this.render, 50);
                 }
 
                 this.trigger(this.onViewportChanged);
