@@ -2,7 +2,7 @@ import { attrEncode, disableSelection, H, htmlEncode, EditController, EditorLock
 import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
 import { EditCommand, Editor } from "./editor";
 import { applyFormatterResultToCellNode, CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
-import { absBox, addUiStateHover, autosizeColumns, CachedRow,  calcMinMaxPageXOnDragStart,  getMaxSupportedCssHeight, getScrollBarDimensions, PostProcessCleanupEntry, removeUiStateHover, shrinkOrStretchColumn, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
+import { absBox, addUiStateHover, autosizeColumns, CachedRow, calcMinMaxPageXOnDragStart,  getInnerWidth,  getMaxSupportedCssHeight, getScrollBarDimensions, getVBoxDelta, PostProcessCleanupEntry, removeUiStateHover, shrinkOrStretchColumn, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
 import { IPlugin, Position, RowCell, SelectionModel, ViewportInfo, ViewRange } from "./types";
 import { ArgsCell, ArgsGrid, ArgsAddNewRow, ArgsEditorDestroy, ArgsCellEdit, ArgsColumnNode, ArgsCellChange, ArgsCssStyle, ArgsColumn, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { gridDefaults, GridOptions } from "./gridoptions";
@@ -1019,18 +1019,6 @@ export class Grid<TItem = any> {
         });
     }
 
-    private getVBoxDelta(el: HTMLElement): number {
-        var style = getComputedStyle(el);
-        if (style.boxSizing == 'border-box')
-            return 0;
-
-        var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
-        var delta = 0;
-        p.forEach(val => delta += parseFloat(style.getPropertyValue(val)) || 0);
-        return delta;
-    }
-
-
     private setOverflow(): void {
         this._layout.setOverflow();
         if (this._options.viewportClass)
@@ -1974,12 +1962,12 @@ export class Grid<TItem = any> {
     private calcViewportSize(): void {
         const layout = this._layout;
         const vs = this._viewportInfo;
-        vs.width = parseFloat(getComputedStyle(this._container).width);
-        vs.groupingPanelHeight = (this._options.groupingPanel && this._options.showGroupingPanel) ? (this._options.groupingPanelHeight + this.getVBoxDelta(this._groupingPanel)) : 0
-        vs.topPanelHeight = this._options.showTopPanel ? (this._options.topPanelHeight + this.getVBoxDelta(layout.getTopPanelFor(0).parentElement)) : 0;
-        vs.headerRowHeight = this._options.showHeaderRow ? (this._options.headerRowHeight + this.getVBoxDelta(layout.getHeaderRowColsFor(0).parentElement)) : 0;
-        vs.footerRowHeight = this._options.showFooterRow ? (this._options.footerRowHeight + this.getVBoxDelta(layout.getFooterRowColsFor(0).parentElement)) : 0;
-        vs.headerHeight = (this._options.showColumnHeader) ? (parseFloat(getComputedStyle(layout.getHeaderColsFor(0).parentElement).height) + this.getVBoxDelta(layout.getHeaderColsFor(0).parentElement)) : 0;
+        vs.width = getInnerWidth(this._container);
+        vs.groupingPanelHeight = (this._options.groupingPanel && this._options.showGroupingPanel) ? (this._options.groupingPanelHeight + getVBoxDelta(this._groupingPanel)) : 0
+        vs.topPanelHeight = this._options.showTopPanel ? (this._options.topPanelHeight + getVBoxDelta(layout.getTopPanelFor(0).parentElement)) : 0;
+        vs.headerRowHeight = this._options.showHeaderRow ? (this._options.headerRowHeight + getVBoxDelta(layout.getHeaderRowColsFor(0).parentElement)) : 0;
+        vs.footerRowHeight = this._options.showFooterRow ? (this._options.footerRowHeight + getVBoxDelta(layout.getFooterRowColsFor(0).parentElement)) : 0;
+        vs.headerHeight = (this._options.showColumnHeader) ? (parseFloat(getComputedStyle(layout.getHeaderColsFor(0).parentElement).height) + getVBoxDelta(layout.getHeaderColsFor(0).parentElement)) : 0;
 
         if (this._options.autoHeight) {
             vs.height = this._options.rowHeight * this.getDataLengthIncludingAddNew();

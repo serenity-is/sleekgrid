@@ -14,6 +14,7 @@ classes should alter those!
   --slick-row-odd-bg: #f9f9f9;
   --slick-padding-v: 4px;
   --slick-padding-h: 6px;
+  --slick-icon-font: 900 normal normal 1em/1 'Font Awesome 5 Free';
 }
 
 .slick-container {
@@ -111,31 +112,22 @@ classes should alter those!
 }
 
 .slick-sort-indicator {
-  display: inline-block;
-  width: 8px;
-  height: 5px;
-  margin-left: 4px;
-  margin-top: 6px;
+  font: var(--slick-icon-font);
 }
 
-.slick-sort-indicator-numbered {
-  float: left;
-  width: 8px;
-  height: 5px;
-  margin-left: 4px;
-  margin-top: 0;
-  font-family: Arial;
-  font-style: normal;
-  font-weight: bold;
-  color: #6190CD;
+.slick-sort-indicator::before {
+  content: "\F0DC";
+  opacity: 0.3;
 }
 
-.slick-sort-indicator-desc {
-  background: url(images/sort-desc.gif);
+.slick-sort-indicator-desc::before {
+  content: "\F0DD";
+  opacity: 1;
 }
 
-.slick-sort-indicator-asc {
-  background: url(images/sort-asc.gif);
+.slick-sort-indicator-asc::before {
+  content: "\F0DE";
+  opacity: 1;
 }
 
 .slick-resizable-handle {
@@ -163,6 +155,8 @@ classes should alter those!
 .slick-headerrow-column,
 .slick-footerrow-column {
   position: absolute;
+  top: 0;
+  bottom: 0;
   border-right: 1px solid var(--slick-cell-border);
   border-bottom: 1px solid var(--slick-cell-border);
   overflow: hidden;
@@ -232,7 +226,8 @@ classes should alter those!
   border: 2px dashed black;
 }
 
-.slick-cell>.editor-text {
+.slick-cell>.editor-text,
+.slick-headerrow-column>.editor-text {
   width: 100%;
   height: 100%;
   border: 0;

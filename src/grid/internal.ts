@@ -333,6 +333,31 @@ export function removeUiStateHover() {
     (this as HTMLElement)?.classList.remove("ui-state-hover");
 }
 
+export function getVBoxDelta(el: HTMLElement): number {
+    var style = getComputedStyle(el);
+    if (style.boxSizing === 'border-box')
+        return 0;
+
+    var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
+    var delta = 0;
+    for (var val of p)
+        delta += delta += parseFloat(style.getPropertyValue(val)) || 0;
+    return delta;
+}
+
+export function getInnerWidth(el: HTMLElement): number {
+    var style = getComputedStyle(el);
+    var width = parseFloat(style.width);
+    if (style.boxSizing != 'border-box')
+        return width;
+
+    var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
+    for (var val of p)
+        width -= parseFloat(style.getPropertyValue(val)) || 0;
+
+    return Math.max(width, 0);
+}
+
 export interface CachedRow {
     rowNodeL: HTMLElement,
     rowNodeR: HTMLElement,
