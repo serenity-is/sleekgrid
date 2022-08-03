@@ -50,7 +50,7 @@ export const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["attrEncode", "disableSelection", "Event", "EventData", "GlobalEditorLock", "H", "htmlEncode", "keyCode", "NonDataRow", "preClickClassName", "spacerDiv", "Range"],
+        Slick: ["addClass", "attrEncode", "disableSelection", "Event", "EventData", "GlobalEditorLock", "H", "htmlEncode", "keyCode", "NonDataRow", "preClickClassName", "removeClass", "spacerDiv", "Range"],
     })]
 }
 

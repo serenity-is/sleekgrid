@@ -1,3 +1,16 @@
+export function addClass(el: Element, cls: string) {
+    if (cls == null || !cls.length)
+        return;
+
+    if (cls.indexOf(' ') >= 0) {
+        var arr = cls.split(' ').map(x => x.trim()).filter(x => x.length);
+        for (var a of arr)
+            el.classList.add(a);
+    }
+    else
+        el.classList.add(cls);
+}
+
 export function attrEncode(s: any) {
     if (s == null)
         return '';
@@ -15,6 +28,19 @@ export function disableSelection(target: HTMLElement) {
         target.style.userSelect = "none";
         target.addEventListener('selectstart', () => false);
     }
+}
+
+export function removeClass(el: Element, cls: string) {
+    if (cls == null || !cls.length)
+        return;
+
+    if (cls.indexOf(' ') >= 0) {
+        var arr = cls.split(' ').map(x => x.trim()).filter(x => x.length);
+        for (var a of arr)
+            el.classList.remove(a);
+    }
+    else
+        el.classList.remove(cls);
 }
 
 export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { [key: string]: (string | boolean) }, ...children: Node[]): HTMLElementTagNameMap[K] {

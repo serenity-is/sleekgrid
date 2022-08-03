@@ -1,4 +1,4 @@
-import { attrEncode, disableSelection, H, htmlEncode, EditController, EditorLock, Event, IEventData, EventData, keyCode, GroupTotals, NonDataRow, preClickClassName, Range } from "../core/index";
+import { attrEncode, disableSelection, H, htmlEncode, EditController, EditorLock, Event, IEventData, EventData, keyCode, GroupTotals, NonDataRow, preClickClassName, Range, addClass, removeClass } from "../core/index";
 import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
 import { EditCommand, Editor } from "./editor";
 import { applyFormatterResultToCellNode, CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
@@ -223,7 +223,7 @@ export class Grid<TItem = any> {
         this._container.append(this._focusSink2 = this._focusSink1.cloneNode() as HTMLElement);
 
         if (options.viewportClass)
-            this.getViewports().forEach(vp => vp.classList.add(options.viewportClass,));
+            this.getViewports().forEach(vp => addClass(vp, options.viewportClass));
 
         if (!options.explicitInitialization) {
             this.init();
@@ -598,9 +598,9 @@ export class Grid<TItem = any> {
             this._hasJQuery && $(footerRowCell).data("column", m);
 
             if (m.footerCssClass)
-                footerRowCell.classList.add(m.footerCssClass);
+                addClass(footerRowCell, m.footerCssClass);
             else if (m.cssClass)
-                footerRowCell.classList.add(m.cssClass);
+                addClass(footerRowCell, m.cssClass);
 
             this._layout.getFooterRowColsFor(i).appendChild(footerRowCell);
 
@@ -713,7 +713,7 @@ export class Grid<TItem = any> {
             header.dataset.c = i.toString();
             this._hasJQuery && $(header).data("column", m);
 
-            m.headerCssClass && header.classList.add(m.headerCssClass);
+            m.headerCssClass && addClass(header, m.headerCssClass);
 
             (i < frozenCols) && header.classList.add("frozen");
 
@@ -852,7 +852,7 @@ export class Grid<TItem = any> {
                 ui.placeholder.outerWidth(ui.helper.outerWidth());
                 canDragScroll = !this.hasFrozenColumns() ||
                     (ui.placeholder.offset()[this._options.rtl ? 'right' : 'left'] + Math.round(ui.placeholder.width())) > $(this._layout.getScrollContainerX()).offset()[this._options.rtl ? 'right' : 'left'];
-                $(ui.helper).addClass("slick-header-column-active");
+                ui.helper.classList.add("slick-header-column-active");
             },
             beforeStop: (_: any, ui: any) => {
                 $(ui.helper).removeClass("slick-header-column-active");
@@ -1034,7 +1034,7 @@ export class Grid<TItem = any> {
     private setOverflow(): void {
         this._layout.setOverflow();
         if (this._options.viewportClass)
-            this.getViewports().forEach(vp => vp.classList.add(this._options.viewportClass));
+            this.getViewports().forEach(vp => addClass(vp, this._options.viewportClass));
     }
 
     private measureCellPaddingAndBorder(): void {
@@ -2678,12 +2678,7 @@ export class Grid<TItem = any> {
                         node = this.getCellNode(parseInt(row, 10), this.getColumnIndex(columnId));
                         if (node) {
                             const r = removedRowHash[columnId];
-                            if (r.length) {
-                                for (var x of r) {
-                                    if (x.length)
-                                        node.classList.remove(x);
-                                }
-                            }
+                            removeClass(node, r);
                         }
                     }
                 }
@@ -2695,12 +2690,7 @@ export class Grid<TItem = any> {
                         node = this.getCellNode(parseInt(row, 10), this.getColumnIndex(columnId));
                         if (node) {
                             const a = addedRowHash[columnId];
-                            if (a.length) {
-                                for (var x of a) {
-                                    if (x.length)
-                                        node.classList.add(x);
-                                }
-                            }
+                            addClass(node, a);
                         }
                     }
                 }

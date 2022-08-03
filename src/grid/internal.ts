@@ -326,11 +326,11 @@ export function shrinkOrStretchColumn(cols: Column[], colIdx: number, d: number,
 }
 
 export function addUiStateHover() {
-    (this as HTMLElement)?.classList?.add("ui-state-hover");
+    (this as HTMLElement)?.classList.add("ui-state-hover");
 }
 
 export function removeUiStateHover() {
-    (this as HTMLElement)?.classList?.remove("ui-state-hover");
+    (this as HTMLElement)?.classList.remove("ui-state-hover");
 }
 
 export interface CachedRow {

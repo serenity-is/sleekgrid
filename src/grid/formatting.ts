@@ -1,4 +1,4 @@
-import { htmlEncode } from "../core/index";
+import { addClass, htmlEncode, removeClass } from "../core/index";
 import type { Column } from "./column";
 import type { Grid } from "./grid";
 
@@ -26,8 +26,8 @@ export function defaultFormatter(_r: number, _c: number, value: any) {
 
 export function applyFormatterResultToCellNode(fmtResult: FormatterResult | string, cellNode: HTMLElement) {
     var oldFmtCls = cellNode.dataset?.fmtcls as string;
-    if (oldFmtCls != null && oldFmtCls.length > 0) {
-        cellNode.classList.remove(...oldFmtCls.split(' '));
+    if (oldFmtCls?.length) {
+        removeClass(cellNode, oldFmtCls);
         delete cellNode.dataset.fmtcls;
     }
 
@@ -56,7 +56,7 @@ export function applyFormatterResultToCellNode(fmtResult: FormatterResult | stri
         cellNode.textContent = fmtResult.text ?? '';
 
     if (fmtResult.addClass?.length) {
-        cellNode.classList.add(...fmtResult.addClass.split(' '));
+        addClass(cellNode, fmtResult.addClass);
         cellNode.dataset.fmtcls = fmtResult.addClass;
     }
 
