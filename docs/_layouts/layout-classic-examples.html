@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <section class="container container-xxl">
+    <section class="{% if page.fullwidth %}{%else%}container container-xxl{% endif %}">
         <h2 class="mb-4">{{ page.title }}</h2>
         <div class="row">
             <div class="example-sidenav col-lg-2 d-none d-lg-block">

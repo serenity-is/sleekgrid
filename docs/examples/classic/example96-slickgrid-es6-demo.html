@@ -1,8 +1,7 @@
 ---
 title: 'SlickGrid-ES6 Demo (in progress)'
-
-about: 'this is a reimplementation of <a href="https://dimitarchristoff.github.io/slickgrid-example">slickgrid-es6 sample</a>.
-'
+about: 'this is a reimplementation of <a href="https://dimitarchristoff.github.io/slickgrid-example">slickgrid-es6 sample</a>.'
+fullwidth: true
 
 demonstrates:
 - general setup, sorting, resizing, filtering
@@ -22,10 +21,51 @@ requires_slick_scripts:
 <script src="https://cdn.jsdelivr.net/npm/preact@10.10.0/compat/dist/compat.umd.js"></script>
 <script>var React = preactCompat</script>
 <script src="https://cdn.jsdelivr.net/npm/react-sparklines@1.7.0/build/index.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/flag-icons@6.6.4/css/flag-icons.min.css" rel="stylesheet">
 
 <style>
     .slick-cell.full-size {
         padding: 0;
+    }
+
+    .amount {
+        text-align: right;
+    }
+
+    div.up, div.down {
+        display: flex;
+        align-items: center;
+    }
+
+    div.up::before, div.down::before {
+        font: var(--slick-icon-font);
+        margin-right: auto;
+    }
+
+    div.up::before {
+        content: "\f077";
+        color: blue;
+    }
+
+    div.down::before {
+        content: "\f078";
+        color: orange;
+    }
+
+    div.green {
+        color: darkgreen;
+    }
+
+    div.red {
+        color: maroon;
+    }
+
+    progress {
+        width: 100%;
+    }
+
+    input.range {
+        width: 100%;
     }
 </style>
 
@@ -35,7 +75,6 @@ requires_slick_scripts:
     import { faker } from 'https://cdn.jsdelivr.net/npm/@faker-js/faker/+esm';
 
     const H = preact.createElement;
-    var grid;
 
     const makeArray = (l, cb) => {
         const r = [];
@@ -48,7 +87,7 @@ requires_slick_scripts:
         if (d == null)
             return '';
 
-        return (d.getDate() < 10 ? '0' : '') + d.getDate() + (d.getMonth() < 9 ? '0' : '') + d.getMonth() + d.getYear();
+        return (d.getDate() < 10 ? '0' : '') + d.getDate() + '/' + (d.getMonth() < 9 ? '0' : '') + d.getMonth() + '/' + d.getFullYear();
     }
 
     const formatNumber = (n, m) => {
@@ -57,26 +96,23 @@ requires_slick_scripts:
         if (typeof n !== "number")
             n = parseFloat(n);
 
-        return n.toFixed(m ?? 2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        var s = n.toFixed(m).split('.');
+        return s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (s.length > 1 ? ('.' + s[1]) : '');
     }
 
-    const debounce = function(f, t) {
-        var h = 0;
-        t = t || 50;
-        const d = function() {
-            if (h) {
-                clearTimeout(h);
-                h = 0;
-            }
-            setTimeout(f, t);
+    const debounce = (func, delay) => {
+        let debounceTimer
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => func.apply(context, args), delay);
         }
-        return d;
     }
-
 
     const amountFormatter = (r, c, value) => `<div class="${value < 500 ? 'green' : 'red'}">$ ${formatNumber(value, 2)}</div>`
 
-    const pipFormatter = (r, c, value, cd, dataContext) => `<div class='${dataContext.direction}'>${formatNumber(value, 4)}</div>`;
+    const pipFormatter = (r, c, value, cd, dataContext) => `<div class="${dataContext.direction}">${formatNumber(value, 2)}</div>`;
 
     const imageFormatter = (r, c, value) => `<img src="${value}" />`;
 
@@ -91,7 +127,7 @@ requires_slick_scripts:
 
     const countryFormatter = (r, c, value) => {
         const val = value.substr(0, 2).toLocaleLowerCase()
-        return `<span class="flag-icon flag-icon-${val}"></span> ${value}`
+        return `<span class="fi fi-${val}"></span> ${value}`
     }
 
     const style = { stroke: "black", fill: "none" }
@@ -157,18 +193,18 @@ requires_slick_scripts:
         // asyncEditorLoading: false,
         enableAsyncPostRender: true,
         autoEdit: false,
-        forceFitColumns: true,
         showHeaderRow: true,
         headerRowHeight: 32,
-        explicitInitialization: true
+        explicitInitialization: true,
+        forceFitColumns: true
     };
 
     const columnFilters = {};
     let healthValue = 0
 
     // data view
-    const dv = new Slick.Data.DataView();
-    dv.setFilter(item => {
+    const view = new Slick.Data.DataView();
+    view.setFilter(item => {
         let pass = true;
 
         for (let key in item) {
@@ -180,8 +216,8 @@ requires_slick_scripts:
         return pass;
     });
 
-    dv.getItemMetadata = index => {
-        const row = dv.getItem(index);
+    view.getItemMetadata = index => {
+        const row = view.getItem(index);
         return row.type === 'BUY' ? { cssClasses: 'buy' } : { cssClasses: '' }
     }
 
@@ -195,13 +231,15 @@ requires_slick_scripts:
             name: 'Side',
             sortable: true,
             field: 'type',
-            maxWidth: 120,
+            width: 60,
+            minWidth: 60,
+            maxWidth: 60
         },
         {
             id: 'counterparty',
             name: 'Counterparty',
             field: 'counterparty',
-            minWidth: 200,
+            minWidth: 100,
             maxWidth: 200,
             cssClass: 'slick-editable',
             editor: Slick.Editors.Text,
@@ -211,8 +249,8 @@ requires_slick_scripts:
             id: 'currency',
             name: 'CUR',
             field: 'currency',
-            minWidth: 90,
-            maxWidth: 90,
+            minWidth: 70,
+            maxWidth: 70,
             sortable: true,
             formatter: countryFormatter,
         },
@@ -223,8 +261,8 @@ requires_slick_scripts:
             headerCssClass: 'amount',
             cssClass: 'amount',
             formatter: pipFormatter,
-            minWidth: 100,
-            maxWidth: 100
+            minWidth: 80,
+            maxWidth: 80
         },
         {
             id: 'historic',
@@ -247,8 +285,8 @@ requires_slick_scripts:
             cssClass: 'amount slick-editable',
             formatter: amountFormatter,
             editor: Slick.Editors.Text,
-            minWidth: 100,
-            maxWidth: 100
+            minWidth: 80,
+            maxWidth: 80
         },
         {
             id: 'total',
@@ -258,8 +296,8 @@ requires_slick_scripts:
             cssClass: 'amount',
             formatter: totalFormatter,
             sortable: false,
-            minWidth: 100,
-            maxWidth: 128
+            minWidth: 90,
+            maxWidth: 100
         },
         {
             id: 'paymentDate',
@@ -302,7 +340,7 @@ requires_slick_scripts:
     const sample = (arr) => arr[random(0, arr.length - 1)];
 
     // fake data
-    dv.setItems(makeArray(300, id => {
+    view.setItems(makeArray(300, id => {
         const currency = sample(['USD', 'AUD', 'CAD', 'EUR', 'JPY', 'CHF']);
         const data = {
             id,
@@ -320,7 +358,6 @@ requires_slick_scripts:
         return data
     }));
 
-    // filter renderer is a react component
     class Filter extends React.Component {
 
         handleChange = ({ target }) => {
@@ -332,7 +369,7 @@ requires_slick_scripts:
                 delete this.props.columnFilters[this.props.columnId]
             }
 
-            this.props.dv.refresh()
+            this.props.view.refresh()
         }
 
         render() {
@@ -346,7 +383,6 @@ requires_slick_scripts:
         }
     }
 
-    // main!
     class Home extends preact.Component {
 
         rates = Object.keys(rates)
@@ -357,23 +393,23 @@ requires_slick_scripts:
         }, {})
 
         handleResize = () => {
-            grid.setColumns(columns)
+            this.grid.setColumns(columns)
         }
 
         state = {
             editing: null
         }
 
-        componentDidMount() {
-            const grid = this.gridInstance = new Slick.Grid(this.grid, dv, columns, options);
-            columns[7].formatter = columns[7].formatter.bind(this.gridInstance)
+        componentDidMount = () => {
+            const grid = this.grid = new Slick.Grid(this.gridEl, view, columns, options);
+            columns[7].formatter = columns[7].formatter.bind(this.grid)
 
             grid.setSelectionModel(new Slick.RowSelectionModel({ selectActiveRow: false }));
             grid.registerPlugin(checkboxSelector);
 
             const changeFilter = debounce(value => {
                 healthValue = value
-                dv.refresh()
+                view.refresh()
             }, 500)
 
             grid.onHeaderRowCellRendered.subscribe((e, { node, column }) => {
@@ -383,7 +419,7 @@ requires_slick_scripts:
                             {
                                 columnId: column.id,
                                 columnFilters: columnFilters,
-                                dv
+                                view
                             }), node);
                     node.classList.add('slick-editable');
                 }
@@ -416,10 +452,10 @@ requires_slick_scripts:
 
                 // Delegate the sorting to DataView.
                 // This will fire the change events and update the grid.
-                dv.sort(comparer, args.sortAsc);
+                view.sort(comparer, args.sortAsc);
             });
 
-            dv.onRowCountChanged.subscribe(() => {
+            view.onRowCountChanged.subscribe(() => {
                 grid.updateRowCount();
                 grid.render();
             });
@@ -431,10 +467,10 @@ requires_slick_scripts:
             grid.onBeforeCellEditorDestroy.subscribe(() => this.setState({ editing: null }));
 
             grid.onCellChange.subscribe((e, { item }) => {
-                dv.updateItem(item.id, item)
+                view.updateItem(item.id, item)
             })
 
-            dv.onRowsChanged.subscribe((e, { rows }) => {
+            view.onRowsChanged.subscribe((e, { rows }) => {
                 grid.invalidateRows(rows);
                 grid.render();
             });
@@ -455,7 +491,7 @@ requires_slick_scripts:
 
             let hasUpdates = false;
 
-            dv.getItems().forEach(item => {
+            view.getItems().forEach(item => {
                 if (this.state.editing && item.id === this.state.editing.id)
                     return;
 
@@ -466,30 +502,30 @@ requires_slick_scripts:
 
                     if (!hasUpdates) {
                         hasUpdates = true
-                        dv.beginUpdate();
+                        view.beginUpdate();
                     }
-                    dv.updateItem(item.id, item);
+                    view.updateItem(item.id, item);
                 }
             })
 
-            hasUpdates && dv.endUpdate();
+            hasUpdates && view.endUpdate();
             this._timer = setTimeout(this.mutate, random(100, 1000));
         }
 
-        componentWillUnmount() {
+        componentWillUnmount = () => {
             clearTimeout(this._timer);
             grid.destroy();
             window.removeEventListener('resize', this.handleResize);
         }
 
-        render() {
+        render = () => {
             return H("div", {
                 style: "height: " + this.props.containerHeight + "px"
             },
                 H("div", {
                     id: "myGrid",
                     className: "slickgrid-container",
-                    ref: grid => this.grid = grid
+                    ref: el => this.gridEl = el
                 }));
         }
     }
