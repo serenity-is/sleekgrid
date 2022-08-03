@@ -1,0 +1,498 @@
+---
+title: 'SlickGrid-ES6 Demo (in progress)'
+
+about: 'this is a reimplementation of <a href="https://dimitarchristoff.github.io/slickgrid-example">slickgrid-es6 sample</a>.
+'
+
+demonstrates:
+- general setup, sorting, resizing, filtering
+- editing, custom editors (money etc.)
+- custom renderers (computed columns like A * B), styling
+- custom preact components in cells and filters
+- ticking prices/updates via data view layer
+
+requires_slick_scripts:
+- slick.dataview.js
+- slick.editors.js
+- plugins/slick.checkboxselectcolumn.js
+- plugins/slick.rowselectionmodel.js
+---
+<script src="https://cdn.jsdelivr.net/npm/preact@10.10.0/dist/preact.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/preact@10.10.0/hooks/dist/hooks.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/preact@10.10.0/compat/dist/compat.umd.js"></script>
+<script>var React = preactCompat</script>
+<script src="https://cdn.jsdelivr.net/npm/react-sparklines@1.7.0/build/index.min.js"></script>
+
+<style>
+    .slick-cell.full-size {
+        padding: 0;
+    }
+</style>
+
+<div id="Home"></div>
+
+<script type="module">
+    import { faker } from 'https://cdn.jsdelivr.net/npm/@faker-js/faker/+esm';
+
+    const H = preact.createElement;
+    var grid;
+
+    const makeArray = (l, cb) => {
+        const r = [];
+        for (var i = 0; i < l; i++)
+            r.push(cb(i));
+        return r;
+    }
+
+    const formatDate = (d) => {
+        if (d == null)
+            return '';
+
+        return (d.getDate() < 10 ? '0' : '') + d.getDate() + (d.getMonth() < 9 ? '0' : '') + d.getMonth() + d.getYear();
+    }
+
+    const formatNumber = (n, m) => {
+        if (n == null)
+            return "";
+        if (typeof n !== "number")
+            n = parseFloat(n);
+
+        return n.toFixed(m ?? 2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    const debounce = function(f, t) {
+        var h = 0;
+        t = t || 50;
+        const d = function() {
+            if (h) {
+                clearTimeout(h);
+                h = 0;
+            }
+            setTimeout(f, t);
+        }
+        return d;
+    }
+
+
+    const amountFormatter = (r, c, value) => `<div class="${value < 500 ? 'green' : 'red'}">$ ${formatNumber(value, 2)}</div>`
+
+    const pipFormatter = (r, c, value, cd, dataContext) => `<div class='${dataContext.direction}'>${formatNumber(value, 4)}</div>`;
+
+    const imageFormatter = (r, c, value) => `<img src="${value}" />`;
+
+    const dateFormatter = (r, c, value) => formatDate(new Date(value));
+
+    const totalFormatter = (r, c, value, cd, { price, amount }) => '$' + formatNumber(price * amount, 2);
+
+    const healthFormatter = (r, c, value) => {
+        const className = value > 66 ? 'danger' : ''
+        return `<progress value="${value}" max="100" class="${className}">${value}</progress>`
+    }
+
+    const countryFormatter = (r, c, value) => {
+        const val = value.substr(0, 2).toLocaleLowerCase()
+        return `<span class="flag-icon flag-icon-${val}"></span> ${value}`
+    }
+
+    const style = { stroke: "black", fill: "none" }
+    const dummy = document.createElement('div')
+
+    const historicRenderer = (value, node) => {
+        const S = ReactSparklines;
+        return preact.render(
+            H(S.Sparklines,
+                {
+                    data: value,
+                    limit: 15,
+                    width: 128,
+                    height: 30,
+                    margin: 0
+                },
+                H(S.SparklinesLine,
+                    {
+                        style: style,
+                    }),
+                H(S.SparklinesReferenceLine, null, []),
+                H(S.SparklinesSpots, null, [])), dummy);
+    }
+
+    const historicSyncFormatter = (r, c, value) => {
+        dummy.innerHTML = '';
+        historicRenderer(value, dummy);
+        const html = dummy.innerHTML
+        React.unmountComponentAtNode(dummy);
+        return html;
+    }
+
+    const historicFormatter = (node, row, data) => {
+        historicRenderer(data.historic, node);
+    }
+
+    const rates = {
+        "AUD": 1.7443,
+        "CAD": 1.7643,
+        "CHF": 1.2963,
+        "JPY": 146.4,
+        "USD": 1.2854,
+        "EUR": 1.1836
+    }
+
+    const morphRate = (symbol, noSave) => {
+        const rate = rates[symbol];
+        const diff = rate / 100 * random(1, 25) / 100;
+        const newRate = random(0, 1) ? rate + diff : rate - diff;
+        noSave || (rates[symbol] = newRate)
+        return newRate
+    }
+
+    const checkboxSelector = new Slick.CheckboxSelectColumn({
+        cssClass: "slick-cell-checkboxsel"
+    });
+
+    const options = {
+        rowHeight: 32,
+        editable: true,
+        enableAddRow: !true,
+        enableCellNavigation: true,
+        // asyncEditorLoading: false,
+        enableAsyncPostRender: true,
+        autoEdit: false,
+        forceFitColumns: true,
+        showHeaderRow: true,
+        headerRowHeight: 32,
+        explicitInitialization: true
+    };
+
+    const columnFilters = {};
+    let healthValue = 0
+
+    // data view
+    const dv = new Slick.Data.DataView();
+    dv.setFilter(item => {
+        let pass = true;
+
+        for (let key in item) {
+            pass = pass && item.health >= healthValue
+            if (key in columnFilters && columnFilters[key].length && key !== 'health') {
+                pass = pass && String(item[key]).match(new RegExp(columnFilters[key], 'ig'));
+            }
+        }
+        return pass;
+    });
+
+    dv.getItemMetadata = index => {
+        const row = dv.getItem(index);
+        return row.type === 'BUY' ? { cssClasses: 'buy' } : { cssClasses: '' }
+    }
+
+    const columns = [
+        {
+            ...checkboxSelector.getColumnDefinition(),
+            nameIsHtml: true
+        },
+        {
+            id: 'type',
+            name: 'Side',
+            sortable: true,
+            field: 'type',
+            maxWidth: 120,
+        },
+        {
+            id: 'counterparty',
+            name: 'Counterparty',
+            field: 'counterparty',
+            minWidth: 200,
+            maxWidth: 200,
+            cssClass: 'slick-editable',
+            editor: Slick.Editors.Text,
+            sortable: true
+        },
+        {
+            id: 'currency',
+            name: 'CUR',
+            field: 'currency',
+            minWidth: 90,
+            maxWidth: 90,
+            sortable: true,
+            formatter: countryFormatter,
+        },
+        {
+            id: 'price',
+            name: 'Price',
+            field: 'price',
+            headerCssClass: 'amount',
+            cssClass: 'amount',
+            formatter: pipFormatter,
+            minWidth: 100,
+            maxWidth: 100
+        },
+        {
+            id: 'historic',
+            name: 'Historic',
+            field: 'historic',
+            rerenderOnResize: true,
+            //asyncPostRender: historicFormatter,
+            formatter: historicSyncFormatter,
+            // formatter: (a,b, value) => JSON.stringify(value),
+            // formatter: historicFormatter,
+            cssClass: 'full-size',
+            minWidth: 128,
+            maxWidth: 128
+        },
+        {
+            id: 'amount',
+            name: 'Amount',
+            field: 'amount',
+            headerCssClass: 'amount',
+            cssClass: 'amount slick-editable',
+            formatter: amountFormatter,
+            editor: Slick.Editors.Text,
+            minWidth: 100,
+            maxWidth: 100
+        },
+        {
+            id: 'total',
+            name: 'Total',
+            fieldName: 'total',
+            headerCssClass: 'amount',
+            cssClass: 'amount',
+            formatter: totalFormatter,
+            sortable: false,
+            minWidth: 100,
+            maxWidth: 128
+        },
+        {
+            id: 'paymentDate',
+            sortable: true,
+            name: 'Execution',
+            field: 'paymentDate',
+            minWidth: 100,
+            maxWidth: 100,
+            cssClass: 'slick-editable amount',
+            headerCssClass: 'amount',
+            //todo: fix date picker as it goes off-screen
+            editor: Slick.Editors.Date,
+            options: {
+                date: {
+                    dateFormat: 'd/m/Y', // see https://chmln.github.io/flatpickr/#options,
+                    parseDate: input => {
+                        const split = input.split('/')
+                        return new Date(`${split[1]}-${split[0]}-${split[2]}`)
+                    }
+                }
+            }
+        },
+        {
+            id: 'health',
+            name: 'Health',
+            field: 'health',
+            cssClass: 'is-hidden-mobile',
+            headerCssClass: 'is-hidden-mobile',
+            formatter: healthFormatter,
+            sortable: true
+        },
+    ];
+
+    function random(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max + 1);
+        return Math.floor(Math.random() * (max - min) + min);
+    }
+
+    const sample = (arr) => arr[random(0, arr.length - 1)];
+
+    // fake data
+    dv.setItems(makeArray(300, id => {
+        const currency = sample(['USD', 'AUD', 'CAD', 'EUR', 'JPY', 'CHF']);
+        const data = {
+            id,
+            avatar: faker.image.avatar(),
+            type: sample(['BUY', 'SELL']),
+            counterparty: faker.company.companyName(),
+            health: random(0, 100),
+            currency,
+            amount: faker.finance.amount(),
+            price: rates[currency],
+            paymentDate: dateFormatter(null, null, faker.date.future())
+        };
+
+        data.historic = [data.price]
+        return data
+    }));
+
+    // filter renderer is a react component
+    class Filter extends React.Component {
+
+        handleChange = ({ target }) => {
+            const value = target.value.trim()
+            if (value.length) {
+                this.props.columnFilters[this.props.columnId] = value;
+            }
+            else {
+                delete this.props.columnFilters[this.props.columnId]
+            }
+
+            this.props.dv.refresh()
+        }
+
+        render() {
+            return H('input',
+                {
+                    defaultValue: this.props.columnFilters[this.props.columnId],
+                    type: 'text',
+                    className: 'editor-text',
+                    onChange: this.handleChange
+                });
+        }
+    }
+
+    // main!
+    class Home extends preact.Component {
+
+        rates = Object.keys(rates)
+
+        historic = this.rates.reduce((acc, cur) => {
+            acc[cur] = [rates[cur]]
+            return acc
+        }, {})
+
+        handleResize = () => {
+            grid.setColumns(columns)
+        }
+
+        state = {
+            editing: null
+        }
+
+        componentDidMount() {
+            const grid = this.gridInstance = new Slick.Grid(this.grid, dv, columns, options);
+            columns[7].formatter = columns[7].formatter.bind(this.gridInstance)
+
+            grid.setSelectionModel(new Slick.RowSelectionModel({ selectActiveRow: false }));
+            grid.registerPlugin(checkboxSelector);
+
+            const changeFilter = debounce(value => {
+                healthValue = value
+                dv.refresh()
+            }, 500)
+
+            grid.onHeaderRowCellRendered.subscribe((e, { node, column }) => {
+                if (['_checkbox_selector', 'historic', 'health'].indexOf(column.id) === -1) {
+                    preact.render(
+                        H(Filter,
+                            {
+                                columnId: column.id,
+                                columnFilters: columnFilters,
+                                dv
+                            }), node);
+                    node.classList.add('slick-editable');
+                }
+                else if (column.id === 'health') {
+                    preact.render(
+                        H('input', {
+                            className: 'range',
+                            defaultValue: healthValue,
+                            type: 'range',
+                            onChange: e => changeFilter(e.target.value)
+                        }), node);
+                }
+                else {
+                    node.classList.add('slick-uneditable');
+                }
+                if (column.id === '_checkbox_selector') {
+                    node.innerHTML = '<i class="fa fa-filter" />';
+                }
+            });
+
+            grid.onSort.subscribe(function (e, args) {
+                // args.multiColumnSort indicates whether or not this is a multi-column sort.
+                // If it is, args.sortCols will have an array of {sortCol:..., sortAsc:...} objects.
+                // If not, the sort column and direction will be in args.sortCol & args.sortAsc.
+
+                // We'll use a simple comparer function here.
+                const comparer = function (a, b) {
+                    return (a[args.sortCol.field] > b[args.sortCol.field]) ? 1 : -1;
+                }
+
+                // Delegate the sorting to DataView.
+                // This will fire the change events and update the grid.
+                dv.sort(comparer, args.sortAsc);
+            });
+
+            dv.onRowCountChanged.subscribe(() => {
+                grid.updateRowCount();
+                grid.render();
+            });
+
+            grid.onBeforeEditCell.subscribe((e, { item }) => {
+                this.setState({ editing: item });
+            });
+
+            grid.onBeforeCellEditorDestroy.subscribe(() => this.setState({ editing: null }));
+
+            grid.onCellChange.subscribe((e, { item }) => {
+                dv.updateItem(item.id, item)
+            })
+
+            dv.onRowsChanged.subscribe((e, { rows }) => {
+                grid.invalidateRows(rows);
+                grid.render();
+            });
+
+            grid.init();
+
+            window.addEventListener('resize', this.handleResize);
+
+            this.mutate();
+        }
+
+        mutate = () => {
+            const currency = sample(this.rates);
+            const price = morphRate(currency);
+
+            this.historic[currency].push(price);
+            this.historic[currency].length > 15 && this.historic[currency].shift()
+
+            let hasUpdates = false;
+
+            dv.getItems().forEach(item => {
+                if (this.state.editing && item.id === this.state.editing.id)
+                    return;
+
+                if (item.currency === currency) {
+                    item.direction = price > item.price ? 'up' : 'down';
+                    item.price = price;
+                    item.historic = this.historic[currency];
+
+                    if (!hasUpdates) {
+                        hasUpdates = true
+                        dv.beginUpdate();
+                    }
+                    dv.updateItem(item.id, item);
+                }
+            })
+
+            hasUpdates && dv.endUpdate();
+            this._timer = setTimeout(this.mutate, random(100, 1000));
+        }
+
+        componentWillUnmount() {
+            clearTimeout(this._timer);
+            grid.destroy();
+            window.removeEventListener('resize', this.handleResize);
+        }
+
+        render() {
+            return H("div", {
+                style: "height: " + this.props.containerHeight + "px"
+            },
+                H("div", {
+                    id: "myGrid",
+                    className: "slickgrid-container",
+                    ref: grid => this.grid = grid
+                }));
+        }
+    }
+
+    preact.render(H(Home), document.getElementById('Home'));
+</script>
