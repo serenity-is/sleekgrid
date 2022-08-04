@@ -852,7 +852,7 @@ export class Grid<TItem = any> {
                 ui.placeholder.outerWidth(ui.helper.outerWidth());
                 canDragScroll = !this.hasFrozenColumns() ||
                     (ui.placeholder.offset()[this._options.rtl ? 'right' : 'left'] + Math.round(ui.placeholder.width())) > $(this._layout.getScrollContainerX()).offset()[this._options.rtl ? 'right' : 'left'];
-                ui.helper.classList.add("slick-header-column-active");
+                $(ui.helper).addClass("slick-header-column-active");
             },
             beforeStop: (_: any, ui: any) => {
                 $(ui.helper).removeClass("slick-header-column-active");
