@@ -30,7 +30,7 @@ export interface LayoutEngine {
     afterRenderRows(rendered: ViewRange): void;
     bindAncestorScrollEvents(): void;
     calcCanvasWidth(): number;
-    calcHeaderWidths(): void;
+    updateHeadersWidth(): void;
     isFrozenRow(row: number): boolean;
     destroy(): void;
     getCanvasNodeFor(cell: number, row: number): HTMLElement;

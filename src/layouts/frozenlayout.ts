@@ -727,7 +727,7 @@ export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
         bindAncestorScrollEvents,
         beforeCleanupAndRenderCells,
         calcCanvasWidth,
-        calcHeaderWidths,
+        updateHeadersWidth: calcHeaderWidths,
         isFrozenRow,
         destroy,
         getCanvasNodeFor,

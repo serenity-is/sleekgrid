@@ -689,7 +689,7 @@ export class Grid<TItem = any> {
         });
 
 
-        this._layout.calcHeaderWidths();
+        this._layout.updateHeadersWidth();
 
         var cols = this._cols, frozenCols = this._layout.getFrozenCols();
         for (var i = 0; i < cols.length; i++) {

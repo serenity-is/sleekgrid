@@ -79,7 +79,7 @@ export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
             host.getAvailableWidth()) : rowWidth;
     }
 
-    function calcHeaderWidths() {
+    function updateHeadersWidth() {
         headersWidth = 0;
 
         var scrollWidth = host.getScrollDims().width;
@@ -196,35 +196,24 @@ export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
 
     function updateCanvasWidth(): boolean {
         var oldCanvasWidth = canvasWidth;
-        var widthChanged;
         canvasWidth = calcCanvasWidth();
         var scrollWidth = host.getScrollDims().width;
 
-        widthChanged = canvasWidth !== oldCanvasWidth;
-
         const vpi = host.getViewportInfo();
-        if (widthChanged) {
-            var cwl = canvasWidth + 'px'
-
-            canvas.style.width = cwl;
-
-            calcHeaderWidths();
-
-            headerRowCols.parentElement.style.width = '100%';
-            headerRowCols.style.width = canvasWidth + 'px';
-            footerRowCols.parentElement.style.width = '100%';
-            footerRowCols.style.width = canvasWidth + 'px';
-            viewport.style.width = '100%';
-
+        if (canvasWidth != oldCanvasWidth) {
+            var canvasWidthPx = canvasWidth + 'px'
+            canvas.style.width = canvasWidthPx;
+            headerRowCols.style.width = canvasWidthPx;
+            footerRowCols.style.width = canvasWidthPx;
+            updateHeadersWidth();
             vpi.hasHScroll = (canvasWidth > host.getViewportInfo().width - scrollWidth);
         }
 
-        var w = (canvasWidth + (vpi.hasVScroll ? scrollWidth : 0)) + 'px';
+        var spacerWidthPx = (canvasWidth + (vpi.hasVScroll ? scrollWidth : 0)) + 'px';
+        headerRowSpacer.style.width = spacerWidthPx;
+        footerRowSpacer.style.width = spacerWidthPx;
 
-        headerRowSpacer.style.width = w;
-        footerRowSpacer.style.width = w;
-
-        return widthChanged;
+        return canvasWidth != oldCanvasWidth;
     }
 
     const resizeCanvas = () => {
@@ -253,7 +242,7 @@ export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
         beforeCleanupAndRenderCells: noop,
         bindAncestorScrollEvents,
         calcCanvasWidth,
-        calcHeaderWidths,
+        updateHeadersWidth,
         isFrozenRow: returnFalse,
         destroy,
         getCanvasNodeFor,
