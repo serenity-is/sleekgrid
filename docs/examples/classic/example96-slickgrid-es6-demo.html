@@ -261,6 +261,7 @@ requires_slick_scripts:
             headerCssClass: 'amount',
             cssClass: 'amount',
             formatter: pipFormatter,
+            sortable: true,
             minWidth: 80,
             maxWidth: 80
         },
@@ -283,6 +284,7 @@ requires_slick_scripts:
             field: 'amount',
             headerCssClass: 'amount',
             cssClass: 'amount slick-editable',
+            sortable: true,
             formatter: amountFormatter,
             editor: Slick.Editors.Text,
             minWidth: 80,
@@ -295,7 +297,6 @@ requires_slick_scripts:
             headerCssClass: 'amount',
             cssClass: 'amount',
             formatter: totalFormatter,
-            sortable: false,
             minWidth: 90,
             maxWidth: 100
         },
@@ -488,26 +489,24 @@ requires_slick_scripts:
             this.historic[currency].push(price);
             this.historic[currency].length > 15 && this.historic[currency].shift()
 
-            let hasUpdates = false;
-
             view.getItems().forEach(item => {
                 if (this.state.editing && item.id === this.state.editing.id)
                     return;
 
                 if (item.currency === currency) {
-                    item.direction = price > item.price ? 'up' : 'down';
-                    item.price = price;
-                    item.historic = this.historic[currency];
-
-                    if (!hasUpdates) {
-                        hasUpdates = true
-                        view.beginUpdate();
+                    const row = view.getRowById(item.id);
+                    const dir = price > item.price ? 'up' : 'down';
+                    if (price !== item.price || item.direction !== dir) {
+                        item.direction = dir;
+                        item.price = price;
+                        item.historic = this.historic[currency];
+                        this.grid.updateCell(row, this.grid.getColumnIndex("price"));
+                        this.grid.updateCell(row, this.grid.getColumnIndex("total"));
+                        this.grid.updateCell(row, this.grid.getColumnIndex("historic"));
                     }
-                    view.updateItem(item.id, item);
                 }
             })
 
-            hasUpdates && view.endUpdate();
             this._timer = setTimeout(this.mutate, random(100, 1000));
         }
 
