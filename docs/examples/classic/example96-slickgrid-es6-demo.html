@@ -87,7 +87,7 @@ requires_slick_scripts:
         if (d == null)
             return '';
 
-        return (d.getDate() < 10 ? '0' : '') + d.getDate() + '/' + (d.getMonth() < 9 ? '0' : '') + d.getMonth() + '/' + d.getFullYear();
+        return (d.getDate() < 10 ? '0' : '') + d.getDate() + '/' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1) + '/' + d.getFullYear();
     }
 
     const formatNumber = (n, m) => {
