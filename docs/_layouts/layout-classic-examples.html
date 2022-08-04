@@ -21,35 +21,40 @@
 </head>
 
 <body>
-    <section class="{% if page.fullwidth %}{%else%}container container-xxl{% endif %}">
-        <h2 class="mb-4">{{ page.title }}</h2>
-        <div class="row">
-            <div class="example-sidenav col-lg-2 d-none d-lg-block">
-                <h5 class="text-muted">Classic Examples</h5>
-                <ul class="m-0 p-0 list-unstyled">
-                    {% assign classic_examples_pages = site.pages | where: "dir", "/examples/classic/" %}
-                    {% for p in classic_examples_pages %}
-                    <li{% if page.url == p.url %} class="active-link"{% endif %}>
-                        <a href="{{ site.baseurl }}{{ p.url | replace: ".html", "" }}">
-                            {{ p.title }}</a>
-                    {% endfor %}
-                    </li>
-                </ul>
-            </div>
-            <div class="col-lg-7 example-container mb-4">
-                <div class="example-content">
-                    {{ content }}
-                </div>
-            </div>
-            <div class="col-lg-3 example-info">
-                {% include _example_about.html %}
-                {% include _example_demonstrates.html %}
-                {% include _example_controls.html %}
-                {% include _example_sources.html %}
-            </div>
+    <div class="row">
+        <div class="example-sidenav col-lg-2 d-none d-lg-block">
+            <h5 class="text-muted">Classic Examples</h5>
+            <ul class="m-0 p-0 list-unstyled">
+                {% assign classic_examples_pages = site.pages | where: "dir", "/examples/classic/" %}
+                {% for p in classic_examples_pages %}
+                <li{% if page.url == p.url %} class="active-link"{% endif %}>
+                    <a href="{{ site.baseurl }}{{ p.url | replace: ".html", "" }}">
+                        {{ p.title }}</a>
+                {% endfor %}
+                </li>
+            </ul>
         </div>
-        {% include _layout_footer.html %}
-    </section>
+        <div class="col-lg-10">
+            <section class="{% if page.fullwidth %}{%else%}container container-xxl{% endif %}">
+                <h2 class="mb-4">{{ page.title }}</h2>
+                <div class="row">
+                    <div class="col-lg-7 example-container mb-4">
+                        <div class="example-content">
+                            {{ content }}
+                        </div>
+                    </div>
+                    <div class="col-lg-3 example-info">
+                        {% include _example_about.html %}
+                        {% include _example_demonstrates.html %}
+                        {% include _example_controls.html %}
+                        {% include _example_sources.html %}
+                    </div>
+                </div>
+                {% include _layout_footer.html %}
+            </section>
+        </div>
+    </div>
+
     {% include _layout_js.html %}
 </body>
 

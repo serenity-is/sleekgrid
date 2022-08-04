@@ -72,7 +72,7 @@ requires_slick_scripts:
 <div id="Home"></div>
 
 <script type="module">
-    import { faker } from 'https://cdn.jsdelivr.net/npm/@faker-js/faker/+esm';
+    import { randCompanyName, randFutureDate, randNumber } from 'https://cdn.jsdelivr.net/npm/@ngneat/falso@6.1.0/+esm';
 
     const H = preact.createElement;
 
@@ -344,14 +344,13 @@ requires_slick_scripts:
         const currency = sample(['USD', 'AUD', 'CAD', 'EUR', 'JPY', 'CHF']);
         const data = {
             id,
-            avatar: faker.image.avatar(),
             type: sample(['BUY', 'SELL']),
-            counterparty: faker.company.companyName(),
+            counterparty: randCompanyName(),
             health: random(0, 100),
             currency,
-            amount: faker.finance.amount(),
+            amount: randNumber({ min: 100, max: 1000, fraction: 2 }),
             price: rates[currency],
-            paymentDate: dateFormatter(null, null, faker.date.future())
+            paymentDate: dateFormatter(null, null, randFutureDate())
         };
 
         data.historic = [data.price]
