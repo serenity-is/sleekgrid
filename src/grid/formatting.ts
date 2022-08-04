@@ -25,51 +25,48 @@ export function defaultFormatter(_r: number, _c: number, value: any) {
 }
 
 export function applyFormatterResultToCellNode(fmtResult: FormatterResult | string, cellNode: HTMLElement) {
-    var oldFmtCls = cellNode.dataset?.fmtcls as string;
-    if (oldFmtCls?.length) {
-        removeClass(cellNode, oldFmtCls);
-        delete cellNode.dataset.fmtcls;
-    }
 
     var oldFmtAtt = cellNode.dataset?.fmtatt as string;
-    if (oldFmtAtt != null && oldFmtAtt.length > 0) {
+    if (oldFmtAtt?.length > 0) {
         for (var k of oldFmtAtt.split(','))
             cellNode.removeAttribute(k);
         delete cellNode.dataset.fmtatt;
     }
 
-    cellNode.removeAttribute('tooltip');
+    const isFmtResult = fmtResult != null && typeof fmtResult !== "string" && Object.prototype.toString.call(fmtResult) !== '[object Object]';
 
-    if (fmtResult == null) {
-        cellNode.innerHTML = '';
-        return;
+    var oldFmtCls = cellNode.dataset?.fmtcls as string;
+    if (oldFmtCls?.length && (!isFmtResult || fmtResult.addClass != oldFmtCls)) {
+        removeClass(cellNode, oldFmtCls);
+        if (!isFmtResult || !fmtResult.addClass?.length)
+            delete cellNode.dataset.fmtcls;
     }
 
-    if (typeof fmtResult === "string" || Object.prototype.toString.call(fmtResult) !== '[object Object]') {
+    var oldToolTip = cellNode.getAttribute('tooltip');
+    if (oldToolTip != null && (!isFmtResult || fmtResult.toolTip != oldToolTip))
+        cellNode.removeAttribute('tooltip');
+
+    if (isFmtResult && fmtResult.toolTip !== undefined && oldToolTip != fmtResult.toolTip)
+        cellNode.setAttribute('tooltip', fmtResult.toolTip);
+
+    if (fmtResult == null)
+        cellNode.innerHTML = "";
+    else if (!isFmtResult)
         cellNode.innerHTML = "" + fmtResult;
-        return;
-    }
+    else {
+        if (fmtResult.html != null)
+            cellNode.innerHTML = fmtResult.html;
+        else
+            cellNode.textContent = fmtResult.text ?? '';
 
-    if (fmtResult.html != null)
-        cellNode.innerHTML = fmtResult.html;
-    else
-        cellNode.textContent = fmtResult.text ?? '';
-
-    if (fmtResult.addClass?.length) {
-        addClass(cellNode, fmtResult.addClass);
-        cellNode.dataset.fmtcls = fmtResult.addClass;
-    }
-
-    if (fmtResult.addAttrs != null) {
-        var keys = Object.keys(fmtResult.addAttrs);
-        if (keys.length) {
-            for (var k of keys) {
-                cellNode.setAttribute(k, fmtResult.addAttrs[k]);
+        if (fmtResult.addAttrs != null) {
+            var keys = Object.keys(fmtResult.addAttrs);
+            if (keys.length) {
+                for (var k of keys) {
+                    cellNode.setAttribute(k, fmtResult.addAttrs[k]);
+                }
+                cellNode.dataset.fmtatt = keys.join(',');
             }
-            cellNode.dataset.fmtatt = keys.join(',');
         }
     }
-
-    if (fmtResult.toolTip !== undefined)
-        cellNode.setAttribute('tooltip', fmtResult.toolTip ?? '');
 }
