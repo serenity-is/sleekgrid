@@ -33,21 +33,21 @@ export function applyFormatterResultToCellNode(fmtResult: FormatterResult | stri
         delete cellNode.dataset.fmtatt;
     }
 
-    const isFmtResult = fmtResult != null && typeof fmtResult === 'object';
+    const isFmtResult = fmtResult != null && typeof fmtResult !== 'string' && Object.prototype.toString.call(fmtResult) === '[object Object]';
 
     var oldFmtCls = cellNode.dataset?.fmtcls as string;
-    if (oldFmtCls?.length && (!isFmtResult || fmtResult?.addClass != oldFmtCls)) {
+    if (oldFmtCls?.length && (!isFmtResult || fmtResult.addClass != oldFmtCls)) {
         removeClass(cellNode, oldFmtCls);
-        if (!isFmtResult || !fmtResult?.addClass?.length)
+        if (!isFmtResult || !fmtResult.addClass.length)
             delete cellNode.dataset.fmtcls;
     }
 
     var oldToolTip = cellNode.getAttribute('tooltip');
-    if (oldToolTip != null && (!isFmtResult || fmtResult?.toolTip != oldToolTip))
+    if (oldToolTip != null && (!isFmtResult || fmtResult.toolTip != oldToolTip))
         cellNode.removeAttribute('tooltip');
 
-    if (isFmtResult && fmtResult?.toolTip !== undefined && oldToolTip != fmtResult?.toolTip)
-        cellNode.setAttribute('tooltip', fmtResult!.toolTip);
+    if (isFmtResult && fmtResult.toolTip !== undefined && oldToolTip != fmtResult.toolTip)
+        cellNode.setAttribute('tooltip', fmtResult.toolTip);
 
     if (fmtResult == null)
         cellNode.innerHTML = "";
