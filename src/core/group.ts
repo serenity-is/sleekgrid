@@ -16,7 +16,7 @@ export class Group<TEntity = any> extends NonDataRow {
     /***
      * Number of rows in the group.
      * @property count
-     * @type {Integer}
+     * @type {Number}
      */
     count: number = 0;
 
@@ -76,12 +76,12 @@ export class Group<TEntity = any> extends NonDataRow {
    * @method equals
    * @return {Boolean}
    * @param group {Group} Group instance to compare to.
-   */    
+   */
     equals(group: Group): boolean {
         return this.value === group.value &&
             this.count === group.count &&
             this.collapsed === group.collapsed &&
-            this.title === group.title;    
+            this.title === group.title;
     }
 }
 
@@ -91,7 +91,7 @@ export class Group<TEntity = any> extends NonDataRow {
  * so that they can store arbitrary data in it.  That data can later be accessed by group totals
  * formatters during the display.
  * @class GroupTotals
- * @extends Sleek.NonDataRow
+ * @extends NonDataRow
  * @constructor
  */
  export class GroupTotals<TEntity = any> extends NonDataRow {
@@ -113,22 +113,22 @@ export class Group<TEntity = any> extends NonDataRow {
      */
     initialized: boolean = false;
 
-    /** 
+    /**
      * Contains sum
      */
     sum?: number;
 
-    /** 
+    /**
      * Contains avg
      */
     avg?: number;
 
-    /** 
+    /**
      * Contains min
      */
     min?: any;
 
-    /** 
+    /**
      * Contains max
      */
     max?: any;

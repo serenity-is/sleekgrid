@@ -33,12 +33,12 @@ export function applyFormatterResultToCellNode(fmtResult: FormatterResult | stri
         delete cellNode.dataset.fmtatt;
     }
 
-    const isFmtResult = fmtResult != null && typeof fmtResult !== "string" && Object.prototype.toString.call(fmtResult) !== '[object Object]';
+    const isFmtResult = fmtResult != null && typeof fmtResult !== 'string' && Object.prototype.toString.call(fmtResult) === '[object Object]';
 
     var oldFmtCls = cellNode.dataset?.fmtcls as string;
     if (oldFmtCls?.length && (!isFmtResult || fmtResult.addClass != oldFmtCls)) {
         removeClass(cellNode, oldFmtCls);
-        if (!isFmtResult || !fmtResult.addClass?.length)
+        if (!isFmtResult || !fmtResult.addClass.length)
             delete cellNode.dataset.fmtcls;
     }
 
@@ -67,6 +67,11 @@ export function applyFormatterResultToCellNode(fmtResult: FormatterResult | stri
                 }
                 cellNode.dataset.fmtatt = keys.join(',');
             }
+        }
+
+        if (fmtResult.addClass?.length) {
+            addClass(cellNode, fmtResult.addClass);
+            cellNode.dataset.fmtcls = fmtResult.addClass;
         }
     }
 }
