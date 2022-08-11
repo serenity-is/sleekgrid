@@ -637,36 +637,6 @@ export class Grid<TItem = any> {
             return htmlEncode(total?.toString());
     }
 
-    private groupTotalText(totals: GroupTotals, columnDef: Column<TItem>, key: string): string {
-        var ltKey = (key.substring(0, 1).toUpperCase() + key.substring(1));
-        //@ts-ignore
-        var text = (typeof Q !== "undefined" && Q.tryGetText && Q.tryGetText(ltKey)) || ltKey;
-
-        var total = totals[key][columnDef.field];
-        total = this.formatGroupTotal(total, columnDef);
-
-        return "<span class='aggregate agg-" + key + "'  title='" + text + "'>" +
-            total +
-            "</span>";
-    }
-
-    private groupTotalsFormatter(totals: GroupTotals, columnDef: Column<TItem>): string {
-        if (!totals || !columnDef)
-            return "";
-
-        var text: string = null;
-        var self = this;
-
-        ["sum", "avg", "min", "max", "cnt"].forEach(function (key) {
-            if (text == null && totals[key] && totals[key][columnDef.field] != null) {
-                text = self.groupTotalText(totals, columnDef, key);
-                return false;
-            }
-        });
-
-        return text || "";
-    }
-
     private createColumnHeaders(): void {
         const headerCols = this._layout.getHeaderCols();
         headerCols.forEach(hc => {
@@ -1382,7 +1352,7 @@ export class Grid<TItem = any> {
             this.invalidateAllRows();
             this.createColumnHeaders();
             this.createColumnFooters();
-            this.updateFooterTotals();
+            this.updateGrandTotals();
             this.removeCssRules();
             this.createCssRules();
             this.resizeCanvas();
@@ -1443,7 +1413,7 @@ export class Grid<TItem = any> {
     private viewOnRowsChanged = (_: any, args: { rows: number[] }): void => {
         this.invalidateRows(args.rows);
         this.render();
-        this.updateFooterTotals();
+        this.updateGrandTotals();
     }
 
     private viewOnDataChanged = (): void => {
@@ -1822,7 +1792,7 @@ export class Grid<TItem = any> {
         this.updateRowCount();
         this.invalidateAllRows();
         this.render();
-        this.updateFooterTotals();
+        this.updateGrandTotals();
     }
 
     invalidateAllRows(): void {
@@ -2436,26 +2406,24 @@ export class Grid<TItem = any> {
         }
     }
 
-    private updateFooterTotals(): void {
+    private updateGrandTotals(): void {
         if (!this._options.showFooterRow || !this._initialized)
             return;
 
-        var totals = null;
-        if (this._data.getGrandTotals) {
+        var totals;
+        if (this._data && this._data.getGrandTotals)
             totals = this._data.getGrandTotals();
-        }
+        totals = totals ?? {};
 
         var cols = this._cols;
-        for (var i = 0; i < cols.length; i++) {
-            var m = cols[i];
-
-            var content;
-            if (m.field && totals) {
-                content = (m.groupTotalsFormatter && m.groupTotalsFormatter(totals, m, this)) ||
-                    (this.groupTotalsFormatter && this.groupTotalsFormatter(totals, m)) || "";
+        for (var m of cols) {
+            if (m.id != void 0) {
+                var formatter = m.groupTotalsFormatter ?? this._options.groupTotalsFormatter;
+                if (!formatter)
+                    continue;
+                var content = formatter(totals, m, this) ?? '';
+                this.getFooterRowColumn(m.id).innerHTML = content;
             }
-
-            this.getFooterRowColumn(m.id).innerHTML = content;
         }
     }
 

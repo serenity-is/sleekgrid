@@ -3,6 +3,8 @@ import { EditorLock, GlobalEditorLock } from "../core/editlock";
 import type { EditCommand, EditorFactory } from "./editor";
 import { ColumnFormatter, FormatterFactory, defaultFormatter } from "./formatting";
 import { LayoutEngine as LayoutEngine } from "./layout";
+import { GroupTotals } from "../core";
+import { Grid } from "./grid";
 
 export interface GridOptions<TItem = any> {
     addNewRowCssClass?: string;
@@ -46,6 +48,7 @@ export interface GridOptions<TItem = any> {
     fullWidthRows?: boolean;
     groupingPanel?: boolean,
     groupingPanelHeight?: number;
+    groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: Grid<TItem>) => string;
     headerRowHeight?: number;
     jQuery?: JQueryStatic;
     leaveSpaceForNewRows?: boolean;
