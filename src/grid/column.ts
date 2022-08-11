@@ -1,7 +1,7 @@
 import type { Grid } from "./grid";
 import type { Editor, ValidationResult } from "./editor";
 import type { AsyncPostCleanup, AsyncPostRender, ColumnFormatter } from "./formatting";
-import { GroupTotals } from "../core/index";
+import { GroupTotals } from "../core";
 
 export interface Column<TItem = any> {
     asyncPostRender?: AsyncPostRender<TItem>;

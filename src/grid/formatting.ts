@@ -1,4 +1,4 @@
-import { addClass, htmlEncode, removeClass } from "../core/index";
+import { htmlEncode, removeClass } from "../core";
 import type { Column } from "./column";
 import type { Grid } from "./grid";
 

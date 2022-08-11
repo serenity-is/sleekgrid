@@ -1,3 +1,5 @@
+import path, { resolve } from "path";
+
 export function globalExternals(filter, externals) {
     return {
         name: "global-externals",

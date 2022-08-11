@@ -1,4 +1,4 @@
-import { attrEncode, disableSelection, H, htmlEncode, EditController, EditorLock, Event, IEventData, EventData, keyCode, GroupTotals, NonDataRow, preClickClassName, Range, addClass, removeClass } from "../core/index";
+import { attrEncode, disableSelection, H, htmlEncode, EditController, EditorLock, Event, IEventData, EventData, keyCode, GroupTotals, NonDataRow, preClickClassName, Range, addClass, removeClass } from "../core";
 import { Column, columnDefaults, ColumnSort, ItemMetadata } from "./column";
 import { EditCommand, Editor } from "./editor";
 import { applyFormatterResultToCellNode, CellStylesHash, ColumnFormatter, FormatterResult } from "./formatting";
@@ -33,7 +33,6 @@ export class Grid<TItem = any> {
     private _currentEditor: Editor = null;
     private _data: any;
     private _editController: EditController;
-    private _hasJQuery = typeof jQuery !== "undefined";
     private _headerColumnWidthDiff: number = 0;
     private _hEditorLoader: number = null;
     private _hPostRender: number = null;
@@ -43,6 +42,7 @@ export class Grid<TItem = any> {
     private _initColById: { [key: string]: number };
     private _initCols: Column<TItem>[];
     private _initialized = false;
+    private _jQuery: JQueryStatic;
     private _jumpinessCoefficient: number;
     private _lastRenderTime: number;
     private _layout: LayoutEngine;
@@ -126,7 +126,10 @@ export class Grid<TItem = any> {
         this._data = data;
         this._colDefaults = Object.assign({}, columnDefaults);
 
-        if (this._hasJQuery && container instanceof jQuery)
+        this._options = options = Object.assign({}, gridDefaults, options);
+        options.jQuery = this._jQuery = options.jQuery === void 0 ? (typeof jQuery !== "undefined" ? jQuery : void 0) : void 0;
+
+        if (this._jQuery && container instanceof this._jQuery)
             this._container = container[0];
         else if (container instanceof Element)
             this._container = container as HTMLElement;
@@ -149,8 +152,6 @@ export class Grid<TItem = any> {
                 options.showGroupingPanel = options.showPreHeaderPanel;
         }
 
-        options = Object.assign({}, gridDefaults, options);
-        this._options = options;
         this._options.rtl = this._options.rtl ??
             (document.body.classList.contains('rtl') || (typeof getComputedStyle != "undefined" &&
                 getComputedStyle(this._container).direction == 'rtl'));
@@ -163,8 +164,8 @@ export class Grid<TItem = any> {
             "cancelCurrentEdit": this.cancelCurrentEdit.bind(this)
         };
 
-        if (this._hasJQuery)
-            $(this._container).empty();
+        if (this._jQuery)
+            this._jQuery(this._container).empty();
         else
             this._container.innerHTML = '';
 
@@ -251,11 +252,11 @@ export class Grid<TItem = any> {
 
         var viewports = this.getViewports();
 
-        if (this._hasJQuery && !this._options.enableTextSelectionOnCells) {
+        if (this._jQuery && !this._options.enableTextSelectionOnCells) {
             // disable text selection in grid cells except in input and textarea elements
             // (this is IE-specific, because selectstart event will only fire in IE)
-            $(viewports).on("selectstart.ui", function () {
-                return $(this).is("input,textarea");
+            this._jQuery(viewports).on("selectstart.ui", () => {
+                return this._jQuery(this).is("input,textarea");
             });
         }
 
@@ -287,8 +288,8 @@ export class Grid<TItem = any> {
             });
         });
 
-        if (this._hasJQuery && ($.fn as any).mousewheel && (this.hasFrozenColumns() || this.hasFrozenRows())) {
-            $(viewports).on("mousewheel", this.handleMouseWheel.bind(this));
+        if (this._jQuery && (this._jQuery.fn as any).mousewheel && (this.hasFrozenColumns() || this.hasFrozenRows())) {
+            this._jQuery(viewports).on("mousewheel", this.handleMouseWheel.bind(this));
         }
 
         this._layout.getHeaderCols().forEach(hs => {
@@ -321,8 +322,8 @@ export class Grid<TItem = any> {
             canvas.addEventListener("contextmenu", this.handleContextMenu.bind(this));
         });
 
-        if (this._hasJQuery && ($.fn as any).drag) {
-            $(canvases)
+        if (this._jQuery && (this._jQuery.fn as any).drag) {
+            this._jQuery(canvases)
                 .on("draginit", this.handleDragInit.bind(this))
                 .on("dragstart", { distance: 3 }, this.handleDragStart.bind(this))
                 .on("drag", this.handleDrag.bind(this))
@@ -339,8 +340,8 @@ export class Grid<TItem = any> {
         // Work around http://crbug.com/312427.
         if (navigator.userAgent.toLowerCase().match(/webkit/) &&
             navigator.userAgent.toLowerCase().match(/macintosh/) &&
-            this._hasJQuery) {
-            $(canvases).on("mousewheel", this.handleMouseWheel.bind(this));
+            this._jQuery) {
+            this._jQuery(canvases).on("mousewheel", this.handleMouseWheel.bind(this));
         }
     }
 
@@ -427,7 +428,7 @@ export class Grid<TItem = any> {
 
     getCanvases(): JQuery | HTMLElement[] {
         var canvases = this._layout.getCanvasNodes();
-        return this._hasJQuery ? $(canvases) : canvases;
+        return this._jQuery ? this._jQuery(canvases) : canvases;
     }
 
     getActiveCanvasNode(e?: IEventData): HTMLElement {
@@ -582,8 +583,8 @@ export class Grid<TItem = any> {
                     }
                 })
 
-            if (this._hasJQuery) {
-                $(frc).empty();
+            if (this._jQuery) {
+                this._jQuery(frc).empty();
             }
             else
                 frc.innerHTML = '';
@@ -595,7 +596,7 @@ export class Grid<TItem = any> {
 
             var footerRowCell = H("div", { class: "slick-footerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? ' ui-state-default' : '') });
             footerRowCell.dataset.c = i.toString();
-            this._hasJQuery && $(footerRowCell).data("column", m);
+            this._jQuery && this._jQuery(footerRowCell).data("column", m);
 
             if (m.footerCssClass)
                 addClass(footerRowCell, m.footerCssClass);
@@ -680,8 +681,8 @@ export class Grid<TItem = any> {
                     }
                 });
 
-            if (this._hasJQuery) {
-                $(hc).empty();
+            if (this._jQuery) {
+                this._jQuery(hc).empty();
             }
             else {
                 hc.innerHTML = '';
@@ -711,7 +712,7 @@ export class Grid<TItem = any> {
             }, name);
 
             header.dataset.c = i.toString();
-            this._hasJQuery && $(header).data("column", m);
+            this._jQuery && this._jQuery(header).data("column", m);
 
             m.headerCssClass && addClass(header, m.headerCssClass);
 
@@ -739,7 +740,7 @@ export class Grid<TItem = any> {
 
                 var headerRowCell = H("div", { class: "slick-headerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? " ui-state-default" : "") });
                 headerRowCell.dataset.c = i.toString();
-                this._hasJQuery && $(headerRowCell).data("column", m);
+                this._jQuery && this._jQuery(headerRowCell).data("column", m);
                 headerRowTarget.appendChild(headerRowCell);
 
                 this.trigger(this.onHeaderRowCellRendered, {
@@ -822,8 +823,8 @@ export class Grid<TItem = any> {
     }
 
     private setupColumnReorder(): void {
-        if (this._hasJQuery)
-            ($(this._layout.getHeaderCols()).filter(":ui-sortable") as any).sortable("destroy");
+        if (this._jQuery)
+            (this._jQuery(this._layout.getHeaderCols()).filter(":ui-sortable") as any).sortable("destroy");
         var columnScrollTimer: number = null;
 
         var scrollColumnsRight = () => {
@@ -837,7 +838,7 @@ export class Grid<TItem = any> {
         var canDragScroll: boolean;
 
         var hasGrouping = this._options.groupingPanel;
-        ($([this._layout.getHeaderCols()]) as any).sortable({
+        (this._jQuery([this._layout.getHeaderCols()]) as any).sortable({
             containment: hasGrouping ? undefined : "parent",
             distance: 3,
             axis: hasGrouping ? undefined : "x",
@@ -851,18 +852,18 @@ export class Grid<TItem = any> {
                 ui.placeholder.outerHeight(ui.helper.outerHeight());
                 ui.placeholder.outerWidth(ui.helper.outerWidth());
                 canDragScroll = !this.hasFrozenColumns() ||
-                    (ui.placeholder.offset()[this._options.rtl ? 'right' : 'left'] + Math.round(ui.placeholder.width())) > $(this._layout.getScrollContainerX()).offset()[this._options.rtl ? 'right' : 'left'];
-                $(ui.helper).addClass("slick-header-column-active");
+                    (ui.placeholder.offset()[this._options.rtl ? 'right' : 'left'] + Math.round(ui.placeholder.width())) > this._jQuery(this._layout.getScrollContainerX()).offset()[this._options.rtl ? 'right' : 'left'];
+                this._jQuery(ui.helper).addClass("slick-header-column-active");
             },
             beforeStop: (_: any, ui: any) => {
-                $(ui.helper).removeClass("slick-header-column-active");
+                this._jQuery(ui.helper).removeClass("slick-header-column-active");
                 if (hasGrouping) {
-                    var $headerDraggableGroupBy = $(this.getGroupingPanel());
-                    var hasDroppedColumn = $headerDraggableGroupBy
+                    var headerDraggableGroupBy = this._jQuery(this.getGroupingPanel());
+                    var hasDroppedColumn = headerDraggableGroupBy
                         .find(".slick-dropped-grouping").length;
                     if (hasDroppedColumn > 0) {
-                        $headerDraggableGroupBy.find(".slick-dropped-placeholder").hide();
-                        $headerDraggableGroupBy.find(".slick-dropped-grouping").show();
+                        headerDraggableGroupBy.find(".slick-dropped-placeholder").hide();
+                        headerDraggableGroupBy.find(".slick-dropped-grouping").show();
                     }
                 }
             },
@@ -872,7 +873,7 @@ export class Grid<TItem = any> {
                         columnScrollTimer = setInterval(
                             scrollColumnsRight, 100);
                     }
-                } else if (canDragScroll && (e.originalEvent as any).pageX < $(this._layout.getScrollContainerX()).offset().left) {
+                } else if (canDragScroll && (e.originalEvent as any).pageX < this._jQuery(this._layout.getScrollContainerX()).offset().left) {
                     if (!(columnScrollTimer)) {
                         columnScrollTimer = setInterval(
                             scrollColumnsLeft, 100);
@@ -888,14 +889,14 @@ export class Grid<TItem = any> {
                 columnScrollTimer = null;
 
                 if (cancel || !this.getEditorLock().commitCurrentEdit()) {
-                    ($(e.target) as any).sortable("cancel");
+                    (this._jQuery(e.target) as any).sortable("cancel");
                     return;
                 }
 
                 var reorderedCols;
                 this._layout.getHeaderCols().forEach(el =>
                     reorderedCols = sortToDesiredOrderAndKeepRest(this._initCols,
-                        ($(el) as any).sortable("toArray").map((x: string) => x.substring(this._uid.length))));
+                        (this._jQuery(el) as any).sortable("toArray").map((x: string) => x.substring(this._uid.length))));
 
                 this.setColumns(reorderedCols);
                 this.trigger(this.onColumnsReordered, {});
@@ -929,7 +930,7 @@ export class Grid<TItem = any> {
             return;
         }
 
-        const noJQueryDrag = !this._hasJQuery || !$.fn || !($.fn as any).drag;
+        const noJQueryDrag = !this._jQuery || !this._jQuery.fn || !(!this._jQuery.fn as any).drag;
         columnElements.forEach((el, colIdx) => {
 
             if (colIdx < firstResizable || (this._options.forceFitColumns && colIdx >= lastResizable)) {
@@ -1011,7 +1012,7 @@ export class Grid<TItem = any> {
                 handle.addEventListener("dragover", (e: any) => { e.preventDefault(); e.dataTransfer.effectAllowed = "move"; });
             }
             else {
-                ($(handle) as any)
+                (this._jQuery(handle) as any)
                     .on("dragstart", dragStart)
                     .on("drag", drag)
                     .on("dragend", dragEnd);
@@ -1136,17 +1137,17 @@ export class Grid<TItem = any> {
             this.unregisterPlugin(this._plugins[i]);
         }
 
-        if (this._options.enableColumnReorder && this._hasJQuery) {
-            ($(this._layout.getHeaderCols()).filter(":ui-sortable") as any).sortable("destroy");
+        if (this._options.enableColumnReorder && this._jQuery) {
+            (this._jQuery(this._layout.getHeaderCols()).filter(":ui-sortable") as any).sortable("destroy");
         }
 
         this.unbindAncestorScrollEvents();
-        $(this._container).off(".slickgrid");
+        this._jQuery(this._container).off(".slickgrid");
         this.removeCssRules();
 
         var canvasNodes = this._layout.getCanvasNodes();
-        if (this._hasJQuery)
-            $(canvasNodes).off("draginit dragstart dragend drag");
+        if (this._jQuery)
+            this._jQuery(canvasNodes).off("draginit dragstart dragend drag");
         else
             canvasNodes.forEach(el => el.remove());
 
@@ -1411,7 +1412,7 @@ export class Grid<TItem = any> {
             this.invalidateRow(this.getDataLength());
         }
 
-        this._options = $.extend(this._options, args);
+        this._options = Object.assign(this._options, args);
         this.validateAndEnforceOptions();
         this._layout.afterSetOptions(args);
 
@@ -1511,8 +1512,8 @@ export class Grid<TItem = any> {
             this._options.showTopPanel = !!visible;
 
             this._layout.getTopPanelNodes().forEach(el => {
-                if (this._hasJQuery)
-                    $(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
+                if (this._jQuery)
+                    this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
                 else {
                     el.style.display = visible ? '' : 'none';
                     this.resizeCanvas();
@@ -1526,8 +1527,8 @@ export class Grid<TItem = any> {
             this._options.showColumnHeader = visible;
             this._layout.getHeaderCols().forEach(n => {
                 const el = n.parentElement;
-                if (animate && this._hasJQuery)
-                    $(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
+                if (animate && this._jQuery)
+                    this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
                 else {
                     el.style.display = visible ? '' : 'none';
                     this.resizeCanvas();
@@ -1541,8 +1542,8 @@ export class Grid<TItem = any> {
             this._options.showFooterRow = !!visible;
             this._layout.getFooterRowCols().forEach(n => {
                 const el = n.parentElement;
-                if (this._hasJQuery)
-                    $(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
+                if (this._jQuery)
+                    this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
                 else {
                     el.style.display = visible ? '' : 'none';
                     this.resizeCanvas();
@@ -1558,8 +1559,8 @@ export class Grid<TItem = any> {
                 return;
 
             const el = this._groupingPanel;
-            if (this._hasJQuery)
-                $(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
+            if (this._jQuery)
+                this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
             else {
                 el.style.display = visible ? '' : 'none';
                 this.resizeCanvas();
@@ -1576,8 +1577,8 @@ export class Grid<TItem = any> {
             this._options.showHeaderRow = visible;
             this._layout.getHeaderRowCols().forEach(n => {
                 const el = n.parentElement;
-                if (this._hasJQuery)
-                    $(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
+                if (this._jQuery)
+                    this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
                 else {
                     el.style.display = visible ? '' : 'none';
                     this.resizeCanvas();
@@ -1608,7 +1609,7 @@ export class Grid<TItem = any> {
     private scrollTo(y: number): void {
         const vpi = this._viewportInfo;
         y = Math.max(y, 0);
-        y = Math.min(y, vpi.virtualHeight - Math.round($(this._layout.getScrollContainerY()).height()) + ((vpi.hasHScroll || this.hasFrozenColumns()) ? this._scrollDims.height : 0));
+        y = Math.min(y, vpi.virtualHeight - Math.round(this._jQuery(this._layout.getScrollContainerY()).height()) + ((vpi.hasHScroll || this.hasFrozenColumns()) ? this._scrollDims.height : 0));
 
         var oldOffset = this._pageOffset;
 
@@ -1868,7 +1869,7 @@ export class Grid<TItem = any> {
             columnIdx: columnIdx,
             rowIdx: rowIdx
         });
-        $(cellnode).detach();
+        this._jQuery(cellnode).detach();
     }
 
     private removeRowFromCache(row: number): void {
@@ -2724,7 +2725,7 @@ export class Grid<TItem = any> {
     flashCell(row: number, cell: number, speed?: number): void {
         speed = speed || 100;
         if (this._rowsCache[row]) {
-            var $cell = $(this.getCellNode(row, cell));
+            var cellEl = this._jQuery(this.getCellNode(row, cell));
             toggleCellClass(4);
         }
 
@@ -2735,8 +2736,8 @@ export class Grid<TItem = any> {
                 return;
             }
             setTimeout(function () {
-                $cell.queue(function () {
-                    $cell.toggleClass(klass).dequeue();
+                cellEl.queue(function () {
+                    cellEl.toggleClass(klass).dequeue();
                     toggleCellClass(times - 1);
                 });
             }, speed);
@@ -2887,7 +2888,7 @@ export class Grid<TItem = any> {
             // if this click resulted in some cell child node getting focus,
             // don't steal it back - keyboard events will still bubble up
             // IE9+ seems to default DIVs to tabIndex=0 instead of -1, so check for cell clicks directly.
-            if (e.target != document.activeElement || $(e.target).hasClass("slick-cell")) {
+            if (e.target != document.activeElement || this._jQuery(e.target).hasClass("slick-cell")) {
                 this.setFocus();
             }
         }
@@ -2914,13 +2915,13 @@ export class Grid<TItem = any> {
     }
 
     private handleContextMenu(e: JQueryMouseEventObject): void {
-        var $cell = $(e.target).closest(".slick-cell", this._container);
-        if ($cell.length === 0) {
+        var cellEl = e.target.closest(".slick-cell");
+        if (!cellEl) {
             return;
         }
 
         // are we editing this cell?
-        if (this._activeCellNode === $cell[0] && this._currentEditor != null) {
+        if (this._activeCellNode === cellEl && this._currentEditor != null) {
             return;
         }
 
@@ -3015,8 +3016,8 @@ export class Grid<TItem = any> {
             return null;
 
         var cell = this.getCellFromNode(cellNode);
-        if (cell === null && this._hasJQuery)
-            return $(cell).data("column") as Column<TItem>;
+        if (cell === null && this._jQuery)
+            return this._jQuery(cell).data("column") as Column<TItem>;
 
         return this._cols[cell];
     }

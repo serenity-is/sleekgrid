@@ -1,4 +1,4 @@
-import { H } from "../core/index";
+import { H } from "../core";
 import type { Column } from "./column";
 import { Position } from "./types";
 

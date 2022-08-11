@@ -47,6 +47,7 @@ export interface GridOptions<TItem = any> {
     groupingPanel?: boolean,
     groupingPanelHeight?: number;
     headerRowHeight?: number;
+    jQuery?: JQueryStatic;
     leaveSpaceForNewRows?: boolean;
     layoutEngine?: LayoutEngine;
     minBuffer?: number;

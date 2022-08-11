@@ -1,4 +1,4 @@
-import type { Event, Range } from "../core/index";
+import type { Event, Range } from "../core";
 import type { Grid } from "./grid";
 
 export interface IPlugin {

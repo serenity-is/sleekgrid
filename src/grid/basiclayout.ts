@@ -1,4 +1,4 @@
-import { H, spacerDiv } from "../core/index";
+import { H, spacerDiv } from "../core";
 import { Column } from "./column";
 import { LayoutEngine, LayoutHost } from "./layout";
 

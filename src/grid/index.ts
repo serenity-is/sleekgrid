@@ -5,5 +5,5 @@ export * from "./formatting";
 export * from "./gridoptions";
 export * from "./grid";
 export { BasicLayout } from "./basiclayout"
-export { LayoutEngine, LayoutHost } from "./layout";
-export { ViewRange } from "./types";
+export type { LayoutEngine, LayoutHost } from "./layout";
+export type { IPlugin, Position, RowCell, SelectionModel, ViewRange, ViewportInfo } from "./types";

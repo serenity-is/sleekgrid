@@ -33,10 +33,10 @@
     "table"
   ],
   "author": "Volkan Ceylan, Furkan Evran, Victor Tomaili (https://serenity.is)",
-  "repository": "serenity-is/SleekGrid",
+  "repository": "serenity-is/sleekgrid",
   "license": "MIT",
-  "bugs": "https://github.com/serenity-is/SleekGrid/issues",
-  "homepage": "https://github.com/serenity-is/SleekGrid#readme",
+  "bugs": "https://github.com/serenity-is/sleekGrid/issues",
+  "homepage": "https://github.com/serenity-is/sleekGrid#readme",
   "devDependencies": {
     "@happy-dom/jest-environment": "^6.0.4",
     "@types/jest": "^28.1.6",

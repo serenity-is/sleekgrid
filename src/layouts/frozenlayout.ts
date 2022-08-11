@@ -1,5 +1,5 @@
-import { disableSelection, H, spacerDiv } from "../core/index";
-import { Column, gridDefaults, GridOptions, LayoutEngine, LayoutHost, ViewRange } from "../grid/index";
+import { disableSelection, H, spacerDiv } from "../core";
+import { Column, GridOptions, LayoutEngine, LayoutHost, ViewRange } from "../grid";
 
 export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
     var canvasWidth: number;

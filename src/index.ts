@@ -1,2 +1,3 @@
-export * from "./core/index";
-export * from "./grid/index";
+export * from "./core";
+export * from "./grid";
+export * from "./layouts/frozenlayout";

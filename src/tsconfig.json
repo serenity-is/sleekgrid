@@ -1,3 +1,31 @@
 {
-  "extends": "../build/tsconfig.base.json"
-}
+    "compileOnSave": false,
+    "compilerOptions": {
+      "allowJs": false,
+      "experimentalDecorators": true,
+      "declaration": true,
+      "emitBOM": true,
+      "lib": [
+        "ES2015",
+        "DOM"
+      ],
+      "newLine": "lf",
+      "noEmit": true,
+      "noEmitHelpers": false,
+      "noImplicitAny": true,
+      "isolatedModules": true,
+      "sourceMap": false,
+      "skipLibCheck": true,
+      "outDir": "./dist",
+      "suppressImplicitAnyIndexErrors": true,
+      "moduleResolution": "Node",
+      "target": "ESNext",
+      "typeRoots": [
+        "../node_modules/@types"
+      ],
+      "types": [
+        "jquery"
+      ],
+      "useDefineForClassFields": false
+    }
+  }
