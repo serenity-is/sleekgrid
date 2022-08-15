@@ -2,8 +2,8 @@ export type Handler<TArgs, TEventData extends IEventData = IEventData> = (e: TEv
 
 export interface IEventData {
     readonly type?: string;
-    currentTarget?: EventTarget;
-    target?: EventTarget;
+    currentTarget?: EventTarget | null;
+    target?: EventTarget | null;
     originalEvent?: any;
     defaultPrevented?: boolean;
     preventDefault?(): void;

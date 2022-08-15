@@ -16,7 +16,7 @@
       "isolatedModules": true,
       "sourceMap": false,
       "skipLibCheck": true,
-      "outDir": "./dist",
+      "outDir": "../dist",
       "suppressImplicitAnyIndexErrors": true,
       "moduleResolution": "Node",
       "target": "ESNext",

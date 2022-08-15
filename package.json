@@ -1,20 +1,22 @@
 {
   "name": "@serenity-is/sleekgrid",
-  "version": "1.2.4",
+  "version": "1.2.8",
   "description": "A modern Data Grid / Spreadsheet component",
   "type": "module",
-  "types": "./src/index.ts",
+  "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "exports": {
     ".": {
         "types": "./src/index.ts",
+        "main": "./dist/index.js",
         "import": "./dist/index.js"
-    }
+    },
+    "./build/defines": "./build/defines.js"
   },
   "files": [
     "build/defines.js",
-    "build/tsconfig.base.json",
+    "dist/**/*.ts",
     "dist/**/*.css",
     "dist/**/*.js",
     "dist/**/*.map",
