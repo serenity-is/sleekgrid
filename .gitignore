@@ -1,6 +1,8 @@
 .vs/
 _site
-/dist
+/dist/**/*.js
+/dist/**/*.map
+/dist/**/*.min.js
 .jekyll-*
 GemFile*
 node_modules/
