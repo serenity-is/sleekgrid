@@ -1,6 +1,4 @@
-import { H } from "../core";
-import type { Column } from "./column";
-import { Position } from "./types";
+import { Column, H, Position } from "../core";
 
 // shared across all grids on the page
 let maxSupportedCssHeight: number;  // browser's breaking point

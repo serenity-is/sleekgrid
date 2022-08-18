@@ -1,10 +1,6 @@
-import type { Column } from "./column";
-import { EditorLock, GlobalEditorLock } from "../core/editlock";
-import type { EditCommand, EditorFactory } from "./editor";
-import { ColumnFormatter, FormatterFactory, defaultFormatter } from "./formatting";
-import { LayoutEngine as LayoutEngine } from "./layout";
-import { GroupTotals } from "../core";
-import { Grid } from "./grid";
+import type { Column, EditCommand, EditorFactory, EditorLock } from "../core";
+import { ColumnFormat, CompatFormatter, defaultColumnFormat, FormatterFactory, GlobalEditorLock, GroupTotals } from "../core";
+import { LayoutEngine } from "./layout";
 
 export interface GridOptions<TItem = any> {
     addNewRowCssClass?: string;
@@ -22,7 +18,8 @@ export interface GridOptions<TItem = any> {
     createPreHeaderPanel?: boolean;
     dataItemColumnValueExtractor?: (item: TItem, column: Column<TItem>) => void;
     defaultColumnWidth?: number;
-    defaultFormatter?: ColumnFormatter<TItem>;
+    defaultFormat?: ColumnFormat<TItem>;
+    defaultFormatter?: CompatFormatter<TItem>;
     editable?: boolean;
     editCommandHandler?: (item: TItem, column: Column<TItem>, command: EditCommand) => void;
     editorFactory?: EditorFactory;
@@ -48,7 +45,7 @@ export interface GridOptions<TItem = any> {
     fullWidthRows?: boolean;
     groupingPanel?: boolean,
     groupingPanelHeight?: number;
-    groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: Grid<TItem>) => string;
+    groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
     headerRowHeight?: number;
     jQuery?: JQueryStatic;
     leaveSpaceForNewRows?: boolean;
@@ -89,7 +86,7 @@ export const gridDefaults: GridOptions = {
     cellFlashingCssClass: "flashing",
     dataItemColumnValueExtractor: null,
     defaultColumnWidth: 80,
-    defaultFormatter: defaultFormatter,
+    defaultFormat: defaultColumnFormat,
     editable: false,
     editorFactory: null,
     editorLock: GlobalEditorLock,

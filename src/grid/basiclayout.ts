@@ -1,5 +1,4 @@
-import { H, spacerDiv } from "../core";
-import { Column } from "./column";
+import { Column, H, spacerDiv } from "../core";
 import { LayoutEngine, LayoutHost } from "./layout";
 
 export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {

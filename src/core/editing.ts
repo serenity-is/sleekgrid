@@ -1,3 +1,66 @@
+import { Column, ColumnMetadata } from "./column";
+import { IEventData } from "./event";
+
+export interface Position {
+    bottom?: number;
+    height?: number;
+    left?: number;
+    right?: number;
+    top?: number;
+    visible?: boolean;
+    width?: number;
+}
+
+export interface ValidationResult {
+    valid: boolean;
+    msg?: string;
+}
+
+export interface EditorOptions {
+    grid: unknown;
+    gridPosition?: Position;
+    position?: Position;
+    column?: Column;
+    columnMetaData?: ColumnMetadata<any>;
+    container?: HTMLElement;
+    item?: any;
+    event?: IEventData;
+    commitChanges?: () => void,
+    cancelChanges?: () => void
+}
+
+export interface EditorFactory {
+    getEditor(column: Column): Editor;
+}
+
+export interface EditCommand {
+    row: number;
+    cell: number;
+    editor: Editor;
+    serializedValue: any;
+    prevSerializedValue: any;
+    execute: () => void;
+    undo: () => void;
+}
+
+
+export interface Editor {
+    new(options: EditorOptions): Editor;
+    destroy(): void;
+    applyValue(item: any, value: any): void;
+    focus(): void;
+    isValueChanged(): boolean;
+    keyCaptureList?: number[];
+    loadValue(value: any): void;
+    serializeValue(): any;
+    position?(pos: Position): void;
+    preClick?(): void;
+    hide?(): void;
+    show?(): void;
+    suppressClearOnEdit?: boolean;
+    validate?(): ValidationResult;
+}
+
 export interface EditController {
     commitCurrentEdit(): boolean;
     cancelCurrentEdit(): boolean;

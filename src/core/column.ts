@@ -1,7 +1,6 @@
-import type { Grid } from "./grid";
-import type { Editor, ValidationResult } from "./editor";
-import type { AsyncPostCleanup, AsyncPostRender, ColumnFormatter } from "./formatting";
-import { GroupTotals } from "../core";
+import type { AsyncPostCleanup, AsyncPostRender, ColumnFormat, CompatFormatter } from "./formatting";
+import { GroupTotals } from "./group";
+import { Editor, ValidationResult } from "./editing";
 
 export interface Column<TItem = any> {
     asyncPostRender?: AsyncPostRender<TItem>;
@@ -15,8 +14,9 @@ export interface Column<TItem = any> {
     frozen?: boolean;
     focusable?: boolean;
     footerCssClass?: string;
-    formatter?: ColumnFormatter<TItem>;
-    groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: Grid<TItem>) => string;
+    format?: ColumnFormat<TItem>;
+    formatter?: CompatFormatter<TItem>;
+    groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: unknown) => string;
     headerCssClass?: string;
     id?: string;
     maxWidth?: any;
@@ -43,8 +43,6 @@ export const columnDefaults: Partial<Column> = {
     sortable: false,
     minWidth: 30,
     rerenderOnResize: false,
-    headerCssClass: null,
-    footerCssClass: null,
     defaultSortAsc: true,
     focusable: true,
     selectable: true
@@ -52,7 +50,8 @@ export const columnDefaults: Partial<Column> = {
 
 export interface ColumnMetadata<TItem = any> {
     colspan: number | '*';
-    formatter?: ColumnFormatter<TItem>;
+    format?: ColumnFormat<TItem>;
+    formatter?: CompatFormatter<TItem>;
 }
 
 export interface ColumnSort {
@@ -62,6 +61,7 @@ export interface ColumnSort {
 
 export interface ItemMetadata<TItem = any> {
     columns?: { [key: string]: ColumnMetadata<TItem> };
-    formatter?: ColumnFormatter<TItem>;
+    format?: ColumnFormat<TItem>;
+    formatter?: CompatFormatter<TItem>;
 }
 

@@ -7,16 +7,6 @@ export interface IPlugin {
     destroy?: () => void;
 }
 
-export interface Position {
-    bottom?: number;
-    height?: number;
-    left?: number;
-    right?: number;
-    top?: number;
-    visible?: boolean;
-    width?: number;
-}
-
 export interface ViewportInfo {
     height: number;
     width: number;

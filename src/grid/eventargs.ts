@@ -1,6 +1,4 @@
-import type { Column } from "./column";
-import type { Editor, ValidationResult } from "./editor";
-import type { CellStylesHash } from "./formatting";
+import type { CellStylesHash, Column, Editor, ValidationResult } from "../core";
 import type { Grid } from "./grid";
 
 export interface ArgsGrid {

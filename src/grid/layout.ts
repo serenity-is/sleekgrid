@@ -1,4 +1,4 @@
-import { Column } from "./column";
+import { Column } from "../core/column";
 import { GridOptions } from "./gridoptions";
 import { CachedRow } from "./internal";
 import { RowCell, ViewportInfo, ViewRange } from "./types";

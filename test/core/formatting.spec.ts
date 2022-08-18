@@ -1,43 +1,44 @@
-import { defaultFormatter, applyFormatterResultToCellNode } from "@/grid/formatting";
+import { defaultColumnFormat, applyFormatterResultToCellNode } from "@/core/formatting";
+import { htmlEncode } from "@/core/util";
 
 describe('defaultFormatter', () => {
     it('should encode & as &amp;', () => {
-        expect(defaultFormatter(1, 1, '&')).toBe('&amp;');
+        expect(defaultColumnFormat({ value: '&' })).toBe('&amp;');
     });
 
     it('should encode < as &lt;', () => {
-        expect(defaultFormatter(1, 1, '<')).toBe('&lt;');
+        expect(defaultColumnFormat({ value: '<' })).toBe('&lt;');
     });
 
     it('should encode > as &gt;', () => {
-        expect(defaultFormatter(1, 1, '>')).toBe('&gt;');
+        expect(defaultColumnFormat({ value: '>' })).toBe('&gt;');
     });
 
     it('should encode multiple & as &amp;', () => {
-        expect(defaultFormatter(1, 1, '&&')).toBe('&amp;&amp;');
+        expect(defaultColumnFormat({ value: '&&' })).toBe('&amp;&amp;');
     });
 
     it('should encode multiple < as &lt;', () => {
-        expect(defaultFormatter(1, 1, '<<')).toBe('&lt;&lt;');
+        expect(defaultColumnFormat({ value: '<<' })).toBe('&lt;&lt;');
     });
 
     it('should encode multiple > as &gt;', () => {
-        expect(defaultFormatter(1, 1, '>>')).toBe('&gt;&gt;');
+        expect(defaultColumnFormat({ value: '>>' })).toBe('&gt;&gt;');
     });
 
     it('should encode all characters', () => {
-        expect(defaultFormatter(1, 1, '&<>')).toBe('&amp;&lt;&gt;');
+        expect(defaultColumnFormat({ value: '&<>' })).toBe('&amp;&lt;&gt;');
     });
 
     it('should return empty string if parameter is null or undefined', () => {
-        expect(defaultFormatter(1, 1, null)).toBe('');
-        expect(defaultFormatter(1, 1, undefined)).toBe('');
+        expect(defaultColumnFormat({ value: null })).toBe('');
+        expect(defaultColumnFormat({ value: undefined })).toBe('');
     });
 
     it('should convert any type to a string', () => {
-        expect(defaultFormatter(1, 1, 1)).toBe('1');
-        expect(defaultFormatter(1, 1, true)).toBe('true');
-        expect(defaultFormatter(1, 1, {})).toBe('[object Object]');
+        expect(defaultColumnFormat({ value: 1 })).toBe('1');
+        expect(defaultColumnFormat({ value: true })).toBe('true');
+        expect(defaultColumnFormat({ value: {} })).toBe('[object Object]');
     });
 });
 
@@ -48,7 +49,7 @@ describe('applyFormatterResultToCellNode', () => {
 
         expect(cellNode.dataset.fmtatt).not.toBe(undefined);
 
-        applyFormatterResultToCellNode('', cellNode);
+        applyFormatterResultToCellNode({}, '', cellNode);
 
         expect(cellNode.dataset.fmtatt).toBe(undefined);
     });
@@ -60,7 +61,7 @@ describe('applyFormatterResultToCellNode', () => {
         cellNode.setAttribute('b', '2');
         cellNode.setAttribute('c', '3');
 
-        applyFormatterResultToCellNode('', cellNode);
+        applyFormatterResultToCellNode({}, '', cellNode);
 
         expect(cellNode.dataset.fmtatt).toBe(undefined);
         expect(cellNode.getAttribute('a')).toBe(null);
@@ -74,7 +75,7 @@ describe('applyFormatterResultToCellNode', () => {
 
         expect(cellNode.dataset.fmtcls).not.toBe(undefined);
 
-        applyFormatterResultToCellNode('', cellNode);
+        applyFormatterResultToCellNode({}, '', cellNode);
 
         expect(cellNode.dataset.fmtcls).toBe(undefined);
     });
@@ -84,7 +85,7 @@ describe('applyFormatterResultToCellNode', () => {
         cellNode.dataset.fmtcls = 'a b c';
         cellNode.classList.add('a', 'b', 'c');
 
-        applyFormatterResultToCellNode('', cellNode);
+        applyFormatterResultToCellNode({}, '', cellNode);
 
         expect(cellNode.dataset.fmtcls).toBe(undefined);
         expect(cellNode.classList.contains('a')).toBe(false);
@@ -96,7 +97,7 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
         cellNode.setAttribute('tooltip', 'a');
 
-        applyFormatterResultToCellNode('', cellNode);
+        applyFormatterResultToCellNode({}, '', cellNode);
 
         expect(cellNode.getAttribute('tooltip')).toBe(null);
     });
@@ -105,8 +106,8 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
 
         applyFormatterResultToCellNode({
-            toolTip: 'test'
-        }, cellNode);
+            tooltip: 'test'
+        }, undefined, cellNode);
 
         expect(cellNode.getAttribute('tooltip')).toBe('test');
     });
@@ -114,7 +115,7 @@ describe('applyFormatterResultToCellNode', () => {
     it('should set html of the element if fmtResult is string', () => {
         const cellNode = document.createElement('div');
 
-        applyFormatterResultToCellNode('test', cellNode);
+        applyFormatterResultToCellNode({}, 'test', cellNode);
 
         expect(cellNode.innerHTML).toBe('test');
     });
@@ -122,23 +123,10 @@ describe('applyFormatterResultToCellNode', () => {
     it('should set html of the element to the html in the object', () => {
         const cellNode = document.createElement('div');
 
-        applyFormatterResultToCellNode({
-            html: 'test<span>test</span>'
-        }, cellNode);
+        applyFormatterResultToCellNode({}, 'test<span>test</span>', cellNode);
 
         expect(cellNode.childElementCount).toBe(1);
         expect(cellNode.innerHTML).toBe('test<span>test</span>');
-    });
-
-    it('should set text content of the element to the text in the object', () => {
-        const cellNode = document.createElement('div');
-
-        applyFormatterResultToCellNode({
-            text: 'test<<span>test</span>'
-        }, cellNode);
-
-        expect(cellNode.childElementCount).toBe(0);
-        expect(cellNode.textContent).toBe('test<<span>test</span>');
     });
 
     it('should apply attributes using addAttrs in the object', () => {
@@ -150,7 +138,7 @@ describe('applyFormatterResultToCellNode', () => {
                 b: '2',
                 c: '3'
             }
-        }, cellNode);
+        }, undefined, cellNode);
 
         expect(cellNode.getAttribute('a')).toBe('1');
         expect(cellNode.getAttribute('b')).toBe('2');
@@ -166,7 +154,7 @@ describe('applyFormatterResultToCellNode', () => {
                 b: '2',
                 c: '3'
             }
-        }, cellNode);
+        }, undefined, cellNode);
 
         expect(cellNode.dataset.fmtatt).toBe('a,b,c');
     });
@@ -175,8 +163,8 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
 
         applyFormatterResultToCellNode({
-            toolTip: 'test'
-        }, cellNode);
+            tooltip: 'test'
+        }, undefined, cellNode);
 
         expect(cellNode.getAttribute('tooltip')).toBe('test');
     });
@@ -185,11 +173,11 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
         cellNode.innerHTML = 'test';
 
-        applyFormatterResultToCellNode(null, cellNode);
+        applyFormatterResultToCellNode({}, null, cellNode);
         expect(cellNode.innerHTML).toBe('');
 
         cellNode.innerHTML = 'test';
-        applyFormatterResultToCellNode(undefined, cellNode);
+        applyFormatterResultToCellNode({}, undefined, cellNode);
         expect(cellNode.innerHTML).toBe('');
     });
 
@@ -198,7 +186,7 @@ describe('applyFormatterResultToCellNode', () => {
 
         applyFormatterResultToCellNode({
             addClass: 'a b c'
-        }, cellNode);
+        }, undefined, cellNode);
 
         expect(cellNode.classList.contains('a')).toBe(true);
         expect(cellNode.classList.contains('b')).toBe(true);
@@ -210,7 +198,7 @@ describe('applyFormatterResultToCellNode', () => {
 
         applyFormatterResultToCellNode({
             addClass: 'a b c'
-        }, cellNode);
+        }, undefined, cellNode);
 
         expect(cellNode.dataset.fmtcls).toBe('a b c');
     });
