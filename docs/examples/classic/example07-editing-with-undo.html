@@ -7,9 +7,11 @@ demonstrates:
 controls:
 - <button onclick="undo()"><i class="fa fa-undo"></i> Undo</button>
 
+requires_scripts:
+- dist/compat/slick.formatters.js
+
 requires_slick_scripts:
 - slick.editors.js
-- slick.formatters.js
 ---
 
 <div id="myGrid"></div>
@@ -29,10 +31,6 @@ requires_slick_scripts:
         }
     }
 
-    function checkMark(row, cell, value) {
-        return `<i class="check-mark fa fa-${(value ? "check-circle text-success" : "circle opacity-25")}" style="font-size: 1.8em"></i>`;
-    }
-
     $.datepicker.setDefaults({
         buttonImage: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E`
     });
@@ -47,10 +45,10 @@ requires_slick_scripts:
         { id: "title", name: "Title", field: "title", width: 120, cssClass: "cell-title", editor: Slick.Editors.Text, validator: requiredFieldValidator },
         { id: "desc", name: "Description", field: "description", width: 100, editor: Slick.Editors.LongText },
         { id: "duration", name: "Duration", field: "duration", editor: Slick.Editors.Text },
-        { id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, formatter: Slick.Formatters.PercentCompleteBar, editor: patchedPercentCompleteEditor },
+        { id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, format: Slick.PercentCompleteBarFormat, editor: patchedPercentCompleteEditor },
         { id: "start", name: "Start", field: "start", minWidth: 110, editor: Slick.Editors.Date },
         { id: "finish", name: "Finish", field: "finish", minWidth: 110, editor: Slick.Editors.Date },
-        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", formatter: checkMark }
+        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven",  editor: Slick.Editors.Checkbox, format: Slick.CheckboxFormat }
     ];
 
     var options = {
@@ -92,15 +90,4 @@ requires_slick_scripts:
 
     var grid = new Slick.Grid("#myGrid", data, columns, options);
 
-    grid.getContainerNode().addEventListener('click', e => {
-        if (e.target.classList.contains('check-mark')) {
-            var c = grid.getCellFromEvent(e);
-            if (c) {
-                var col = grid.getColumns()[c.cell];
-                data[c.row][col.field] = !data[c.row][col.field];
-                grid.invalidateRow(c.row);
-                grid.render();
-            }
-        }
-    });
 </script>

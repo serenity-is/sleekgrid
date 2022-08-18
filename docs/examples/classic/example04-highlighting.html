@@ -44,15 +44,15 @@ controls:
     ];
     var currentServer;
 
-    function cpuUtilizationFormatter(row, cell, value, columnDef, dataContext) {
-        if (value > 90) {
-            return "<span class='load-hi'>" + value + "%</span>";
+    function cpuUtilizationFormatter(ctx) {
+        if (ctx.value > 90) {
+            return "<span class='load-hi'>" + ctx.value + "%</span>";
         }
-        else if (value > 70) {
-            return "<span class='load-medium'>" + value + "%</span>";
+        else if (ctx.value > 70) {
+            return "<span class='load-medium'>" + ctx.value + "%</span>";
         }
         else {
-            return value + "%";
+            return ctx.value + "%";
         }
     }
 
@@ -62,7 +62,7 @@ controls:
             name: "CPU" + i,
             field: i,
             width: 80,
-            formatter: cpuUtilizationFormatter
+            format: cpuUtilizationFormatter
         });
     }
 

@@ -1,5 +1,3 @@
-import path, { resolve } from "path";
-
 export function globalExternals(filter, externals) {
     return {
         name: "global-externals",
@@ -37,7 +35,7 @@ export const compatDefaults = {
     logLevel: 'info',
     sourcemap: true,
     footer: {
-        js: '["Plugins", "Formatters", "Editors"].forEach(ns => Slick[ns] = Object.assign(Slick[ns] || {}, Slick._[ns] || {})); Object.assign(Slick, Slick._); delete Slick._;'
+        js: '["Editors", "Formatters", "Plugins"].forEach(ns => Slick._[ns] && (Slick[ns] = Object.assign(Slick[ns] || {}, Slick._[ns])) && delete Slick._[ns]); Object.assign(Slick, Slick._); delete Slick._;'
     }
 }
 
