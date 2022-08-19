@@ -95,7 +95,7 @@ requires_slick_scripts:
     });
 
     grid.getContainerNode().addEventListener('click', e => {
-        if (e.target.classList.contains('slick-check-box')) {
+        if (e.target.classList.contains('slick-checkbox')) {
             var c = grid.getCellFromEvent(e);
             if (c) {
                 var col = grid.getColumns()[c.cell];

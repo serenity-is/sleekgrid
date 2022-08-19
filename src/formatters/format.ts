@@ -30,9 +30,9 @@ export function YesNoFormat(ctx: FormatterContext) {
 
 
 export function CheckboxFormat(ctx: FormatterContext) {
-    return `<i class="slick-check-box slick-edit-preclick${ctx.value ? " checked" : ""}"></i>`;
+    return `<i class="slick-checkbox slick-edit-preclick${ctx.value ? " checked" : ""}"></i>`;
 }
 
 export function CheckmarkFormat(ctx: FormatterContext) {
-    return ctx.value ? '<i class="slick-check-mark fa fa-check text-success" style="font-size: 1.5em"></i>' : '';
+    return ctx.value ? '<i class="slick-checkmark"></i>' : '';
 }

@@ -14,7 +14,6 @@ classes should alter those!
   --slick-row-odd-bg: #f9f9f9;
   --slick-padding-v: 4px;
   --slick-padding-h: 6px;
-  --slick-icon-font: 900 normal normal 1em/1 'Font Awesome 5 Free';
 }
 
 .slick-container {
@@ -112,23 +111,26 @@ classes should alter those!
 }
 
 .slick-sort-indicator {
-  font: var(--slick-icon-font);
+  margin-left: 3px;
 }
 
 .slick-sort-indicator::before {
-  content: "\F0DC";
-  opacity: 0.3;
-}
-
-.slick-sort-indicator-desc::before {
-  content: "\F0DD";
-  opacity: 1;
+  content: '';
+  display: inline-block;
+  vertical-align: -0.15em;
+  width: 1em;
+  height: 1em;
+  background: no-repeat center center url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23bbb' viewBox='0 0 32 32'%3E%3Cpath d='M 16 3.59375 L 15.28125 4.28125 L 7.28125 12.28125 L 5.59375 14 L 26.40625 14 L 24.71875 12.28125 L 16.71875 4.28125 Z M 16 6.4375 L 21.5625 12 L 10.4375 12 Z M 5.59375 18 L 7.28125 19.71875 L 15.28125 27.71875 L 16 28.40625 L 16.71875 27.71875 L 24.71875 19.71875 L 26.40625 18 Z M 10.4375 20 L 21.5625 20 L 16 25.5625 Z'/%3E%3C/svg%3E");
 }
 
 .slick-sort-indicator-asc::before {
-  content: "\F0DE";
-  opacity: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23036' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 13.5a.5.5 0 0 1-1 0V4.707L1.354 5.854a.5.5 0 1 1-.708-.708l2-1.999.007-.007a.498.498 0 0 1 .7.006l2 2a.5.5 0 1 1-.707.708L3.5 4.707V13.5zm4-9.5a.5.5 0 0 1 0-1h1a.5.5 0 0 1 0 1h-1zm0 3a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1h-3zm0 3a.5.5 0 0 1 0-1h5a.5.5 0 0 1 0 1h-5zM7 12.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 0-1h-7a.5.5 0 0 0-.5.5z'/%3E%3C/svg%3E");
 }
+
+.slick-sort-indicator-desc::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23036' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 2.5a.5.5 0 0 0-1 0v8.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L3.5 11.293V2.5zm3.5 1a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zM7.5 6a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zm0 3a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3zm0 3a.5.5 0 0 0 0 1h1a.5.5 0 0 0 0-1h-1z'/%3E%3C/svg%3E");
+}
+
 
 .slick-resizable-handle {
   position: absolute;
@@ -238,17 +240,23 @@ classes should alter those!
   font-weight: inherit;
 }
 
-.slick-check-box {
+.slick-checkbox {
   display: inline-block;
-  font: var(--slick-icon-font);
   width: 1.4em;
+  margin-top: 0.1em;
   height: 1.4em;
   border: 1px solid #ccc;
-  border-radius: 4px;
 }
 
-.slick-check-box.checked {
+.slick-checkbox.checked {
   background-color: var(--bs-primary, '#f00');
   border-color: var(--bs-primary, '#f00');
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+}
+
+.slick-checkmark {
+  display: inline-block;
+  width: 1.5em;
+  height: 1.5em;
+  background: no-repeat center center url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='%23090' class='bi bi-check-lg' viewBox='0 0 16 16'%3E%3Cpath d='M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z'/%3E%3C/svg%3E");
 }
