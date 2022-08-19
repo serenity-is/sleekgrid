@@ -15,7 +15,7 @@
       "noImplicitAny": true,
       "isolatedModules": true,
       "sourceMap": false,
-      "skipLibCheck": true,
+      "skipLibCheck": false,
       "outDir": "../dist",
       "suppressImplicitAnyIndexErrors": true,
       "moduleResolution": "Node",
