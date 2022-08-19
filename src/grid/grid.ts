@@ -1631,6 +1631,21 @@ export class Grid<TItem = any> {
         return defaultColumnFormat;
     }
 
+    getFormatterContext(row: number, cell: number): FormatterContext {
+        var column = this._cols[cell];
+        var item = this.getDataItem(row);
+        const ctx: FormatterContext = {
+            cell,
+            column,
+            grid: this,
+            item,
+            row
+        }
+        if (item)
+            ctx.value = this.getDataItemValueForColumn(item, column);
+        return ctx;
+    }
+
     private getEditor(row: number, cell: number): Editor {
         var column = this._cols[cell];
         var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
@@ -1646,10 +1661,9 @@ export class Grid<TItem = any> {
         return column.editor || (this._options.editorFactory && this._options.editorFactory.getEditor(column));
     }
 
-    private getDataItemValueForColumn(item: TItem, columnDef: Column<TItem>): any {
-        if (this._options.dataItemColumnValueExtractor) {
+    getDataItemValueForColumn(item: TItem, columnDef: Column<TItem>): any {
+        if (this._options.dataItemColumnValueExtractor)
             return this._options.dataItemColumnValueExtractor(item, columnDef);
-        }
         return item[columnDef.field];
     }
 
@@ -1910,28 +1924,16 @@ export class Grid<TItem = any> {
         if (this._currentEditor && this._activeRow === row && this._activeCell === cell) {
             this._currentEditor.loadValue(this.getDataItem(row));
         } else {
-            this.callFormatterForCellNode(cellNode, row, cell);
+            this.updateCellWithFormatter(cellNode, row, cell);
             this.invalidatePostProcessingResults(row);
         }
     }
 
-    private callFormatterForCellNode(cellNode: HTMLElement, row: number, cell: number) {
-        var column = this._cols[cell];
-        var item = this.getDataItem(row);
+    private updateCellWithFormatter(cellNode: HTMLElement, row: number, cell: number): void {
         var html: string;
-        const ctx: FormatterContext = {
-            cell,
-            column,
-            grid: this,
-            item,
-            row
-        }
-
-        if (item) {
-            ctx.value = this.getDataItemValueForColumn(item, column);
-            html = this.getFormatter(row, column)(ctx);
-        }
-
+        const ctx = this.getFormatterContext(row, cell);
+        if (ctx.item)
+            html = this.getFormatter(row, ctx.column)(ctx);
         applyFormatterResultToCellNode(ctx, html, cellNode);
     }
 
@@ -1955,7 +1957,7 @@ export class Grid<TItem = any> {
                 this._currentEditor.loadValue(d);
             }
             else {
-                this.callFormatterForCellNode(cacheEntry.cellNodesByColumnIdx[cell], row, cell);
+                this.updateCellWithFormatter(cacheEntry.cellNodesByColumnIdx[cell], row, cell);
             }
         }
 
@@ -3241,7 +3243,7 @@ export class Grid<TItem = any> {
 
         if (this._activeCellNode) {
             this._activeCellNode.classList.remove("editable", "invalid");
-            this.callFormatterForCellNode(this._activeCellNode, this._activeRow, this._activeCell);
+            this.updateCellWithFormatter(this._activeCellNode, this._activeRow, this._activeCell);
             this.invalidatePostProcessingResults(this._activeRow);
         }
 
