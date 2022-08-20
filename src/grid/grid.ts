@@ -1,14 +1,14 @@
-import { addClass, applyFormatterResultToCellNode, attrEncode, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter as importCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorLock, Event, EventData, FormatterContext, H, IEventData, ItemMetadata, keyCode, Position, preClickClassName, Range, removeClass } from "../core";
+import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter as importCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { gridDefaults, GridOptions } from "./gridoptions";
 import { absBox, addUiStateHover, autosizeColumns, CachedRow, calcMinMaxPageXOnDragStart, getInnerWidth, getMaxSupportedCssHeight, getScrollBarDimensions, getVBoxDelta, PostProcessCleanupEntry, removeUiStateHover, shrinkOrStretchColumn, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
 import { LayoutEngine } from "./layout";
-import { IPlugin, RowCell, SelectionModel, ViewportInfo, ViewRange } from "./types";
+import { IPlugin, SelectionModel, ViewportInfo, ViewRange } from "./types";
 
 
-export class Grid<TItem = any> {
+export class Grid<TItem = any> implements EditorHost {
     private _absoluteColMinWidth: number;
     private _activeCanvasNode: HTMLElement;
     private _activeCell: number;
@@ -92,16 +92,16 @@ export class Grid<TItem = any> {
     readonly onBeforeHeaderRowCellDestroy = new Event<ArgsColumnNode>();
     readonly onCellChange = new Event<ArgsCellChange>();
     readonly onCellCssStylesChanged = new Event<ArgsCssStyle>();
-    readonly onClick = new Event<ArgsCell, JQueryMouseEventObject>();
+    readonly onClick = new Event<ArgsCell, MouseEvent>();
     readonly onColumnsReordered = new Event<ArgsGrid>();
     readonly onColumnsResized = new Event<ArgsGrid>();
     readonly onCompositeEditorChange = new Event<ArgsGrid>();
-    readonly onContextMenu = new Event<ArgsGrid, JQueryEventObject>();
-    readonly onDblClick = new Event<ArgsCell, JQueryMouseEventObject>();
-    readonly onDrag = new Event<ArgsGrid, JQueryEventObject>();
-    readonly onDragEnd = new Event<ArgsGrid, JQueryEventObject>();
-    readonly onDragInit = new Event<ArgsGrid, JQueryEventObject>();
-    readonly onDragStart = new Event<ArgsGrid, JQueryEventObject>();
+    readonly onContextMenu = new Event<ArgsGrid, UIEvent>();
+    readonly onDblClick = new Event<ArgsCell, MouseEvent>();
+    readonly onDrag = new Event<ArgsGrid, UIEvent>();
+    readonly onDragEnd = new Event<ArgsGrid, UIEvent>();
+    readonly onDragInit = new Event<ArgsGrid, UIEvent>();
+    readonly onDragStart = new Event<ArgsGrid, UIEvent>();
     readonly onFooterRowCellRendered = new Event<ArgsColumnNode>();
     readonly onHeaderCellRendered = new Event<ArgsColumnNode>();
     readonly onHeaderClick = new Event<ArgsColumn>();
@@ -109,7 +109,7 @@ export class Grid<TItem = any> {
     readonly onHeaderMouseEnter = new Event<ArgsColumn, MouseEvent>();
     readonly onHeaderMouseLeave = new Event<ArgsColumn, MouseEvent>();
     readonly onHeaderRowCellRendered = new Event<ArgsColumnNode>();
-    readonly onKeyDown = new Event<ArgsCell, JQueryKeyEventObject>();
+    readonly onKeyDown = new Event<ArgsCell, KeyboardEvent>();
     readonly onMouseEnter = new Event<ArgsGrid, MouseEvent>();
     readonly onMouseLeave = new Event<ArgsGrid, MouseEvent>();
     readonly onScroll = new Event<ArgsScroll>();
@@ -809,7 +809,7 @@ export class Grid<TItem = any> {
                     }
                 }
             },
-            sort: (e: JQueryEventObject) => {
+            sort: (e: IEventData) => {
                 if (canDragScroll && (e.originalEvent as any).pageX > this._container.clientWidth) {
                     if (!(columnScrollTimer)) {
                         columnScrollTimer = setInterval(
@@ -1638,6 +1638,7 @@ export class Grid<TItem = any> {
             cell,
             column,
             grid: this,
+            escape,
             item,
             row
         }
@@ -1646,7 +1647,7 @@ export class Grid<TItem = any> {
         return ctx;
     }
 
-    private getEditor(row: number, cell: number): Editor {
+    private getEditor(row: number, cell: number): EditorClass {
         var column = this._cols[cell];
         var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
         var colsMetadata = itemMetadata && itemMetadata.columns;
@@ -1761,6 +1762,7 @@ export class Grid<TItem = any> {
         const ctx: FormatterContext = {
             cell,
             column,
+            escape,
             grid: this,
             item,
             row
@@ -1771,30 +1773,30 @@ export class Grid<TItem = any> {
             html = this.getFormatter(row, column)(ctx);
         }
 
-        klass = attrEncode(klass);
+        klass = escape(klass);
 
         if (ctx.addClass?.length || ctx.addAttrs?.length || ctx.tooltip?.length) {
             if (ctx.addClass?.length)
-                klass += (" " + attrEncode(ctx.addClass));
+                klass += (" " + escape(ctx.addClass));
 
             sb.push('<div class="' + klass + '"');
 
             if (ctx.addClass?.length)
-                sb.push(' data-fmtcls="' + attrEncode(ctx.addClass) + '"');
+                sb.push(' data-fmtcls="' + escape(ctx.addClass) + '"');
 
             var attrs = ctx.addAttrs;
             if (attrs != null) {
                 var ks = [];
                 for (var k in attrs) {
-                    sb.push(k + '="' + attrEncode(attrs[k]) + '"');
+                    sb.push(k + '="' + escape(attrs[k]) + '"');
                     ks.push(k);
                 }
-                sb.push(' data-fmtatt="' + attrEncode(ks.join(',')) + '"');
+                sb.push(' data-fmtatt="' + escape(ks.join(',')) + '"');
             }
 
             var toolTip = ctx.tooltip;
             if (toolTip != null && toolTip.length)
-                sb.push('tooltip="' + attrEncode(toolTip) + '"');
+                sb.push('tooltip="' + escape(toolTip) + '"');
 
             if (html != null)
                 sb.push('>' + html + '</div>');
@@ -2509,7 +2511,7 @@ export class Grid<TItem = any> {
         }
     }
 
-    private handleMouseWheel(e: JQueryEventObject, delta: number, deltaX: number, deltaY: number): void {
+    private handleMouseWheel(e: MouseEvent, delta: number, deltaX: number, deltaY: number): void {
         deltaX = (typeof deltaX == "undefined" ? (e as any).originalEvent.deltaX : deltaX) || 0;
         deltaY = (typeof deltaY == "undefined" ? (e as any).originalEvent.deltaY : deltaY) || 0;
         this._scrollTop = Math.max(0, this._layout.getScrollContainerY().scrollTop - (deltaY * this._options.rowHeight));
@@ -2749,14 +2751,14 @@ export class Grid<TItem = any> {
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Interactivity
 
-    private handleDragInit(e: JQueryEventObject, dd: any): boolean {
+    private handleDragInit(e: UIEvent, dd: any): boolean {
         var cell = this.getCellFromEvent(e);
         if (!cell || !this.cellExists(cell.row, cell.cell)) {
             return false;
         }
 
         var retval = this.trigger(this.onDragInit, dd, e);
-        if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
+        if ((e as IEventData).isImmediatePropagationStopped && (e as IEventData).isImmediatePropagationStopped()) {
             return retval;
         }
 
@@ -2765,31 +2767,31 @@ export class Grid<TItem = any> {
         return false;
     }
 
-    private handleDragStart(e: JQueryEventObject, dd: any): boolean {
+    private handleDragStart(e: UIEvent, dd: any): boolean {
         var cell = this.getCellFromEvent(e);
         if (!cell || !this.cellExists(cell.row, cell.cell)) {
             return false;
         }
 
         var retval = this.trigger(this.onDragStart, dd, e);
-        if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
+        if ((e as IEventData).isImmediatePropagationStopped && (e as IEventData).isImmediatePropagationStopped()) {
             return retval;
         }
 
         return false;
     }
 
-    private handleDrag(e: JQueryEventObject, dd: any): any {
+    private handleDrag(e: UIEvent, dd: any): any {
         return this.trigger(this.onDrag, dd, e);
     }
 
-    private handleDragEnd(e: JQueryEventObject, dd: any): void {
+    private handleDragEnd(e: UIEvent, dd: any): void {
         this.trigger(this.onDragEnd, dd, e);
     }
 
-    private handleKeyDown(e: JQueryKeyEventObject): void {
+    private handleKeyDown(e: KeyboardEvent): void {
         this.trigger(this.onKeyDown, { row: this._activeRow, cell: this._activeCell }, e);
-        var handled = e.isImmediatePropagationStopped && e.isImmediatePropagationStopped();
+        var handled = (e as IEventData).isImmediatePropagationStopped && (e as IEventData).isImmediatePropagationStopped();
 
         if (!handled) {
             if (!e.shiftKey && !e.altKey) {
@@ -2799,7 +2801,7 @@ export class Grid<TItem = any> {
                     }
                 }
 
-                if (e.which == keyCode.HOME) {
+                if (e.key === "Home") {
                     if (e.ctrlKey) {
                         this.navigateTop();
                         handled = true;
@@ -2807,7 +2809,7 @@ export class Grid<TItem = any> {
                     else
                         handled = this.navigateRowStart();
                 }
-                else if (e.which == keyCode.END) {
+                else if (e.key === "End") {
                     if (e.ctrlKey) {
                         this.navigateBottom();
                         handled = true;
@@ -2827,29 +2829,29 @@ export class Grid<TItem = any> {
                     }
                 }
 
-                if (e.which == keyCode.ESCAPE) {
+                if (e.key === "Esc" || e.key === "Escape") {
                     if (!this.getEditorLock().isActive()) {
                         return; // no editing mode to cancel, allow bubbling and default processing (exit without cancelling the event)
                     }
                     this.cancelEditAndSetFocus();
-                } else if (e.which == keyCode.PAGEDOWN) {
+                } else if (e.key === "PageDown") {
                     this.navigatePageDown();
                     handled = true;
-                } else if (e.which == keyCode.PAGEUP) {
+                } else if (e.key === "PageUp") {
                     this.navigatePageUp();
                     handled = true;
-                } else if (e.which == keyCode.LEFT) {
+                } else if (e.key === "Left" || e.key === "ArrowLeft") {
                     handled = this.navigateLeft();
-                } else if (e.which == keyCode.RIGHT) {
+                } else if (e.key === "Right" || e.key === "ArrowRight") {
                     handled = this.navigateRight();
-                } else if (e.which == keyCode.UP) {
+                } else if (e.key === "Up" || e.key === "ArrowUp") {
                     handled = this.navigateUp();
-                } else if (e.which == keyCode.DOWN) {
+                } else if (e.key === "Down" || e.key === "ArrowDown") {
                     handled = this.navigateDown();
-                } else if (e.which == keyCode.TAB) {
+                } else if (e.key === "Tab") {
                     if (this._options.enableTabKeyNavigation)
                         handled = this.navigateNext();
-                } else if (e.which == keyCode.ENTER) {
+                } else if (e.key === "Enter") {
                     if (this._options.editable) {
                         if (this._currentEditor) {
                             // adding new row
@@ -2866,7 +2868,7 @@ export class Grid<TItem = any> {
                     }
                     handled = true;
                 }
-            } else if (e.which == keyCode.TAB && e.shiftKey && !e.ctrlKey && !e.altKey) {
+            } else if (e.key === "Tab" && e.shiftKey && !e.ctrlKey && !e.altKey) {
                 handled = this.navigatePrev();
             }
         }
@@ -2876,7 +2878,7 @@ export class Grid<TItem = any> {
             e.stopPropagation();
             e.preventDefault();
             try {
-                (e.originalEvent as JQueryKeyEventObject).keyCode = 0; // prevent default behaviour for special keys in IE browsers (F3, F5, etc.)
+                ((e as IEventData).originalEvent as JQueryKeyEventObject).keyCode = 0; // prevent default behaviour for special keys in IE browsers (F3, F5, etc.)
             }
             // ignore exceptions - setting the original event's keycode throws access denied exception for "Ctrl"
             // (hitting control key only, nothing else), "Shift" (maybe others)
@@ -2885,7 +2887,7 @@ export class Grid<TItem = any> {
         }
     }
 
-    private handleClick(e: JQueryMouseEventObject): void {
+    private handleClick(e: MouseEvent): void {
         if (!this._currentEditor) {
             // if this click resulted in some cell child node getting focus,
             // don't steal it back - keyboard events will still bubble up
@@ -2901,14 +2903,14 @@ export class Grid<TItem = any> {
         }
 
         this.trigger(this.onClick, { row: cell.row, cell: cell.cell }, e);
-        if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
+        if ((e as IEventData).isImmediatePropagationStopped && (e as IEventData).isImmediatePropagationStopped()) {
             return;
         }
 
         if (this.canCellBeActive(cell.row, cell.cell)) {
             if (!this.getEditorLock().isActive() || this.getEditorLock().commitCurrentEdit()) {
 
-                var preClickModeOn = (e.target && e.target.classList.contains(preClickClassName));
+                var preClickModeOn = (e.target && (e.target as HTMLElement).classList.contains(preClickClassName));
                 var column = this._cols[cell.cell];
                 var suppressActiveCellChangedEvent = !!(this._options.editable && column && column.editor && this._options.suppressActiveCellChangeOnEdit);
                 this.setActiveCellInternal(this.getCellNode(cell.row, cell.cell), null, preClickModeOn, suppressActiveCellChangedEvent, e);
@@ -2916,8 +2918,8 @@ export class Grid<TItem = any> {
         }
     }
 
-    private handleContextMenu(e: JQueryMouseEventObject): void {
-        var cellEl = e.target.closest(".slick-cell");
+    private handleContextMenu(e: MouseEvent): void {
+        var cellEl = (e.target as HTMLElement).closest(".slick-cell");
         if (!cellEl) {
             return;
         }
@@ -2930,14 +2932,14 @@ export class Grid<TItem = any> {
         this.trigger(this.onContextMenu, {}, e);
     }
 
-    private handleDblClick(e: JQueryMouseEventObject): void {
+    private handleDblClick(e: MouseEvent): void {
         var cell = this.getCellFromEvent(e as any);
         if (!cell || (this._currentEditor != null && this._activeRow == cell.row && this._activeCell == cell.cell)) {
             return;
         }
 
         this.trigger(this.onDblClick, { row: cell.row, cell: cell.cell }, e);
-        if (e.isImmediatePropagationStopped && e.isImmediatePropagationStopped()) {
+        if ((e as IEventData).isImmediatePropagationStopped && (e as IEventData).isImmediatePropagationStopped()) {
             return;
         }
 
@@ -3119,7 +3121,7 @@ export class Grid<TItem = any> {
         this.internalScrollColumnIntoView(this._colLeft[cell], this._colRight[cell]);
     }
 
-    internalScrollColumnIntoView(left: number, right: number): void {
+    private internalScrollColumnIntoView(left: number, right: number): void {
 
         var scrollRight = this._scrollLeft + parseFloat(getComputedStyle(this._layout.getScrollContainerX()).width) -
             (this._viewportInfo.hasVScroll ? this._scrollDims.width : 0);
@@ -3153,7 +3155,7 @@ export class Grid<TItem = any> {
         if (this._activeCellNode != null) {
             var bcl = this._activeCellNode.getBoundingClientRect();
 
-            var rowOffset = Math.floor(this._activeCellNode.closest('.grid-canvas').getBoundingClientRect().top + document.body.scrollTop);
+            var rowOffset = Math.floor(this._activeCellNode.closest('.grid-canvas')?.getBoundingClientRect().top ?? 0 + document.body.scrollTop);
             var isBottom = this._activeCellNode.closest('.grid-canvas-bottom') != null;
             if (this.hasFrozenRows() && isBottom) {
                 rowOffset -= (this._options.frozenBottom)
@@ -3256,11 +3258,11 @@ export class Grid<TItem = any> {
         this.getEditorLock().deactivate(this._editController);
     }
 
-    editActiveCell(editor?: Editor): void {
+    editActiveCell(editor?: EditorClass): void {
         this.makeActiveCellEditable(editor);
     }
 
-    private makeActiveCellEditable(editor?: Editor, preClickModeOn?: boolean, e?: any): void {
+    private makeActiveCellEditable(editor?: EditorClass, preClickModeOn?: boolean, e?: any): void {
         if (!this._activeCellNode) {
             return;
         }
@@ -3306,6 +3308,7 @@ export class Grid<TItem = any> {
             columnMetaData: columnMetadata,
             item: item || {},
             event: e,
+            editorCellNavOnLRKeys: this._options.editorCellNavOnLRKeys,
             commitChanges: this.commitEditAndSetFocus.bind(this),
             cancelChanges: this.cancelEditAndSetFocus.bind(this)
         });

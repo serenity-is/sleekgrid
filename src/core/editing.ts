@@ -1,5 +1,5 @@
 import { Column, ColumnMetadata } from "./column";
-import { IEventData } from "./event";
+import { Event, IEventData } from "./event";
 
 export interface Position {
     bottom?: number;
@@ -16,12 +16,30 @@ export interface ValidationResult {
     msg?: string;
 }
 
+export interface RowCell {
+    row: number;
+    cell: number;
+}
+
+export interface EditorHost {
+    getActiveCell(): RowCell;
+    navigateNext(): boolean;
+    navigatePrev(): boolean;
+    onCompositeEditorChange: Event<any>;
+}
+
+interface CompositeEditorOptions {
+    formValues: any;
+}
+
 export interface EditorOptions {
-    grid: unknown;
+    grid: EditorHost;
     gridPosition?: Position;
     position?: Position;
+    editorCellNavOnLRKeys?: boolean;
     column?: Column;
     columnMetaData?: ColumnMetadata<any>;
+    compositeEditorOptions?: CompositeEditorOptions;
     container?: HTMLElement;
     item?: any;
     event?: IEventData;
@@ -30,7 +48,7 @@ export interface EditorOptions {
 }
 
 export interface EditorFactory {
-    getEditor(column: Column): Editor;
+    getEditor(column: Column): EditorClass;
 }
 
 export interface EditCommand {
@@ -43,9 +61,12 @@ export interface EditCommand {
     undo: () => void;
 }
 
+export interface EditorClass {
+    new(options: EditorOptions): Editor;
+    suppressClearOnEdit?: boolean;
+}
 
 export interface Editor {
-    new(options: EditorOptions): Editor;
     destroy(): void;
     applyValue(item: any, value: any): void;
     focus(): void;
@@ -57,7 +78,6 @@ export interface Editor {
     preClick?(): void;
     hide?(): void;
     show?(): void;
-    suppressClearOnEdit?: boolean;
     validate?(): ValidationResult;
 }
 

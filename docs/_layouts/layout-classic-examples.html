@@ -16,7 +16,7 @@
     <script src="{{ site.packageurl.slickgrid }}/{{ x }}"></script>
     {% endfor %}
     {% for x in page.requires_scripts %}
-    <script src="{{ site.packageurl.sleekgrid }}/{{ x }}{%if site.local %}?v={%assign x_ = "/assets/local/dist/" | append: x %}{% assign vf_ = site.static_files | where: "path", x_ | first %}{{ vf_.modified_time | replace: "-", "" | replace: " ", "" | replace: ":", "" | replace: "+", "" }}{% endif %}"></script>
+    <script src="{{ site.packageurl.sleekgrid }}/{{ x }}{%if site.local %}?v={%assign x_ = "/assets/local/" | append: x %}{% assign vf_ = site.static_files | where: "path", x_ | first %}{{ vf_.modified_time | replace: "-", "" | replace: " ", "" | replace: ":", "" | replace: "+", "" }}{% endif %}"></script>
     {% endfor %}
 </head>
 

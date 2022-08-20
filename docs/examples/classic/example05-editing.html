@@ -11,10 +11,10 @@ controls:
 - '<button onclick="grid.setOptions({autoEdit:false})">Auto-edit OFF</button>'
 
 requires_scripts:
+- dist/compat/slick.editors.js
 - dist/compat/slick.formatters.js
 
 requires_slick_scripts:
-- slick.editors.js
 - plugins/slick.cellrangedecorator.js
 - plugins/slick.cellrangeselector.js
 - plugins/slick.cellselectionmodel.js
@@ -22,17 +22,8 @@ requires_slick_scripts:
 
 <div id="myGrid"></div>
 
-<style>
-    .cell-title {
-        font-weight: bold;
-    }
-
-    .cell-effort-driven {
-        text-align: center;
-    }
-</style>
-
 <script>
+
     function requiredFieldValidator(value) {
         if (value == null || value == undefined || !value.length) {
             return { valid: false, msg: "This is a required field" };
@@ -41,38 +32,19 @@ requires_slick_scripts:
         }
     }
 
-    $.datepicker.setDefaults({
-        buttonImage: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E`
-    });
-
-    const patchedPercentCompleteEditor = function(args) {
-        Slick.Editors.PercentComplete.call(this, args);
-        args.container.querySelector('.editor-percentcomplete-wrapper')
-            .appendChild(args.container.querySelector('.editor-percentcomplete-buttons'));
-    }
-
-    var grid;
-    var data = [];
-    var columns = [
+    const columns = [
         { id: "title", name: "Title", field: "title", width: 100, cssClass: "cell-title", editor: Slick.Editors.Text, validator: requiredFieldValidator },
         { id: "desc", name: "Description", field: "description", width: 120, editor: Slick.Editors.LongText },
         { id: "duration", name: "Duration", field: "duration", editor: Slick.Editors.Text },
-        { id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, format: Slick.PercentCompleteBarFormat, editor: patchedPercentCompleteEditor },
+        { id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, format: Slick.PercentCompleteBarFormatter, editor: Slick.PercentCompleteEditor },
         { id: "start", name: "Start", field: "start", minWidth: 110, editor: Slick.Editors.Date },
         { id: "finish", name: "Finish", field: "finish", minWidth: 110, editor: Slick.Editors.Date },
-        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", format: Slick.CheckboxFormat }
+        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", editor: Slick.CheckboxEditor, format: Slick.CheckboxFormatter }
     ];
-    var options = {
-        editable: true,
-        enableAddRow: true,
-        enableCellNavigation: true,
-        asyncEditorLoading: false,
-        autoEdit: false
-    };
 
+    const data = [];
     for (var i = 0; i < 500; i++) {
         var d = (data[i] = {});
-
         d["title"] = "Task " + i;
         d["description"] = "This is a sample task description.\n  It can be multiline";
         d["duration"] = "5 days";
@@ -82,7 +54,13 @@ requires_slick_scripts:
         d["effortDriven"] = (i % 5 == 0);
     }
 
-    grid = new Slick.Grid("#myGrid", data, columns, options);
+    const grid = new Slick.Grid("#myGrid", data, columns, {
+        editable: true,
+        enableAddRow: true,
+        enableCellNavigation: true,
+        asyncEditorLoading: false,
+        autoEdit: false
+    });
 
     grid.setSelectionModel(new Slick.CellSelectionModel());
 
@@ -93,16 +71,14 @@ requires_slick_scripts:
         grid.updateRowCount();
         grid.render();
     });
-
-    grid.getContainerNode().addEventListener('click', e => {
-        if (e.target.classList.contains('slick-checkbox')) {
-            var c = grid.getCellFromEvent(e);
-            if (c) {
-                var col = grid.getColumns()[c.cell];
-                data[c.row][col.field] = !data[c.row][col.field];
-                grid.invalidateRow(c.row);
-                grid.render();
-            }
-        }
-    });
 </script>
+
+<style>
+    .cell-title {
+        font-weight: bold;
+    }
+
+    .cell-effort-driven {
+        text-align: center;
+    }
+</style>

@@ -228,8 +228,8 @@ classes should alter those!
   border: 2px dashed black;
 }
 
-.slick-cell>.editor-text,
-.slick-headerrow-column>.editor-text {
+.slick-editor-text,
+.slick-editor-percentcomplete {
   width: 100%;
   height: 100%;
   border: 0;
@@ -240,18 +240,20 @@ classes should alter those!
   font-weight: inherit;
 }
 
-.slick-checkbox {
+.slick-checkbox, .slick-editor-checkbox {
   display: inline-block;
   width: 1.4em;
   margin-top: 0.1em;
   height: 1.4em;
   border: 1px solid #ccc;
+  border-radius: 2px;
 }
 
-.slick-checkbox.checked {
+.slick-checkbox.checked, .slick-editor-checkbox:checked {
   background-color: var(--bs-primary, '#f00');
   border-color: var(--bs-primary, '#f00');
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+  background-position: center center;
 }
 
 .slick-checkmark {
@@ -259,4 +261,107 @@ classes should alter those!
   width: 1.5em;
   height: 1.5em;
   background: no-repeat center center url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='%23090' class='bi bi-check-lg' viewBox='0 0 16 16'%3E%3Cpath d='M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z'/%3E%3C/svg%3E");
+}
+
+.slick-editor-checkbox {
+    outline: none;
+    appearance: none;
+}
+
+.slick-percentcomplete-bar {
+  display: inline-block;
+  height: 0.7em;
+  border-radius: 0.35em;
+}
+
+.slick-editor-text.hasDatepicker {
+  width: calc(100% - 18px) !important;
+}
+
+.slick-editor-percentcomplete {
+  width: calc(100% - 19px) !important;
+}
+
+.slick-editor-percentcomplete-picker {
+  position: relative;
+  display: inline-block;
+  height: 100%;
+  overflow: visible;
+  z-index: 1000;
+}
+
+.slick-editor-percentcomplete-picker::before {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  content: '\f304';
+}
+
+.slick-editor-percentcomplete-helper {
+  border: 0 solid #ccc;
+  position: absolute;
+  top: -2px;
+  left: -9px;
+  padding-left: 9px;
+  width: 130px;
+  height: 140px;
+  display: none;
+  overflow: visible;
+}
+
+.slick-editor-percentcomplete-wrapper {
+  background: beige;
+  padding: 8px;
+  width: 100%;
+  height: 120px;
+  border: 1px solid #ccc;
+}
+
+.slick-editor-percentcomplete-slider {
+  background: white;
+  border-radius: 4px;
+  float: left;
+  border: 1px solid #d3d3d3;
+  width: 0.8em;
+  height: 100px;
+  position: relative;
+  text-align: left;
+  color: #222;
+}
+
+.slick-editor-percentcomplete-picker .ui-slider-handle  {
+  border: 1px solid #d3d3d3;
+  background: #e6e6e6;
+  left: -0.3em;
+  margin-left: 0;
+  margin-bottom: -0.6em;
+  position: absolute;
+  z-index: 2;
+  width: 1.2em;
+  height: 1.2em;
+  cursor: default;
+  touch-action: none;
+  border-radius: 4px;
+}
+
+.slick-editor-percentcomplete-buttons {
+  float: right;
+  display: flex;
+  flex-direction: column;
+  align-items: top;
+  margin-top: 10px;
+}
+
+.slick-editor-percentcomplete-buttons button {
+  width: 80px;
+  font-size: 12px;
+  border: 1px solid #ccc;
+  margin-bottom: 8px;
+}
+
+.slick-editor-percentcomplete-picker:hover .slick-editor-percentcomplete-helper {
+  display: block;
+}
+
+.slick-editor-percentcomplete-helper:hover {
+  display: block;
 }

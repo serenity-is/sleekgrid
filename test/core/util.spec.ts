@@ -1,4 +1,4 @@
-import { addClass, removeClass, disableSelection, H, spacerDiv, attrEncode, htmlEncode } from "@/core/util";
+import { addClass, escape, removeClass, disableSelection, H, spacerDiv } from "@/core/util";
 
 describe('addClass', () => {
     it('should not do anything if classes to add is null or undefined', () => {
@@ -206,92 +206,51 @@ describe('disableSelection', () => {
     });
 });
 
-describe('attrEncode', () => {
+describe('escape', () => {
     it('should encode & as &amp;', () => {
-        expect(attrEncode('&')).toBe('&amp;');
+        expect(escape('&')).toBe('&amp;');
     });
 
     it('should encode < as &lt;', () => {
-        expect(attrEncode('<')).toBe('&lt;');
+        expect(escape('<')).toBe('&lt;');
     });
 
     it('should encode > as &gt;', () => {
-        expect(attrEncode('>')).toBe('&gt;');
+        expect(escape('>')).toBe('&gt;');
     });
 
     it('should encode " as &quot;', () => {
-        expect(attrEncode('"')).toBe('&quot;');
+        expect(escape('"')).toBe('&quot;');
     });
 
     it('should encode multiple & as &amp;', () => {
-        expect(attrEncode('&&')).toBe('&amp;&amp;');
+        expect(escape('&&')).toBe('&amp;&amp;');
     });
 
     it('should encode multiple < as &lt;', () => {
-        expect(attrEncode('<<')).toBe('&lt;&lt;');
+        expect(escape('<<')).toBe('&lt;&lt;');
     });
 
     it('should encode multiple > as &gt;', () => {
-        expect(attrEncode('>>')).toBe('&gt;&gt;');
+        expect(escape('>>')).toBe('&gt;&gt;');
     });
 
     it('should encode multiple " as &quot;', () => {
-        expect(attrEncode('""')).toBe('&quot;&quot;');
+        expect(escape('""')).toBe('&quot;&quot;');
     });
 
     it('should encode all characters', () => {
-        expect(attrEncode('&<>"')).toBe('&amp;&lt;&gt;&quot;');
+        expect(escape('&<>"')).toBe('&amp;&lt;&gt;&quot;');
     });
 
     it('should return empty string if parameter is null or undefined', () => {
-        expect(attrEncode(null)).toBe('');
-        expect(attrEncode(undefined)).toBe('');
+        expect(escape(null)).toBe('');
+        expect(escape(undefined)).toBe('');
     });
 
     it('should convert any type to a string', () => {
-        expect(attrEncode(1)).toBe('1');
-        expect(attrEncode(true)).toBe('true');
-        expect(attrEncode({})).toBe('[object Object]');
-    });
-});
-
-describe('htmlEncode', () => {
-    it('should encode & as &amp;', () => {
-        expect(htmlEncode('&')).toBe('&amp;');
-    });
-
-    it('should encode < as &lt;', () => {
-        expect(htmlEncode('<')).toBe('&lt;');
-    });
-
-    it('should encode > as &gt;', () => {
-        expect(htmlEncode('>')).toBe('&gt;');
-    });
-
-    it('should encode multiple & as &amp;', () => {
-        expect(htmlEncode('&&')).toBe('&amp;&amp;');
-    });
-
-    it('should encode multiple < as &lt;', () => {
-        expect(htmlEncode('<<')).toBe('&lt;&lt;');
-    });
-
-    it('should encode multiple > as &gt;', () => {
-        expect(htmlEncode('>>')).toBe('&gt;&gt;');
-    });
-
-    it('should encode all characters', () => {
-        expect(htmlEncode('&<>')).toBe('&amp;&lt;&gt;');
-    });
-
-    it('should return empty string if parameter is null or undefined', () => {
-        expect(htmlEncode(null)).toBe('');
-        expect(htmlEncode(undefined)).toBe('');
-    });
-
-    it('should convert any type to a string', () => {
-        expect(htmlEncode(1)).toBe('1');
-        expect(htmlEncode(true)).toBe('true');
-        expect(htmlEncode({})).toBe('[object Object]');
+        expect(escape(1)).toBe('1');
+        expect(escape(true)).toBe('true');
+        expect(escape({})).toBe('[object Object]');
     });
 });

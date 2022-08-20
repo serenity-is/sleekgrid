@@ -6,8 +6,8 @@ demonstrates:
 - right-click the row to open the context menu
 - click the priority cell to toggle values
 
-requires_slick_scripts:
-- slick.editors.js
+requires_scripts:
+- dist/compat/slick.editors.js
 ---
 
 <div id="myGrid"></div>
@@ -20,30 +20,28 @@ requires_slick_scripts:
 </div>
 
 <script>
-    var grid;
     var data = [];
+    for (var i = 0; i < 100; i++) {
+        data.push({
+            title: "Task " + i,
+            priority: "Medium"
+        })
+    }
+
     var columns = [
-        { id: "title", name: "Title", field: "title", width: 200, cssClass: "cell-title", editor: Slick.Editors.Text },
+        { id: "title", name: "Title", field: "title", width: 200, cssClass: "cell-title", editor: Slick.TextEditor },
         { id: "priority", name: "Priority", field: "priority", width: 80, selectable: false, resizable: false }
     ];
 
-    const contextMenu = document.getElementById('contextMenu');
-
-    var options = {
+    var grid = new Slick.Grid("#myGrid", data, columns, {
         editable: true,
         enableAddRow: false,
         enableCellNavigation: true,
         asyncEditorLoading: false,
         rowHeight: 30
-    };
+    });
 
-    for (var i = 0; i < 100; i++) {
-        var d = (data[i] = {});
-        d["title"] = "Task " + i;
-        d["priority"] = "Medium";
-    }
-
-    grid = new Slick.Grid("#myGrid", data, columns, options);
+    const contextMenu = document.getElementById('contextMenu');
 
     function hideContextMenu() {
         contextMenu.style.display = 'none';

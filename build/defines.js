@@ -50,7 +50,7 @@ export const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["addClass", "attrEncode", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "defaultColumnFormat", "disableSelection", "Event", "EventData", "GlobalEditorLock", "H", "htmlEncode", "keyCode", "NonDataRow", "preClickClassName", "removeClass", "spacerDiv", "Range"],
+        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "escape", "defaultColumnFormat", "disableSelection", "Event", "EventData", "GlobalEditorLock", "H", "keyCode", "NonDataRow", "preClickClassName", "removeClass", "spacerDiv", "Range", "RowCell"],
     })]
 }
 
@@ -59,7 +59,16 @@ export const compatFormatters = {
     entryPoints: ['./src/formatters/index.ts'],
     outfile: './dist/compat/slick.formatters.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: [ "htmlEncode" ],
+        Slick: [ "escape" ],
+    })]
+}
+
+export const compatEditors = {
+    ...compatDefaults,
+    entryPoints: ['./src/editors/index.ts'],
+    outfile: './dist/compat/slick.editors.js',
+    plugins: [globalExternals(/\.\.\/core/, {
+        Slick: [ "escape", "H", "keyCode" ],
     })]
 }
 

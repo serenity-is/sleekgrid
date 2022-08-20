@@ -16,45 +16,19 @@ controls:
 
 <div id="myGrid"></div>
 
-<style>
-    .load-medium {
-        color: orange;
-        font-weight: bold;
-    }
-
-    .load-hi {
-        color: red;
-        font-weight: bold;
-    }
-
-    .changed {
-        background: pink;
-    }
-
-    .current-server {
-        background: orange;
-    }
-</style>
-
 <script>
-    var grid;
-    var data = [];
-    var columns = [
+    function cpuUtilizationFormatter(ctx) {
+        if (ctx.value > 90)
+            return "<span class='load-hi'>" + ctx.escape() + "%</span>";
+        else if (ctx.value > 70)
+            return "<span class='load-medium'>" + ctx.escape() + "%</span>";
+        else
+            return ctx.escape() + "%";
+    }
+
+    const columns = [
         { id: "server", name: "Server", field: "server", width: 180 }
     ];
-    var currentServer;
-
-    function cpuUtilizationFormatter(ctx) {
-        if (ctx.value > 90) {
-            return "<span class='load-hi'>" + ctx.value + "%</span>";
-        }
-        else if (ctx.value > 70) {
-            return "<span class='load-medium'>" + ctx.value + "%</span>";
-        }
-        else {
-            return ctx.value + "%";
-        }
-    }
 
     for (var i = 0; i < 4; i++) {
         columns.push({
@@ -66,15 +40,7 @@ controls:
         });
     }
 
-    var options = {
-        editable: false,
-        enableAddRow: false,
-        enableCellNavigation: true,
-        cellHighlightCssClass: "changed",
-        cellFlashingCssClass: "current-server"
-    };
-
-
+    const data = [];
     for (var i = 0; i < 500; i++) {
         var d = (data[i] = {});
         d.server = "Server " + i;
@@ -83,10 +49,20 @@ controls:
         }
     }
 
-    grid = new Slick.Grid("#myGrid", data, columns, options);
+    const grid = new Slick.Grid("#myGrid", data, columns, {
+        editable: false,
+        enableAddRow: false,
+        enableCellNavigation: true,
+        cellHighlightCssClass: "changed",
+        cellFlashingCssClass: "current-server"
+    });
 
-    currentServer = Math.round(Math.random() * (data.length - 1));
+    var currentServer = Math.round(Math.random() * (data.length - 1));
 
+    function findCurrentServer() {
+        grid.scrollRowIntoView(currentServer);
+        grid.flashCell(currentServer, grid.getColumnIndex("server"), 100);
+    }
 
     function simulateRealTimeUpdates() {
         var changes = {};
@@ -116,9 +92,25 @@ controls:
 
         setTimeout(simulateRealTimeUpdates, 500);
     }
-
-    function findCurrentServer() {
-        grid.scrollRowIntoView(currentServer);
-        grid.flashCell(currentServer, grid.getColumnIndex("server"), 100);
-    }
 </script>
+
+
+<style>
+    .load-medium {
+        color: orange;
+        font-weight: bold;
+    }
+
+    .load-hi {
+        color: red;
+        font-weight: bold;
+    }
+
+    .changed {
+        background: pink;
+    }
+
+    .current-server {
+        background: orange;
+    }
+</style>

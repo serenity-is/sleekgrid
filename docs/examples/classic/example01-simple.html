@@ -7,22 +7,7 @@ demonstrates:
 <div id="myGrid"></div>
 
 <script>
-    var grid;
-    var columns = [
-        { id: "title", name: "Title", field: "title" },
-        { id: "duration", name: "Duration", field: "duration" },
-        { id: "%", name: "% Complete", field: "percentComplete", width: 90 },
-        { id: "start", name: "Start", field: "start", width: 100 },
-        { id: "finish", name: "Finish", field: "finish", width: 100 },
-        { id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 100 }
-    ];
-
-    var options = {
-        enableCellNavigation: true,
-        enableColumnReorder: false
-    };
-
-    var data = [];
+    const data = [];
     for (var i = 0; i < 500; i++) {
         data[i] = {
             title: "Task " + i,
@@ -34,5 +19,17 @@ demonstrates:
         };
     }
 
-    grid = new Slick.Grid("#myGrid", data, columns, options);
+    const columns = [
+        { id: "title", name: "Title", field: "title" },
+        { id: "duration", name: "Duration", field: "duration" },
+        { id: "%", name: "% Complete", field: "percentComplete", width: 90 },
+        { id: "start", name: "Start", field: "start", width: 100 },
+        { id: "finish", name: "Finish", field: "finish", width: 100 },
+        { id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 100 }
+    ];
+
+    new Slick.Grid("#myGrid", data, columns, {
+        enableCellNavigation: true,
+        enableColumnReorder: false
+    });
 </script>

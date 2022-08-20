@@ -8,19 +8,11 @@ controls:
 - <button onclick="undo()"><i class="fa fa-undo"></i> Undo</button>
 
 requires_scripts:
+- dist/compat/slick.editors.js
 - dist/compat/slick.formatters.js
-
-requires_slick_scripts:
-- slick.editors.js
 ---
 
 <div id="myGrid"></div>
-
-<style>
-    .cell-effort-driven {
-        text-align: center;
-    }
-</style>
 
 <script>
     function requiredFieldValidator(value) {
@@ -31,34 +23,28 @@ requires_slick_scripts:
         }
     }
 
-    $.datepicker.setDefaults({
-        buttonImage: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E`
-    });
-
-    const patchedPercentCompleteEditor = function(args) {
-        Slick.Editors.PercentComplete.call(this, args);
-        args.container.querySelector('.editor-percentcomplete-wrapper')
-            .appendChild(args.container.querySelector('.editor-percentcomplete-buttons'));
-    }
-
-    var columns = [
+    const columns = [
         { id: "title", name: "Title", field: "title", width: 120, cssClass: "cell-title", editor: Slick.Editors.Text, validator: requiredFieldValidator },
         { id: "desc", name: "Description", field: "description", width: 100, editor: Slick.Editors.LongText },
         { id: "duration", name: "Duration", field: "duration", editor: Slick.Editors.Text },
-        { id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, format: Slick.PercentCompleteBarFormat, editor: patchedPercentCompleteEditor },
+        { id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, format: Slick.PercentCompleteBarFormatter, editor: Slick.PercentCompleteEditor },
         { id: "start", name: "Start", field: "start", minWidth: 110, editor: Slick.Editors.Date },
         { id: "finish", name: "Finish", field: "finish", minWidth: 110, editor: Slick.Editors.Date },
-        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven",  editor: Slick.Editors.Checkbox, format: Slick.CheckboxFormat }
+        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", format: Slick.CheckboxFormatter, editor: Slick.CheckboxEditor }
     ];
 
-    var options = {
-        editable: true,
-        enableAddRow: false,
-        enableCellNavigation: true,
-        asyncEditorLoading: false,
-        autoEdit: true,
-        editCommandHandler: queueAndExecuteCommand
-    };
+    var data = [];
+    for (var i = 0; i < 500; i++) {
+        var d = (data[i] = {});
+
+        d["title"] = "Task " + i;
+        d["description"] = "This is a sample task description.\n  It can be multiline";
+        d["duration"] = "5 days";
+        d["percentComplete"] = Math.round(Math.random() * 100);
+        d["start"] = "01/01/2009";
+        d["finish"] = "01/05/2009";
+        d["effortDriven"] = (i % 5 == 0);
+    }
 
     var commandQueue = [];
 
@@ -75,19 +61,18 @@ requires_slick_scripts:
         }
     }
 
-    var data = [];
-    for (var i = 0; i < 500; i++) {
-        var d = (data[i] = {});
-
-        d["title"] = "Task " + i;
-        d["description"] = "This is a sample task description.\n  It can be multiline";
-        d["duration"] = "5 days";
-        d["percentComplete"] = Math.round(Math.random() * 100);
-        d["start"] = "01/01/2009";
-        d["finish"] = "01/05/2009";
-        d["effortDriven"] = (i % 5 == 0);
-    }
-
-    var grid = new Slick.Grid("#myGrid", data, columns, options);
-
+    var grid = new Slick.Grid("#myGrid", data, columns, {
+        editable: true,
+        enableAddRow: false,
+        enableCellNavigation: true,
+        asyncEditorLoading: false,
+        autoEdit: true,
+        editCommandHandler: queueAndExecuteCommand
+    });
 </script>
+
+<style>
+    .cell-effort-driven {
+        text-align: center;
+    }
+</style>

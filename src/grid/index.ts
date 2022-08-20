@@ -3,4 +3,4 @@ export * from "./gridoptions";
 export * from "./grid";
 export { BasicLayout } from "./basiclayout"
 export type { LayoutEngine, LayoutHost } from "./layout";
-export type { IPlugin, RowCell, SelectionModel, ViewRange, ViewportInfo } from "./types";
+export type { IPlugin, SelectionModel, ViewRange, ViewportInfo } from "./types";

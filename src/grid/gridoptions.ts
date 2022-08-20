@@ -22,6 +22,7 @@ export interface GridOptions<TItem = any> {
     defaultFormatter?: CompatFormatter<TItem>;
     editable?: boolean;
     editCommandHandler?: (item: TItem, column: Column<TItem>, command: EditCommand) => void;
+    editorCellNavOnLRKeys?: boolean;
     editorFactory?: EditorFactory;
     editorLock?: EditorLock;
     enableAddRow?: boolean;

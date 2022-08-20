@@ -22,11 +22,6 @@ export interface ViewportInfo {
     numVisibleRows: number;
 }
 
-export interface RowCell {
-    row: number;
-    cell: number;
-}
-
 export interface SelectionModel extends IPlugin {
     setSelectedRanges(ranges: Range[]): void;
     onSelectedRangesChanged: Event<Range[]>;

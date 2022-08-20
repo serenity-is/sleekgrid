@@ -7,64 +7,15 @@ demonstrates:
 controls:
 - <button onclick="openDetails()">Open Item Edit for active row</button>
 
+requires_scripts:
+- dist/compat/slick.editors.js
+- dist/compat/slick.formatters.js
+
 requires_slick_scripts:
-- slick.editors.js
-- slick.formatters.js
 - slick.compositeeditor.js
 ---
 
 <div id="myGrid"></div>
-
-<style>
-    .cell-title {
-        font-weight: bold;
-    }
-
-    .cell-effort-driven {
-        text-align: center;
-    }
-
-    .item-details-form {
-        z-index: 10000;
-        display: inline-block;
-        border: 1px solid black;
-        margin: 8px;
-        padding: 10px;
-        background: #efefef;
-        box-shadow: 0px 0px 15px black;
-        position: absolute;
-        top: 10px;
-        left: 150px;
-    }
-
-    .item-details-form-buttons {
-        float: right;
-    }
-
-    .item-details-label {
-        margin-left: 10px;
-        margin-top: 20px;
-        display: block;
-        font-weight: bold;
-    }
-
-    .item-details-editor-container {
-        width: 300px;
-        height: calc(1.5em + var(--slick-padding-v) * 2 + 2);
-        border: 1px solid silver;
-        background: white;
-        display: block;
-        margin: 10px;
-        margin-top: 4px;
-        padding: var(--slick-padding-v) var(--slick-padding-h);
-    }
-
-    .item-details-editor-container .editor-text {
-        border: 0;
-        outline: 0;
-        width: 100%;
-    }
-</style>
 
 <script>
     function requiredFieldValidator(value) {
@@ -89,38 +40,15 @@ requires_slick_scripts:
 </div>`);
     }
 
-    function checkMark(row, cell, value) {
-        return `<i class="check-mark fa fa-${(value ? "check-circle text-success" : "circle opacity-25")}" style="font-size: 1.8em"></i>`;
-    }
-
-    $.datepicker.setDefaults({
-        buttonImage: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E`
-    });
-
-    const patchedPercentCompleteEditor = function (args) {
-        Slick.Editors.PercentComplete.call(this, args);
-        args.container.querySelector('.editor-percentcomplete-wrapper')
-            .appendChild(args.container.querySelector('.editor-percentcomplete-buttons'));
-    }
-
-    function requiredFieldValidator(value) {
-        if (value == null || value == undefined || !value.length) {
-            return { valid: false, msg: "This is a required field" };
-        } else {
-            return { valid: true, msg: null };
-        }
-    }
-
     var grid;
-    var data = [];
     var columns = [
-        { id: "title", name: "Title", field: "title", width: 120, cssClass: "cell-title", editor: Slick.Editors.Text, validator: requiredFieldValidator },
-        { id: "desc", name: "Description", field: "description", width: 100, editor: Slick.Editors.Text },
-        { id: "duration", name: "Duration", field: "duration", editor: Slick.Editors.Text },
-        { id: "percent", name: "% Complete", field: "percentComplete", width: 80, resizable: false, formatter: Slick.Formatters.PercentCompleteBar, editor: patchedPercentCompleteEditor },
+        { id: "title", name: "Title", field: "title", width: 120, cssClass: "cell-title", editor: Slick.TextEditor, validator: requiredFieldValidator },
+        { id: "desc", name: "Description", field: "description", width: 150, editor: Slick.TextEditor },
+        { id: "duration", name: "Duration", field: "duration", editor: Slick.TextEditor },
+        { id: "percent", name: "% Complete", field: "percentComplete", width: 100, resizable: false, format: Slick.PercentCompleteBarFormatter, editor: Slick.PercentCompleteEditor },
         { id: "start", name: "Start", field: "start", minWidth: 110, editor: Slick.Editors.Date },
         { id: "finish", name: "Finish", field: "finish", minWidth: 110, editor: Slick.Editors.Date },
-        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", formatter: checkMark, editor: Slick.Editors.Checkbox }
+        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", format: Slick.CheckboxFormatter, editor: Slick.CheckboxEditor }
     ];
     var options = {
         editable: true,
@@ -179,6 +107,7 @@ requires_slick_scripts:
         grid.editActiveCell(compositeEditor);
     }
 
+    var data = [];
     for (var i = 0; i < 500; i++) {
         var d = (data[i] = {});
 
@@ -216,16 +145,56 @@ requires_slick_scripts:
     });
 
     grid.setActiveCell(0, 0);
-
-    grid.getContainerNode().addEventListener('click', e => {
-        if (e.target.classList.contains('check-mark')) {
-            var c = grid.getCellFromEvent(e);
-            if (c) {
-                var col = grid.getColumns()[c.cell];
-                data[c.row][col.field] = !data[c.row][col.field];
-                grid.invalidateRow(c.row);
-                grid.render();
-            }
-        }
-    });
 </script>
+
+
+<style>
+    .cell-title {
+        font-weight: bold;
+    }
+
+    .cell-effort-driven {
+        text-align: center;
+    }
+
+    .item-details-form {
+        z-index: 10000;
+        display: inline-block;
+        border: 1px solid black;
+        margin: 8px;
+        padding: 10px;
+        background: #efefef;
+        box-shadow: 0px 0px 15px black;
+        position: absolute;
+        top: 10px;
+        left: 150px;
+    }
+
+    .item-details-form-buttons {
+        float: right;
+    }
+
+    .item-details-label {
+        margin-left: 10px;
+        margin-top: 20px;
+        display: block;
+        font-weight: bold;
+    }
+
+    .item-details-editor-container {
+        width: 300px;
+        height: calc(1.5em + var(--slick-padding-v) * 2 + 2);
+        border: 1px solid silver;
+        background: white;
+        display: block;
+        margin: 10px;
+        margin-top: 4px;
+        padding: var(--slick-padding-v) var(--slick-padding-h);
+    }
+
+    .item-details-editor-container .editor-text {
+        border: 0;
+        outline: 0;
+        width: 100%;
+    }
+</style>

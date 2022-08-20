@@ -1,4 +1,4 @@
-import { addClass, htmlEncode, removeClass } from "./util";
+import { addClass, escape, removeClass } from "./util";
 import type { Column } from "./column";
 
 export interface FormatterContext<TItem = any> {
@@ -6,10 +6,13 @@ export interface FormatterContext<TItem = any> {
     addClass?: string;
     cell?: number;
     column?: Column<TItem>;
+    /** returns html escaped ctx.value if called without arguments. prefer this over ctx.value to avoid html injection attacks! */
+    readonly escape: ((value?: any) => string);
     grid?: any;
     item?: TItem;
     row?: number;
     tooltip?: string;
+    /** when returning a formatter result, prefer ctx.escape() to avoid html injection attacks! */
     value?: any;
 }
 
@@ -34,7 +37,7 @@ export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number
 export type CellStylesHash = { [row: number]: { [cell: number]: string } }
 
 export function defaultColumnFormat(ctx: FormatterContext) {
-    return htmlEncode(ctx.value);
+    return escape(ctx.value);
 }
 
 export function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat {

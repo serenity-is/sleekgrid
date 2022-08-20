@@ -1,3 +1,5 @@
+import { FormatterContext } from "./formatting";
+
 export function addClass(el: Element, cls: string) {
     if (cls == null || !cls.length)
         return;
@@ -11,15 +13,30 @@ export function addClass(el: Element, cls: string) {
         el.classList.add(cls);
 }
 
-export function attrEncode(s: any) {
+
+const esc = {
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": "&apos;",
+    '&': '&amp;',
+}
+
+function escFunc(a: string) {
+    return esc[a];
+}
+
+export function escape(s: any) {
+    if (!arguments.length)
+        s = this.value;
+
     if (s == null)
         return '';
 
-    return (s + "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+    if (typeof s !== "string")
+        s = "" + s;
+
+    return s.replace(/[<>"'&]/g, escFunc)
 }
 
 export function disableSelection(target: HTMLElement) {
@@ -43,31 +60,28 @@ export function removeClass(el: Element, cls: string) {
         el.classList.remove(cls);
 }
 
-export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { [key: string]: (string | boolean) }, ...children: Node[]): HTMLElementTagNameMap[K] {
+export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { ref?: (el?: HTMLElementTagNameMap[K]) => void, [key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void) }, ...children: (string | Node)[]): HTMLElementTagNameMap[K] {
     var el = document.createElement(tag);
-    var k: string, v: (string | boolean), c: Node;
+    var k: string, v: any, c: Node | string;
     if (attr) {
         for (k in attr) {
             v = attr[k];
-            if (v != null && v !== false)
-                el.setAttribute(k, v === true ? '' : v);
+            if (v != null && v !== false) {
+                if (k === "ref" && typeof v === "function") {
+                    (v as any)(el);
+                    continue;
+                }
+
+                var key = k === "cssClass" ? "class" : k;
+                el.setAttribute(key, v === true ? '' : v as string);
+            }
         }
     }
-    if (children) {
-        for (c of children)
-            el.appendChild(c);
-    }
+
+    if (children && children.length)
+        el.append(...children);
+
     return el;
-}
-
-export function htmlEncode(s: any) {
-    if (s == null)
-        return '';
-
-    return (s + "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
 }
 
 export function spacerDiv(width: string): HTMLDivElement {

@@ -10,9 +10,11 @@ demonstrates:
 - custom preact components in cells and filters
 - ticking prices/updates via data view layer
 
+requires_scripts:
+- dist/compat/slick.editors.js
+
 requires_slick_scripts:
 - slick.dataview.js
-- slick.editors.js
 - plugins/slick.checkboxselectcolumn.js
 - plugins/slick.rowselectionmodel.js
 ---
@@ -111,29 +113,25 @@ requires_slick_scripts:
         }
     }
 
-    const amountFormatter = (r, c, value) => `<div class="${value < 500 ? 'green' : 'red'}">$ ${formatNumber(value, 2)}</div>`
+    const amountFormatter = (ctx) => `<div class="${ctx.value < 500 ? 'green' : 'red'}">$ ${ctx.escape(formatNumber(ctx.value, 2))}</div>`
 
-    const pipFormatter = (r, c, value, cd, dataContext) => `<div class="${dataContext.direction}">${formatNumber(value, 2)}</div>`;
+    const pipFormatter = (ctx) => `<div class="${ctx.escape(ctx.item.direction)}">${ctx.escape(formatNumber(ctx.value, 2))}</div>`;
 
-    const imageFormatter = (r, c, value) => `<img src="${value}" />`;
+    const imageFormatter = (ctx) => `<img src="${ctx.escape()}" />`;
 
-    const dateFormatter = (r, c, value) => formatDate(new Date(value));
+    const dateFormatter = (ctx) => ctx.escape(formatDate(new Date(value)));
 
-    const totalFormatter = (r, c, value, cd, { price, amount }) => '$' + formatNumber(price * amount, 2);
+    const totalFormatter = (ctx) => '$' + ctx.escape(formatNumber(ctx.item.price * ctx.item.amount, 2));
 
-    const healthFormatter = (r, c, value) => {
-        const className = value > 66 ? 'danger' : ''
-        return `<progress value="${value}" max="100" class="${className}">${value}</progress>`
+    const healthFormatter = (ctx) => {
+        const className = ctx.value > 66 ? 'danger' : ''
+        return `<progress value="${ctx.escape()}" max="100" class="${className}">${ctx.escape()}</progress>`
     }
 
-    const countryFormatter = (r, c, value) => {
-        const val = value.substr(0, 2).toLocaleLowerCase()
-        return `<span class="fi fi-${val}"></span> ${value}`
+    const countryFormatter = (ctx) => {
+        const val = ctx.value.substr(0, 2).toLocaleLowerCase()
+        return `<span class="fi fi-${ctx.escape(val)}"></span> ${ctx.escape()}`
     }
-
-    $.datepicker.setDefaults({
-        buttonImage: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E`
-    });
 
     const style = { stroke: "black", fill: "none" }
     const dummy = document.createElement('div')
@@ -157,16 +155,12 @@ requires_slick_scripts:
                 H(S.SparklinesSpots, null, [])), dummy);
     }
 
-    const historicSyncFormatter = (r, c, value) => {
+    const historicSyncFormatter = (ctx) => {
         dummy.innerHTML = '';
-        historicRenderer(value, dummy);
-        const html = dummy.innerHTML
+        historicRenderer(ctx.value, dummy);
+        const html = dummy.innerHTML;
         React.unmountComponentAtNode(dummy);
         return html;
-    }
-
-    const historicFormatter = (node, row, data) => {
-        historicRenderer(data.historic, node);
     }
 
     const rates = {
@@ -247,7 +241,7 @@ requires_slick_scripts:
             minWidth: 100,
             maxWidth: 200,
             cssClass: 'slick-editable',
-            editor: Slick.Editors.Text,
+            editor: Slick.TextEditor,
             sortable: true
         },
         {
@@ -257,7 +251,7 @@ requires_slick_scripts:
             minWidth: 70,
             maxWidth: 70,
             sortable: true,
-            formatter: countryFormatter,
+            format: countryFormatter,
         },
         {
             id: 'price',
@@ -265,7 +259,7 @@ requires_slick_scripts:
             field: 'price',
             headerCssClass: 'amount',
             cssClass: 'amount',
-            formatter: pipFormatter,
+            format: pipFormatter,
             sortable: true,
             minWidth: 80,
             maxWidth: 80
@@ -275,10 +269,7 @@ requires_slick_scripts:
             name: 'Historic',
             field: 'historic',
             rerenderOnResize: true,
-            //asyncPostRender: historicFormatter,
-            formatter: historicSyncFormatter,
-            // formatter: (a,b, value) => JSON.stringify(value),
-            // formatter: historicFormatter,
+            format: historicSyncFormatter,
             cssClass: 'full-size',
             minWidth: 128,
             maxWidth: 128
@@ -290,8 +281,8 @@ requires_slick_scripts:
             headerCssClass: 'amount',
             cssClass: 'amount slick-editable',
             sortable: true,
-            formatter: amountFormatter,
-            editor: Slick.Editors.Text,
+            format: amountFormatter,
+            editor: Slick.TextEditor,
             minWidth: 80,
             maxWidth: 80
         },
@@ -301,7 +292,7 @@ requires_slick_scripts:
             fieldName: 'total',
             headerCssClass: 'amount',
             cssClass: 'amount',
-            formatter: totalFormatter,
+            format: totalFormatter,
             minWidth: 90,
             maxWidth: 100
         },
@@ -315,7 +306,7 @@ requires_slick_scripts:
             cssClass: 'slick-editable amount',
             headerCssClass: 'amount',
             //todo: fix date picker as it goes off-screen
-            editor: Slick.Editors.Date,
+            editor: Slick.DateEditor,
             options: {
                 date: {
                     dateFormat: 'd/m/Y', // see https://chmln.github.io/flatpickr/#options,
@@ -332,7 +323,7 @@ requires_slick_scripts:
             field: 'health',
             cssClass: 'is-hidden-mobile',
             headerCssClass: 'is-hidden-mobile',
-            formatter: healthFormatter,
+            format: healthFormatter,
             sortable: true
         },
     ];
@@ -356,7 +347,7 @@ requires_slick_scripts:
             currency,
             amount: randNumber({ min: 100, max: 1000, fraction: 2 }),
             price: rates[currency],
-            paymentDate: dateFormatter(null, null, randFutureDate())
+            paymentDate: randFutureDate()
         };
 
         data.historic = [data.price]
@@ -382,7 +373,7 @@ requires_slick_scripts:
                 {
                     defaultValue: this.props.columnFilters[this.props.columnId],
                     type: 'text',
-                    className: 'editor-text',
+                    className: 'slick-editor-text',
                     onChange: this.handleChange
                 });
         }
@@ -407,7 +398,7 @@ requires_slick_scripts:
 
         componentDidMount = () => {
             const grid = this.grid = new Slick.Grid(this.gridEl, view, columns, options);
-            columns[7].formatter = columns[7].formatter.bind(this.grid)
+            columns[7].format = columns[7].format.bind(this.grid)
 
             grid.setSelectionModel(new Slick.RowSelectionModel({ selectActiveRow: false }));
             grid.registerPlugin(checkboxSelector);

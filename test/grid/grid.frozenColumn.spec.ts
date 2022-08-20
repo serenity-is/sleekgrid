@@ -1,6 +1,6 @@
-﻿import { Column } from "src/grid/column";
-import { Grid } from "src/grid/grid";
-import { FrozenLayout } from "src/layouts/frozenlayout";
+﻿import { Column } from "@/core/column";
+import { Grid } from "@/grid/grid";
+import { FrozenLayout } from "@/layouts/frozenlayout";
 
 const slickPaneRight = "slick-pane-right";
 const slickPaneLeft = "slick-pane-left";

@@ -1,44 +1,44 @@
 import { defaultColumnFormat, applyFormatterResultToCellNode } from "@/core/formatting";
-import { htmlEncode } from "@/core/util";
+import { escape } from "@/core/util";
 
 describe('defaultFormatter', () => {
     it('should encode & as &amp;', () => {
-        expect(defaultColumnFormat({ value: '&' })).toBe('&amp;');
+        expect(defaultColumnFormat({ escape, value: '&' })).toBe('&amp;');
     });
 
     it('should encode < as &lt;', () => {
-        expect(defaultColumnFormat({ value: '<' })).toBe('&lt;');
+        expect(defaultColumnFormat({ escape, value: '<' })).toBe('&lt;');
     });
 
     it('should encode > as &gt;', () => {
-        expect(defaultColumnFormat({ value: '>' })).toBe('&gt;');
+        expect(defaultColumnFormat({ escape, value: '>' })).toBe('&gt;');
     });
 
     it('should encode multiple & as &amp;', () => {
-        expect(defaultColumnFormat({ value: '&&' })).toBe('&amp;&amp;');
+        expect(defaultColumnFormat({ escape, value: '&&' })).toBe('&amp;&amp;');
     });
 
     it('should encode multiple < as &lt;', () => {
-        expect(defaultColumnFormat({ value: '<<' })).toBe('&lt;&lt;');
+        expect(defaultColumnFormat({ escape, value: '<<' })).toBe('&lt;&lt;');
     });
 
     it('should encode multiple > as &gt;', () => {
-        expect(defaultColumnFormat({ value: '>>' })).toBe('&gt;&gt;');
+        expect(defaultColumnFormat({ escape, value: '>>' })).toBe('&gt;&gt;');
     });
 
     it('should encode all characters', () => {
-        expect(defaultColumnFormat({ value: '&<>' })).toBe('&amp;&lt;&gt;');
+        expect(defaultColumnFormat({ escape, value: '&<>' })).toBe('&amp;&lt;&gt;');
     });
 
     it('should return empty string if parameter is null or undefined', () => {
-        expect(defaultColumnFormat({ value: null })).toBe('');
-        expect(defaultColumnFormat({ value: undefined })).toBe('');
+        expect(defaultColumnFormat({ escape, value: null })).toBe('');
+        expect(defaultColumnFormat({ escape, value: undefined })).toBe('');
     });
 
     it('should convert any type to a string', () => {
-        expect(defaultColumnFormat({ value: 1 })).toBe('1');
-        expect(defaultColumnFormat({ value: true })).toBe('true');
-        expect(defaultColumnFormat({ value: {} })).toBe('[object Object]');
+        expect(defaultColumnFormat({ escape, value: 1 })).toBe('1');
+        expect(defaultColumnFormat({ escape, value: true })).toBe('true');
+        expect(defaultColumnFormat({ escape, value: {} })).toBe('[object Object]');
     });
 });
 
@@ -49,7 +49,7 @@ describe('applyFormatterResultToCellNode', () => {
 
         expect(cellNode.dataset.fmtatt).not.toBe(undefined);
 
-        applyFormatterResultToCellNode({}, '', cellNode);
+        applyFormatterResultToCellNode({ escape }, '', cellNode);
 
         expect(cellNode.dataset.fmtatt).toBe(undefined);
     });
@@ -61,7 +61,7 @@ describe('applyFormatterResultToCellNode', () => {
         cellNode.setAttribute('b', '2');
         cellNode.setAttribute('c', '3');
 
-        applyFormatterResultToCellNode({}, '', cellNode);
+        applyFormatterResultToCellNode({ escape }, '', cellNode);
 
         expect(cellNode.dataset.fmtatt).toBe(undefined);
         expect(cellNode.getAttribute('a')).toBe(null);
@@ -75,7 +75,7 @@ describe('applyFormatterResultToCellNode', () => {
 
         expect(cellNode.dataset.fmtcls).not.toBe(undefined);
 
-        applyFormatterResultToCellNode({}, '', cellNode);
+        applyFormatterResultToCellNode({ escape }, '', cellNode);
 
         expect(cellNode.dataset.fmtcls).toBe(undefined);
     });
@@ -85,7 +85,7 @@ describe('applyFormatterResultToCellNode', () => {
         cellNode.dataset.fmtcls = 'a b c';
         cellNode.classList.add('a', 'b', 'c');
 
-        applyFormatterResultToCellNode({}, '', cellNode);
+        applyFormatterResultToCellNode({ escape }, '', cellNode);
 
         expect(cellNode.dataset.fmtcls).toBe(undefined);
         expect(cellNode.classList.contains('a')).toBe(false);
@@ -97,7 +97,7 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
         cellNode.setAttribute('tooltip', 'a');
 
-        applyFormatterResultToCellNode({}, '', cellNode);
+        applyFormatterResultToCellNode({ escape }, '', cellNode);
 
         expect(cellNode.getAttribute('tooltip')).toBe(null);
     });
@@ -106,6 +106,7 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
 
         applyFormatterResultToCellNode({
+            escape,
             tooltip: 'test'
         }, undefined, cellNode);
 
@@ -115,7 +116,7 @@ describe('applyFormatterResultToCellNode', () => {
     it('should set html of the element if fmtResult is string', () => {
         const cellNode = document.createElement('div');
 
-        applyFormatterResultToCellNode({}, 'test', cellNode);
+        applyFormatterResultToCellNode({ escape }, 'test', cellNode);
 
         expect(cellNode.innerHTML).toBe('test');
     });
@@ -123,7 +124,7 @@ describe('applyFormatterResultToCellNode', () => {
     it('should set html of the element to the html in the object', () => {
         const cellNode = document.createElement('div');
 
-        applyFormatterResultToCellNode({}, 'test<span>test</span>', cellNode);
+        applyFormatterResultToCellNode({ escape }, 'test<span>test</span>', cellNode);
 
         expect(cellNode.childElementCount).toBe(1);
         expect(cellNode.innerHTML).toBe('test<span>test</span>');
@@ -137,7 +138,8 @@ describe('applyFormatterResultToCellNode', () => {
                 a: '1',
                 b: '2',
                 c: '3'
-            }
+            },
+            escape
         }, undefined, cellNode);
 
         expect(cellNode.getAttribute('a')).toBe('1');
@@ -153,7 +155,8 @@ describe('applyFormatterResultToCellNode', () => {
                 a: '1',
                 b: '2',
                 c: '3'
-            }
+            },
+            escape
         }, undefined, cellNode);
 
         expect(cellNode.dataset.fmtatt).toBe('a,b,c');
@@ -163,6 +166,7 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
 
         applyFormatterResultToCellNode({
+            escape,
             tooltip: 'test'
         }, undefined, cellNode);
 
@@ -173,11 +177,11 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
         cellNode.innerHTML = 'test';
 
-        applyFormatterResultToCellNode({}, null, cellNode);
+        applyFormatterResultToCellNode({ escape }, null, cellNode);
         expect(cellNode.innerHTML).toBe('');
 
         cellNode.innerHTML = 'test';
-        applyFormatterResultToCellNode({}, undefined, cellNode);
+        applyFormatterResultToCellNode({ escape }, undefined, cellNode);
         expect(cellNode.innerHTML).toBe('');
     });
 
@@ -185,7 +189,8 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
 
         applyFormatterResultToCellNode({
-            addClass: 'a b c'
+            addClass: 'a b c',
+            escape
         }, undefined, cellNode);
 
         expect(cellNode.classList.contains('a')).toBe(true);
@@ -197,7 +202,8 @@ describe('applyFormatterResultToCellNode', () => {
         const cellNode = document.createElement('div');
 
         applyFormatterResultToCellNode({
-            addClass: 'a b c'
+            addClass: 'a b c',
+            escape
         }, undefined, cellNode);
 
         expect(cellNode.dataset.fmtcls).toBe('a b c');

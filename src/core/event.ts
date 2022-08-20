@@ -165,6 +165,7 @@ export class EventHandler<TArgs = any, TEventData extends IEventData = IEventDat
     }
 }
 
+/** @deprecated */
 export const keyCode = {
     BACKSPACE: 8,
     DELETE: 46,
