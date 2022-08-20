@@ -14,10 +14,13 @@ export interface FormatterContext<TItem = any> {
 	addClass?: string;
 	cell?: number;
 	column?: Column<TItem>;
+	/** returns html escaped ctx.value if called without arguments. prefer this over ctx.value to avoid html injection attacks! */
+	readonly escape: ((value?: any) => string);
 	grid?: any;
 	item?: TItem;
 	row?: number;
 	tooltip?: string;
+	/** when returning a formatter result, prefer ctx.escape() to avoid html injection attacks! */
 	value?: any;
 }
 export declare type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => string;
@@ -38,7 +41,7 @@ export declare type CellStylesHash = {
 		[cell: number]: string;
 	};
 };
-export declare function defaultColumnFormat(ctx: FormatterContext): string;
+export declare function defaultColumnFormat(ctx: FormatterContext): any;
 export declare function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat;
 export declare function applyFormatterResultToCellNode(ctx: FormatterContext, html: string, node: HTMLElement): void;
 /***
@@ -239,6 +242,7 @@ export declare class EventHandler<TArgs = any, TEventData extends IEventData = I
 	unsubscribe(event: Event<TArgs, TEventData>, handler: Handler<TArgs, TEventData>): this;
 	unsubscribeAll(): EventHandler<TArgs, TEventData>;
 }
+/** @deprecated */
 export declare const keyCode: {
 	BACKSPACE: number;
 	DELETE: number;
@@ -269,12 +273,27 @@ export interface ValidationResult {
 	valid: boolean;
 	msg?: string;
 }
+export interface RowCell {
+	row: number;
+	cell: number;
+}
+export interface EditorHost {
+	getActiveCell(): RowCell;
+	navigateNext(): boolean;
+	navigatePrev(): boolean;
+	onCompositeEditorChange: Event<any>;
+}
+export interface CompositeEditorOptions {
+	formValues: any;
+}
 export interface EditorOptions {
-	grid: unknown;
+	grid: EditorHost;
 	gridPosition?: Position;
 	position?: Position;
+	editorCellNavOnLRKeys?: boolean;
 	column?: Column;
 	columnMetaData?: ColumnMetadata<any>;
+	compositeEditorOptions?: CompositeEditorOptions;
 	container?: HTMLElement;
 	item?: any;
 	event?: IEventData;
@@ -282,7 +301,7 @@ export interface EditorOptions {
 	cancelChanges?: () => void;
 }
 export interface EditorFactory {
-	getEditor(column: Column): Editor;
+	getEditor(column: Column): EditorClass;
 }
 export interface EditCommand {
 	row: number;
@@ -293,8 +312,11 @@ export interface EditCommand {
 	execute: () => void;
 	undo: () => void;
 }
-export interface Editor {
+export interface EditorClass {
 	new (options: EditorOptions): Editor;
+	suppressClearOnEdit?: boolean;
+}
+export interface Editor {
 	destroy(): void;
 	applyValue(item: any, value: any): void;
 	focus(): void;
@@ -306,7 +328,6 @@ export interface Editor {
 	preClick?(): void;
 	hide?(): void;
 	show?(): void;
-	suppressClearOnEdit?: boolean;
 	validate?(): ValidationResult;
 }
 export interface EditController {
@@ -377,12 +398,14 @@ export interface Column<TItem = any> {
 	cannotTriggerInsert?: boolean;
 	cssClass?: string;
 	defaultSortAsc?: boolean;
-	editor?: Editor;
+	editor?: EditorClass;
+	editorFixedDecimalPlaces?: number;
 	field: string;
 	frozen?: boolean;
 	focusable?: boolean;
 	footerCssClass?: string;
 	format?: ColumnFormat<TItem>;
+	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
 	groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: unknown) => string;
 	headerCssClass?: string;
@@ -399,7 +422,7 @@ export interface Column<TItem = any> {
 	sortable?: boolean;
 	sortOrder?: number;
 	toolTip?: string;
-	validator?: (value: any) => ValidationResult;
+	validator?: (value: any, editorArgs?: any) => ValidationResult;
 	visible?: boolean;
 	width?: number;
 }
@@ -407,6 +430,7 @@ export declare const columnDefaults: Partial<Column>;
 export interface ColumnMetadata<TItem = any> {
 	colspan: number | "*";
 	format?: ColumnFormat<TItem>;
+	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
 }
 export interface ColumnSort {
@@ -418,6 +442,7 @@ export interface ItemMetadata<TItem = any> {
 		[key: string]: ColumnMetadata<TItem>;
 	};
 	format?: ColumnFormat<TItem>;
+	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
 }
 export declare class Range {
@@ -444,13 +469,13 @@ export declare class Range {
 	toString(): string;
 }
 export declare function addClass(el: Element, cls: string): void;
-export declare function attrEncode(s: any): string;
+export declare function escape(s: any): any;
 export declare function disableSelection(target: HTMLElement): void;
 export declare function removeClass(el: Element, cls: string): void;
 export declare function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: {
-	[key: string]: (string | boolean);
-}, ...children: Node[]): HTMLElementTagNameMap[K];
-export declare function htmlEncode(s: any): string;
+	ref?: (el?: HTMLElementTagNameMap[K]) => void;
+	[key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void);
+}, ...children: (string | Node)[]): HTMLElementTagNameMap[K];
 export declare function spacerDiv(width: string): HTMLDivElement;
 export interface IPlugin {
 	init(grid: Grid): void;
@@ -470,10 +495,6 @@ export interface ViewportInfo {
 	headerRowHeight: number;
 	footerRowHeight: number;
 	numVisibleRows: number;
-}
-export interface RowCell {
-	row: number;
-	cell: number;
 }
 export interface SelectionModel extends IPlugin {
 	setSelectedRanges(ranges: Range[]): void;
@@ -577,6 +598,7 @@ export interface GridOptions<TItem = any> {
 	defaultFormatter?: CompatFormatter<TItem>;
 	editable?: boolean;
 	editCommandHandler?: (item: TItem, column: Column<TItem>, command: EditCommand) => void;
+	editorCellNavOnLRKeys?: boolean;
 	editorFactory?: EditorFactory;
 	editorLock?: EditorLock;
 	enableAddRow?: boolean;
@@ -628,7 +650,7 @@ export interface GridOptions<TItem = any> {
 	viewportClass?: string;
 }
 export declare const gridDefaults: GridOptions;
-export declare class Grid<TItem = any> {
+export declare class Grid<TItem = any> implements EditorHost {
 	private _absoluteColMinWidth;
 	private _activeCanvasNode;
 	private _activeCell;
@@ -710,16 +732,16 @@ export declare class Grid<TItem = any> {
 	readonly onBeforeHeaderRowCellDestroy: Event<ArgsColumnNode, IEventData>;
 	readonly onCellChange: Event<ArgsCellChange, IEventData>;
 	readonly onCellCssStylesChanged: Event<ArgsCssStyle, IEventData>;
-	readonly onClick: Event<ArgsCell, JQueryMouseEventObject>;
+	readonly onClick: Event<ArgsCell, MouseEvent>;
 	readonly onColumnsReordered: Event<ArgsGrid, IEventData>;
 	readonly onColumnsResized: Event<ArgsGrid, IEventData>;
 	readonly onCompositeEditorChange: Event<ArgsGrid, IEventData>;
-	readonly onContextMenu: Event<ArgsGrid, JQueryEventObject>;
-	readonly onDblClick: Event<ArgsCell, JQueryMouseEventObject>;
-	readonly onDrag: Event<ArgsGrid, JQueryEventObject>;
-	readonly onDragEnd: Event<ArgsGrid, JQueryEventObject>;
-	readonly onDragInit: Event<ArgsGrid, JQueryEventObject>;
-	readonly onDragStart: Event<ArgsGrid, JQueryEventObject>;
+	readonly onContextMenu: Event<ArgsGrid, UIEvent>;
+	readonly onDblClick: Event<ArgsCell, MouseEvent>;
+	readonly onDrag: Event<ArgsGrid, UIEvent>;
+	readonly onDragEnd: Event<ArgsGrid, UIEvent>;
+	readonly onDragInit: Event<ArgsGrid, UIEvent>;
+	readonly onDragStart: Event<ArgsGrid, UIEvent>;
 	readonly onFooterRowCellRendered: Event<ArgsColumnNode, IEventData>;
 	readonly onHeaderCellRendered: Event<ArgsColumnNode, IEventData>;
 	readonly onHeaderClick: Event<ArgsColumn, IEventData>;
@@ -727,7 +749,7 @@ export declare class Grid<TItem = any> {
 	readonly onHeaderMouseEnter: Event<ArgsColumn, MouseEvent>;
 	readonly onHeaderMouseLeave: Event<ArgsColumn, MouseEvent>;
 	readonly onHeaderRowCellRendered: Event<ArgsColumnNode, IEventData>;
-	readonly onKeyDown: Event<ArgsCell, JQueryKeyEventObject>;
+	readonly onKeyDown: Event<ArgsCell, KeyboardEvent>;
 	readonly onMouseEnter: Event<ArgsGrid, MouseEvent>;
 	readonly onMouseLeave: Event<ArgsGrid, MouseEvent>;
 	readonly onScroll: Event<ArgsScroll, IEventData>;
@@ -919,12 +941,12 @@ export declare class Grid<TItem = any> {
 	private setFocus;
 	scrollCellIntoView(row: number, cell: number, doPaging?: boolean): void;
 	scrollColumnIntoView(cell: number): void;
-	internalScrollColumnIntoView(left: number, right: number): void;
+	private internalScrollColumnIntoView;
 	private setActiveCellInternal;
 	clearTextSelection(): void;
 	private isCellPotentiallyEditable;
 	private makeActiveCellNormal;
-	editActiveCell(editor?: Editor): void;
+	editActiveCell(editor?: EditorClass): void;
 	private makeActiveCellEditable;
 	private commitEditAndSetFocus;
 	private cancelEditAndSetFocus;
@@ -1031,5 +1053,109 @@ export declare const BasicLayout: {
 export declare const FrozenLayout: {
 	new (): LayoutEngine;
 };
+export declare function PercentCompleteFormatter(ctx: FormatterContext): string;
+export declare function PercentCompleteBarFormatter(ctx: FormatterContext): string;
+export declare function YesNoFormatter(ctx: FormatterContext): "Yes" | "No";
+export declare function CheckboxFormatter(ctx: FormatterContext): string;
+export declare function CheckmarkFormatter(ctx: FormatterContext): "" | "<i class=\"slick-checkmark\"></i>";
+export declare namespace Formatters {
+	function PercentComplete(_row: number, _cell: number, value: any): string;
+	function PercentCompleteBar(_row: number, _cell: number, value: any): string;
+	function YesNo(_row: number, _cell: number, value: any): "Yes" | "No";
+	function Checkbox(_row: number, _cell: number, value: any): string;
+	function Checkmark(_row: number, _cell: number, value: any): "" | "<i class=\"slick-checkmark\"></i>";
+}
+declare abstract class BaseEditor {
+	protected _input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+	protected _defaultValue: any;
+	protected _args: EditorOptions;
+	constructor(args: EditorOptions);
+	abstract init(): void;
+	destroy(): void;
+	focus(): void;
+	getValue(): string;
+	setValue(val: string): void;
+	loadValue(item: any): void;
+	serializeValue(): any;
+	applyValue(item: any, state: any): void;
+	isValueChanged(): boolean;
+	validate(): ValidationResult;
+}
+export declare class TextEditor extends BaseEditor {
+	_input: HTMLInputElement;
+	init(): void;
+}
+export declare class IntegerEditor extends TextEditor {
+	serializeValue(): number;
+	validate(): ValidationResult;
+}
+export declare class FloatEditor extends TextEditor {
+	static AllowEmptyValue: boolean;
+	static DefaultDecimalPlaces: number;
+	getDecimalPlaces(): number;
+	loadValue(item: any): void;
+	serializeValue(): any;
+	validate(): ValidationResult;
+}
+export declare class DateEditor extends TextEditor {
+	private _calendarOpen;
+	init(): void;
+	destroy(): void;
+	show(): void;
+	hide(): void;
+	position(position: Position): void;
+}
+export declare class YesNoSelectEditor extends BaseEditor {
+	_input: HTMLSelectElement;
+	init(): void;
+	loadValue(item: any): void;
+	serializeValue(): boolean;
+	isValueChanged(): boolean;
+	validate(): {
+		valid: boolean;
+		msg: string;
+	};
+}
+export declare class CheckboxEditor extends BaseEditor {
+	_input: HTMLInputElement;
+	init(): void;
+	loadValue(item: any): void;
+	preClick(): void;
+	serializeValue(): boolean;
+	applyValue(item: any, state: any): void;
+	isValueChanged(): boolean;
+	validate(): {
+		valid: boolean;
+		msg: string;
+	};
+}
+export declare class PercentCompleteEditor extends IntegerEditor {
+	protected _picker: HTMLDivElement;
+	init(): void;
+	destroy(): void;
+}
+export declare class LongTextEditor extends BaseEditor {
+	_input: HTMLTextAreaElement;
+	protected _container: HTMLElement;
+	protected _wrapper: HTMLDivElement;
+	init(): void;
+	handleKeyDown(e: KeyboardEvent): void;
+	save(): void;
+	cancel(): void;
+	hide(): void;
+	show(): void;
+	position(position: Position): void;
+	destroy(): void;
+}
+export declare namespace Editors {
+	const Text: typeof TextEditor;
+	const Integer: typeof IntegerEditor;
+	const Float: typeof FloatEditor;
+	const Date: typeof DateEditor;
+	const YesNoSelect: typeof YesNoSelectEditor;
+	const Checkbox: typeof CheckboxEditor;
+	const PercentComplete: typeof PercentCompleteEditor;
+	const LongText: typeof LongTextEditor;
+}
 
 export {};
