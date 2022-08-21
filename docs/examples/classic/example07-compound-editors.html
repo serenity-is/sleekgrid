@@ -91,8 +91,8 @@ requires_scripts:
     }
 
     const columns = [
-        { id: "title", name: "Title", field: "title", width: 120, cssClass: "cell-title", editor: Slick.TextEditor },
-        { id: "range", name: "Range", width: 120, cssClass: "cell-range", format: NumericRangeFormatter, editor: NumericRangeEditor }
+        { field: "title", width: 120, cssClass: "cell-title", editor: Slick.TextEditor },
+        { id: "range", width: 120, cssClass: "cell-range", format: NumericRangeFormatter, editor: NumericRangeEditor }
     ];
 
     grid = new Slick.Grid("#myGrid", data, columns, {

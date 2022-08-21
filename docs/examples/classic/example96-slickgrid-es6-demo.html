@@ -226,17 +226,13 @@ requires_slick_scripts:
             nameIsHtml: true
         },
         {
-            id: 'type',
-            name: 'Side',
-            sortable: true,
             field: 'type',
+            sortable: true,
             width: 60,
             minWidth: 60,
             maxWidth: 60
         },
         {
-            id: 'counterparty',
-            name: 'Counterparty',
             field: 'counterparty',
             minWidth: 100,
             maxWidth: 200,
@@ -245,18 +241,16 @@ requires_slick_scripts:
             sortable: true
         },
         {
-            id: 'currency',
-            name: 'CUR',
             field: 'currency',
+            name: 'CUR',
             minWidth: 70,
             maxWidth: 70,
             sortable: true,
             format: countryFormatter,
         },
         {
-            id: 'price',
-            name: 'Price',
             field: 'price',
+            id: 'price',
             headerCssClass: 'amount',
             cssClass: 'amount',
             format: pipFormatter,
@@ -265,8 +259,6 @@ requires_slick_scripts:
             maxWidth: 80
         },
         {
-            id: 'historic',
-            name: 'Historic',
             field: 'historic',
             rerenderOnResize: true,
             format: historicSyncFormatter,
@@ -275,8 +267,6 @@ requires_slick_scripts:
             maxWidth: 128
         },
         {
-            id: 'amount',
-            name: 'Amount',
             field: 'amount',
             headerCssClass: 'amount',
             cssClass: 'amount slick-editable',
@@ -287,9 +277,7 @@ requires_slick_scripts:
             maxWidth: 80
         },
         {
-            id: 'total',
-            name: 'Total',
-            fieldName: 'total',
+            field: 'total',
             headerCssClass: 'amount',
             cssClass: 'amount',
             format: totalFormatter,
@@ -297,10 +285,9 @@ requires_slick_scripts:
             maxWidth: 100
         },
         {
-            id: 'paymentDate',
-            sortable: true,
-            name: 'Execution',
             field: 'paymentDate',
+            name: 'Execution',
+            sortable: true,
             minWidth: 105,
             maxWidth: 105,
             cssClass: 'slick-editable amount',
@@ -318,14 +305,12 @@ requires_slick_scripts:
             }
         },
         {
-            id: 'health',
-            name: 'Health',
             field: 'health',
             cssClass: 'is-hidden-mobile',
             headerCssClass: 'is-hidden-mobile',
             format: healthFormatter,
             sortable: true
-        },
+        }
     ];
 
     function random(min, max) {

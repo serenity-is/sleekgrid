@@ -20,16 +20,15 @@ demonstrates:
     }
 
     const columns = [
-        { id: "title", name: "Title", field: "title" },
-        { id: "duration", name: "Duration", field: "duration" },
-        { id: "%", name: "% Complete", field: "percentComplete", width: 90 },
-        { id: "start", name: "Start", field: "start", width: 100 },
-        { id: "finish", name: "Finish", field: "finish", width: 100 },
-        { id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 100 }
+        { field: "title" },
+        { field: "duration" },
+        { field: "percentComplete", name: "% Complete", width: 90 },
+        { field: "start", width: 100 },
+        { field: "finish", width: 100 },
+        { field: "effortDriven", width: 100 }
     ];
 
     new Slick.Grid("#myGrid", data, columns, {
-        enableCellNavigation: true,
-        enableColumnReorder: false
+        enableCellNavigation: true
     });
 </script>

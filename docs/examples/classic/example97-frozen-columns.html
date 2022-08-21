@@ -14,13 +14,13 @@ requires_scripts:
 <script>
     var grid;
     var columns = [
-        { id: "title", name: "Title", field: "title", frozen: true },
-        { id: "duration", name: "Duration", field: "duration", frozen: true },
-        { id: "description", name: "Description", field: "description", width: 350 },
-        { id: "%", name: "% Complete", field: "percentComplete", width: 200, format: Slick.PercentCompleteBarFormatter },
-        { id: "start", name: "Start", field: "start", width: 150 },
-        { id: "finish", name: "Finish", field: "finish", width: 150 },
-        { id: "effort-driven", name: "Effort Driven", field: "effortDriven", width: 150 }
+        { field: "title", frozen: true },
+        { field: "duration", frozen: true },
+        { field: "description", width: 350 },
+        { field: "percentComplete", name: "% Complete", width: 200, format: Slick.PercentCompleteBarFormatter },
+        { field: "start", width: 150 },
+        { field: "finish", width: 150 },
+        { field: "effortDriven", width: 150 }
     ];
 
     var data = [];

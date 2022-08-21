@@ -50,7 +50,7 @@ export const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "escape", "defaultColumnFormat", "disableSelection", "Event", "EventData", "GlobalEditorLock", "H", "keyCode", "NonDataRow", "preClickClassName", "removeClass", "spacerDiv", "Range", "RowCell"],
+        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escape", "defaultColumnFormat", "disableSelection", "Event", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "preClickClassName", "Range", "removeClass", "RowCell", "spacerDiv", "titleize"],
     })]
 }
 

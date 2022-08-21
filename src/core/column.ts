@@ -1,6 +1,6 @@
 import type { AsyncPostCleanup, AsyncPostRender, ColumnFormat, CompatFormatter } from "./formatting";
 import { GroupTotals } from "./group";
-import { Editor, EditorClass, ValidationResult } from "./editing";
+import { EditorClass, ValidationResult } from "./editing";
 
 export interface Column<TItem = any> {
     asyncPostRender?: AsyncPostRender<TItem>;
@@ -11,7 +11,7 @@ export interface Column<TItem = any> {
     defaultSortAsc?: boolean;
     editor?: EditorClass;
     editorFixedDecimalPlaces?: number;
-    field: string;
+    field?: string;
     frozen?: boolean;
     focusable?: boolean;
     footerCssClass?: string;
@@ -39,7 +39,6 @@ export interface Column<TItem = any> {
 }
 
 export const columnDefaults: Partial<Column> = {
-    name: "",
     nameIsHtml: false,
     resizable: true,
     sortable: false,
@@ -69,3 +68,52 @@ export interface ItemMetadata<TItem = any> {
     formatter?: CompatFormatter<TItem>;
 }
 
+export function initializeColumns(columns: Column[], defaults: Partial<Column<any>>) {
+    var usedIds: { [key: string]: boolean } = {};
+
+    for (var i = 0; i < columns.length; i++) {
+        var m = columns[i];
+
+        if (defaults != null) {
+            for (var k in defaults) {
+                if (m[k] === undefined)
+                    m[k] = defaults[k];
+            }
+        }
+
+        if (m.minWidth && m.width < m.minWidth)
+            m.width = m.minWidth;
+
+        if (m.maxWidth && m.width > m.maxWidth)
+            m.width = m.maxWidth;
+
+        if (m.id == null ||
+            usedIds[m.id]) {
+            const prefix = m.id != null && m.id.length ? m.id :
+                m.field != null ? m.field : ('col');
+            var x = 0;
+            while (usedIds[(m.id = prefix + (x == 0 ? "" : '_' + x.toString()))]) x++;
+        }
+
+        usedIds[m.id] = true;
+
+        if (m.name === void 0) {
+            m.name = titleize(m.field ?? m.id ?? '');
+            delete m.nameIsHtml;
+        }
+    }
+}
+
+function underscore(str: string) {
+    return (str ?? '').replace(/([A-Z]+)([A-Z][a-z])/, "$1_$2")
+        .replace(/([a-z\d])([A-Z])/, "$1_$2")
+        .replace(/[-\s]/, "_").toLowerCase();
+}
+
+export function titleize(str: string) {
+    if (!str)
+        return str;
+
+    return underscore(str).replace(/\s/, '_').split('_').filter(x => x.length)
+        .map(x => x.charAt(0).toUpperCase() + x.substring(1).toLowerCase()).join(' ');
+}

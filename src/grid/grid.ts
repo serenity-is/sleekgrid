@@ -1,4 +1,4 @@
-import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter as importCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell } from "../core";
+import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
@@ -645,7 +645,8 @@ export class Grid<TItem = any> implements EditorHost {
             if (m.nameIsHtml)
                 name.innerHTML = m.name ?? '';
             else
-                name.textContent = m.name ?? '';
+                name.textContent = (m.name ?? '');
+
             var header = H("div", {
                 class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default " : ""),
                 id: "" + this._uid + m.id,
@@ -1274,27 +1275,14 @@ export class Grid<TItem = any> implements EditorHost {
 
     private setInitialCols(initCols: Column[]) {
 
-        var defs = this._colDefaults;
+        initializeColumns(initCols, this._colDefaults);
+
         var initColById = {};
         var viewCols: Column[] = [];
         var viewColById: { [key: string]: number } = {};
-        var i: number, m: Column, k: string;
+        var i: number, m: Column;
         for (i = 0; i < initCols.length; i++) {
             m = initCols[i];
-
-            for (k in defs) {
-                if (m[k] === undefined)
-                    m[k] = this._colDefaults[k];
-            }
-
-            if (m.minWidth && m.width < m.minWidth) {
-                m.width = m.minWidth;
-            }
-
-            if (m.maxWidth && m.width > m.maxWidth) {
-                m.width = m.maxWidth;
-            }
-
             initColById[m.id] = i;
             if (m.visible !== false)
                 viewCols.push(m);
@@ -1590,13 +1578,13 @@ export class Grid<TItem = any> implements EditorHost {
                         if (columnMetadata.format)
                             return columnMetadata.format;
                         if (columnMetadata.formatter)
-                            return importCompatFormatter(columnMetadata.formatter);
+                            return convertCompatFormatter(columnMetadata.formatter);
                     }
                 }
                 if (itemMetadata.format)
                     return itemMetadata.format;
                 if (itemMetadata.formatter)
-                    return importCompatFormatter(itemMetadata.formatter);
+                    return convertCompatFormatter(itemMetadata.formatter);
             }
         }
 
@@ -1604,7 +1592,7 @@ export class Grid<TItem = any> implements EditorHost {
             return column.format;
 
         if (column.formatter)
-            return importCompatFormatter(column.formatter);
+            return convertCompatFormatter(column.formatter);
 
         var opt = this._options;
 
@@ -1618,7 +1606,7 @@ export class Grid<TItem = any> implements EditorHost {
             else if (factory.getFormatter) {
                 var compat = factory.getFormatter(column);
                 if (compat)
-                    return importCompatFormatter(compat);
+                    return convertCompatFormatter(compat);
             }
         }
 
@@ -1626,7 +1614,7 @@ export class Grid<TItem = any> implements EditorHost {
             return opt.defaultFormat;
 
         if (opt.defaultFormatter)
-            return importCompatFormatter(opt.defaultFormatter);
+            return convertCompatFormatter(opt.defaultFormatter);
 
         return defaultColumnFormat;
     }

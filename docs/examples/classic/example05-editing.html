@@ -33,13 +33,13 @@ requires_slick_scripts:
     }
 
     const columns = [
-        { id: "title", name: "Title", field: "title", width: 100, cssClass: "cell-title", editor: Slick.Editors.Text, validator: requiredFieldValidator },
-        { id: "desc", name: "Description", field: "description", width: 120, editor: Slick.Editors.LongText },
-        { id: "duration", name: "Duration", field: "duration", editor: Slick.Editors.Text },
-        { id: "%", name: "% Complete", field: "percentComplete", width: 80, resizable: false, format: Slick.PercentCompleteBarFormatter, editor: Slick.PercentCompleteEditor },
-        { id: "start", name: "Start", field: "start", minWidth: 110, editor: Slick.Editors.Date },
-        { id: "finish", name: "Finish", field: "finish", minWidth: 110, editor: Slick.Editors.Date },
-        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", editor: Slick.CheckboxEditor, format: Slick.CheckboxFormatter }
+        { field: "title", width: 100, cssClass: "cell-title", editor: Slick.Editors.Text, validator: requiredFieldValidator },
+        { field: "description", width: 120, editor: Slick.Editors.LongText },
+        { field: "duration", editor: Slick.Editors.Text },
+        { field: "percentComplete", name: "% Complete", width: 80, resizable: false, format: Slick.PercentCompleteBarFormatter, editor: Slick.PercentCompleteEditor },
+        { field: "start", minWidth: 110, editor: Slick.Editors.Date },
+        { field: "finish", minWidth: 110, editor: Slick.Editors.Date },
+        { field: "effortDriven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", editor: Slick.CheckboxEditor, format: Slick.CheckboxFormatter }
     ];
 
     const data = [];

@@ -42,22 +42,14 @@ requires_slick_scripts:
 
     var grid;
     var columns = [
-        { id: "title", name: "Title", field: "title", width: 120, cssClass: "cell-title", editor: Slick.TextEditor, validator: requiredFieldValidator },
-        { id: "desc", name: "Description", field: "description", width: 150, editor: Slick.TextEditor },
-        { id: "duration", name: "Duration", field: "duration", editor: Slick.TextEditor },
-        { id: "percent", name: "% Complete", field: "percentComplete", width: 100, resizable: false, format: Slick.PercentCompleteBarFormatter, editor: Slick.PercentCompleteEditor },
-        { id: "start", name: "Start", field: "start", minWidth: 110, editor: Slick.Editors.Date },
-        { id: "finish", name: "Finish", field: "finish", minWidth: 110, editor: Slick.Editors.Date },
-        { id: "effort-driven", name: "Effort Driven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", field: "effortDriven", format: Slick.CheckboxFormatter, editor: Slick.CheckboxEditor }
+        { field: "title", width: 120, cssClass: "cell-title", editor: Slick.TextEditor, validator: requiredFieldValidator },
+        { field: "description", width: 150, editor: Slick.TextEditor },
+        { field: "duration", editor: Slick.TextEditor },
+        { field: "percentComplete", name: "% Complete", width: 100, resizable: false, format: Slick.PercentCompleteBarFormatter, editor: Slick.PercentCompleteEditor },
+        { field: "start", minWidth: 110, editor: Slick.Editors.Date },
+        { field: "finish", minWidth: 110, editor: Slick.Editors.Date },
+        { field: "effortDriven", width: 80, minWidth: 20, maxWidth: 80, cssClass: "cell-effort-driven", format: Slick.CheckboxFormatter, editor: Slick.CheckboxEditor }
     ];
-    var options = {
-        editable: true,
-        enableAddRow: true,
-        enableCellNavigation: true,
-        asyncEditorLoading: false,
-        autoEdit: false
-    };
-
 
     function openDetails() {
         if (grid.getEditorLock().isActive() && !grid.getEditorLock().commitCurrentEdit()) {
@@ -120,7 +112,13 @@ requires_slick_scripts:
         d["effortDriven"] = (i % 5 == 0);
     }
 
-    grid = new Slick.Grid("#myGrid", data, columns, options);
+    grid = new Slick.Grid("#myGrid", data, columns, {
+        editable: true,
+        enableAddRow: true,
+        enableCellNavigation: true,
+        asyncEditorLoading: false,
+        autoEdit: false
+    });
 
     grid.onAddNewRow.subscribe(function (e, args) {
         var item = args.item;
