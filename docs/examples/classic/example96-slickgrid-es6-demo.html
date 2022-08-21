@@ -90,7 +90,7 @@ requires_slick_scripts:
         if (d == null)
             return '';
 
-        return (d.getDate() < 10 ? '0' : '') + d.getDate() + '/' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1) + '/' + d.getFullYear();
+        return $.datepicker.formatDate($.datepicker.regional[""].dateFormat, d);
     }
 
     const formatNumber = (n, m) => {
@@ -119,7 +119,7 @@ requires_slick_scripts:
 
     const imageFormatter = (ctx) => `<img src="${ctx.escape()}" />`;
 
-    const dateFormatter = (ctx) => ctx.escape(formatDate(new Date(value)));
+    const dateFormatter = (ctx) => ctx.escape(formatDate(new Date(ctx.value)));
 
     const totalFormatter = (ctx) => '$' + ctx.escape(formatNumber(ctx.item.price * ctx.item.amount, 2));
 
@@ -292,17 +292,8 @@ requires_slick_scripts:
             maxWidth: 105,
             cssClass: 'slick-editable amount',
             headerCssClass: 'amount',
-            //todo: fix date picker as it goes off-screen
-            editor: Slick.DateEditor,
-            options: {
-                date: {
-                    dateFormat: 'd/m/Y', // see https://chmln.github.io/flatpickr/#options,
-                    parseDate: input => {
-                        const split = input.split('/')
-                        return new Date(`${split[1]}-${split[0]}-${split[2]}`)
-                    }
-                }
-            }
+            format: dateFormatter,
+            editor: Slick.DateEditor
         },
         {
             field: 'health',
@@ -332,7 +323,7 @@ requires_slick_scripts:
             currency,
             amount: randNumber({ min: 100, max: 1000, fraction: 2 }),
             price: rates[currency],
-            paymentDate: randFutureDate()
+            paymentDate: formatDate(randFutureDate())
         };
 
         data.historic = [data.price]
