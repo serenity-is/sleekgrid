@@ -400,7 +400,7 @@ export interface Column<TItem = any> {
 	defaultSortAsc?: boolean;
 	editor?: EditorClass;
 	editorFixedDecimalPlaces?: number;
-	field: string;
+	field?: string;
 	frozen?: boolean;
 	focusable?: boolean;
 	footerCssClass?: string;
@@ -445,6 +445,8 @@ export interface ItemMetadata<TItem = any> {
 	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
 }
+export declare function initializeColumns(columns: Column[], defaults: Partial<Column<any>>): void;
+export declare function titleize(str: string): string;
 export declare class Range {
 	fromRow: number;
 	fromCell: number;
