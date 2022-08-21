@@ -1,4 +1,4 @@
-import { Column, H, Position } from "../core";
+import { Column, H, parsePx, Position } from "../core";
 
 // shared across all grids on the page
 let maxSupportedCssHeight: number;  // browser's breaking point
@@ -135,6 +135,7 @@ export function getScrollBarDimensions(recalc?: boolean): { width: number; heigh
     }
     return scrollbarDimensions;
 }
+
 
 export function simpleArrayEquals(arr1: number[], arr2: number[]) {
     if (!Array.isArray(arr1) || !Array.isArray(arr2) || arr1.length !== arr2.length)
@@ -339,7 +340,7 @@ export function getVBoxDelta(el: HTMLElement): number {
     var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
     var delta = 0;
     for (var val of p)
-        delta += delta += parseFloat(style.getPropertyValue(val)) || 0;
+        delta += delta += parsePx(style.getPropertyValue(val)) || 0;
     return delta;
 }
 
@@ -351,7 +352,7 @@ export function getInnerWidth(el: HTMLElement): number {
 
     var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
     for (var val of p)
-        width -= parseFloat(style.getPropertyValue(val)) || 0;
+        width -= parsePx(style.getPropertyValue(val)) || 0;
 
     return Math.max(width, 0);
 }

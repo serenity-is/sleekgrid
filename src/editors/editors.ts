@@ -1,4 +1,4 @@
-import { Editor, EditorOptions, H, Position } from "../core";
+import { Editor, EditorOptions, H, parsePx, Position } from "../core";
 
 abstract class BaseEditor {
     protected _input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
@@ -176,7 +176,7 @@ export class DateEditor extends TextEditor {
             }
         });
 
-        this._input.style.width = (parseInt(getComputedStyle(this._input).width) - (!this._args.compositeEditorOptions ? 18 : 28)) + 'px';
+        this._input.style.width = (parsePx(getComputedStyle(this._input).width) - (!this._args.compositeEditorOptions ? 18 : 28)) + 'px';
     }
 
     destroy() {

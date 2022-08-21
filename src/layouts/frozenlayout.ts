@@ -1,4 +1,4 @@
-import { Column, disableSelection, H, spacerDiv } from "../core";
+import { Column, disableSelection, H, parsePx, spacerDiv } from "../core";
 import { GridOptions, LayoutEngine, LayoutHost, ViewRange } from "../grid";
 
 export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
@@ -506,10 +506,10 @@ export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
 
         if (options.autoHeight) {
             host.getContainerNode().style.height = (_paneTopH + vs.groupingPanelHeight +
-                parseFloat(getComputedStyle(headerColsL.parentElement).height)) + 'px';
+                parsePx(getComputedStyle(headerColsL.parentElement).height)) + 'px';
         }
 
-        paneTopL.style.top = (vs.groupingPanelHeight + (parseFloat(getComputedStyle(paneHeaderL).height) || vs.headerHeight)) + "px";
+        paneTopL.style.top = (vs.groupingPanelHeight + (parsePx(getComputedStyle(paneHeaderL).height) || vs.headerHeight)) + "px";
         paneTopL.style.height = _paneTopH + 'px';
 
         var paneBottomTop = paneTopL.offsetTop + _paneTopH;
@@ -697,7 +697,7 @@ export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
             var isBottom = cellNode.closest('.grid-canvas-bottom') != null;
 
             if (isBottom) {
-                rowOffset = frozenBottom ? Math.round(parseFloat(getComputedStyle(canvasTopL).height)) : (frozenRows * host.getOptions().rowHeight);
+                rowOffset = frozenBottom ? Math.round(parsePx(getComputedStyle(canvasTopL).height)) : (frozenRows * host.getOptions().rowHeight);
             }
 
             return host.getCellFromPoint(clientX - bcr[host.getOptions().rtl ? 'right' : 'left'] - document.body.scrollLeft, clientY - bcr.top + document.body.scrollTop + rowOffset + document.body.scrollTop).row;

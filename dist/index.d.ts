@@ -479,6 +479,7 @@ export declare function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: 
 	[key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void);
 }, ...children: (string | Node)[]): HTMLElementTagNameMap[K];
 export declare function spacerDiv(width: string): HTMLDivElement;
+export declare function parsePx(str: string): number;
 export interface IPlugin {
 	init(grid: Grid): void;
 	pluginName?: string;

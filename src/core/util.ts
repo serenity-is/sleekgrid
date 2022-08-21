@@ -87,3 +87,10 @@ export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { ref?: 
 export function spacerDiv(width: string): HTMLDivElement {
     return H('div', { style: 'display:block;height:1px;position:absolute;top:0;left:0;', width });
 }
+
+export function parsePx(str: string) {
+    var value = parseFloat(str);
+    if (isNaN(value))
+        return 0;
+    return value;
+}

@@ -1,4 +1,4 @@
-import { Column, H, spacerDiv } from "../core";
+import { Column, H, parsePx, spacerDiv } from "../core";
 import { LayoutEngine, LayoutHost } from "./layout";
 
 export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
@@ -221,7 +221,7 @@ export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
         const options = host.getOptions();
         if (options.autoHeight) {
             host.getContainerNode().style.height = (_paneTopH + vs.groupingPanelHeight +
-                parseFloat(getComputedStyle(headerCols.parentElement).height)) + 'px';
+                parsePx(getComputedStyle(headerCols.parentElement).height)) + 'px';
             viewport.style.height = '';
         }
         else

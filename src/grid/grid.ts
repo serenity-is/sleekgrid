@@ -1,4 +1,4 @@
-import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize } from "../core";
+import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize, parsePx } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
@@ -977,7 +977,7 @@ export class Grid<TItem = any> implements EditorHost {
         this._headerColumnWidthDiff = 0;
         var cs = getComputedStyle(el);
         if (cs.boxSizing != "border-box")
-            h.forEach(val => this._headerColumnWidthDiff += parseFloat(cs.getPropertyValue(val)) || 0);
+            h.forEach(val => this._headerColumnWidthDiff += parsePx(cs.getPropertyValue(val)) || 0);
         el.remove();
 
         var r = this._layout.getCanvasNodeFor(0, 0).appendChild(H("div", { class: "slick-row" },
@@ -986,8 +986,8 @@ export class Grid<TItem = any> implements EditorHost {
         this._cellWidthDiff = this._cellHeightDiff = 0;
         cs = getComputedStyle(el);
         if (cs.boxSizing != "border-box") {
-            h.forEach(val => this._cellWidthDiff += parseFloat(cs.getPropertyValue(val)) || 0);
-            v.forEach(val => this._cellHeightDiff += parseFloat(cs.getPropertyValue(val)) || 0);
+            h.forEach(val => this._cellWidthDiff += parsePx(cs.getPropertyValue(val)) || 0);
+            v.forEach(val => this._cellHeightDiff += parsePx(cs.getPropertyValue(val)) || 0);
         }
         r.remove();
 
@@ -1962,7 +1962,7 @@ export class Grid<TItem = any> implements EditorHost {
         vs.topPanelHeight = this._options.showTopPanel ? (this._options.topPanelHeight + getVBoxDelta(layout.getTopPanelFor(0).parentElement)) : 0;
         vs.headerRowHeight = this._options.showHeaderRow ? (this._options.headerRowHeight + getVBoxDelta(layout.getHeaderRowColsFor(0).parentElement)) : 0;
         vs.footerRowHeight = this._options.showFooterRow ? (this._options.footerRowHeight + getVBoxDelta(layout.getFooterRowColsFor(0).parentElement)) : 0;
-        vs.headerHeight = (this._options.showColumnHeader) ? (parseFloat(getComputedStyle(layout.getHeaderColsFor(0).parentElement).height) + getVBoxDelta(layout.getHeaderColsFor(0).parentElement)) : 0;
+        vs.headerHeight = (this._options.showColumnHeader) ? (parsePx(getComputedStyle(layout.getHeaderColsFor(0).parentElement).height) + getVBoxDelta(layout.getHeaderColsFor(0).parentElement)) : 0;
 
         if (this._options.autoHeight) {
             vs.height = this._options.rowHeight * this.getDataLengthIncludingAddNew();
@@ -1971,9 +1971,9 @@ export class Grid<TItem = any> implements EditorHost {
         } else {
 
             var style = getComputedStyle(this._container);
-            vs.height = parseFloat(style.height)
-                - parseFloat(style.paddingTop)
-                - parseFloat(style.paddingBottom)
+            vs.height = parsePx(style.height)
+                - parsePx(style.paddingTop)
+                - parsePx(style.paddingBottom)
                 - vs.headerHeight
                 - vs.topPanelHeight
                 - vs.headerRowHeight
@@ -2019,7 +2019,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         var dataLengthIncludingAddNew = this.getDataLengthIncludingAddNew();
         var scrollCanvas = this._layout.getScrollCanvasY();
-        var oldH = Math.round(parseFloat(getComputedStyle(scrollCanvas).height));
+        var oldH = Math.round(parsePx(getComputedStyle(scrollCanvas).height));
 
         var numberOfRows;
         const frozenRows = this._layout.getFrozenRows();
@@ -2029,7 +2029,7 @@ export class Grid<TItem = any> implements EditorHost {
             numberOfRows = dataLengthIncludingAddNew + (this._options.leaveSpaceForNewRows ? this._viewportInfo.numVisibleRows - 1 : 0);
         }
 
-        var tempViewportH = Math.round(parseFloat(getComputedStyle(this._layout.getScrollContainerY()).height));
+        var tempViewportH = Math.round(parsePx(getComputedStyle(this._layout.getScrollContainerY()).height));
         const vpi = this._viewportInfo;
         var oldViewportHasVScroll = vpi.hasVScroll;
         // with autoHeight, we do not need to accommodate the vertical scroll bar
@@ -3111,7 +3111,7 @@ export class Grid<TItem = any> implements EditorHost {
 
     private internalScrollColumnIntoView(left: number, right: number): void {
 
-        var scrollRight = this._scrollLeft + parseFloat(getComputedStyle(this._layout.getScrollContainerX()).width) -
+        var scrollRight = this._scrollLeft + parsePx(getComputedStyle(this._layout.getScrollContainerX()).width) -
             (this._viewportInfo.hasVScroll ? this._scrollDims.width : 0);
 
         var target;
@@ -3147,7 +3147,7 @@ export class Grid<TItem = any> implements EditorHost {
             var isBottom = this._activeCellNode.closest('.grid-canvas-bottom') != null;
             if (this.hasFrozenRows() && isBottom) {
                 rowOffset -= (this._options.frozenBottom)
-                    ? Math.round(parseFloat(getComputedStyle(this._layout.getCanvasNodeFor(0, 0)).height))
+                    ? Math.round(parsePx(getComputedStyle(this._layout.getCanvasNodeFor(0, 0)).height))
                     : this._layout.getFrozenRows() * this._options.rowHeight;
             }
 
@@ -3389,7 +3389,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         if (!this._layout.isFrozenRow(row)) {
 
-            var viewportScrollH = Math.round(parseFloat(getComputedStyle(this._layout.getScrollContainerY()).height));
+            var viewportScrollH = Math.round(parsePx(getComputedStyle(this._layout.getScrollContainerY()).height));
 
             var rowNumber = (this.hasFrozenRows() && !this._options.frozenBottom ? row - this._layout.getFrozenRows() + 1 : row);
 

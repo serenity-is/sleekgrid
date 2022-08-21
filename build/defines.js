@@ -50,7 +50,7 @@ export const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escape", "defaultColumnFormat", "disableSelection", "Event", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "preClickClassName", "Range", "removeClass", "RowCell", "spacerDiv", "titleize"],
+        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escape", "defaultColumnFormat", "disableSelection", "Event", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "Range", "removeClass", "RowCell", "spacerDiv", "titleize"],
     })]
 }
 
@@ -68,7 +68,7 @@ export const compatEditors = {
     entryPoints: ['./src/editors/index.ts'],
     outfile: './dist/compat/slick.editors.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: [ "escape", "H", "keyCode" ],
+        Slick: [ "escape", "H", "keyCode", "parsePx" ],
     })]
 }
 
@@ -77,7 +77,7 @@ export const compatLayoutsFrozen = {
     entryPoints: ['./src/layouts/frozenlayout.ts'],
     outfile: './dist/compat/layouts/slick.frozenlayout.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["disableSelection", "H", "spacerDiv"],
+        Slick: ["disableSelection", "H", "parsePx", "spacerDiv"],
     })]
 }
 
