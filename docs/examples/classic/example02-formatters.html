@@ -47,10 +47,10 @@ requires_scripts:
         { field: "percentComplete", id: "status", name: "Status", width: 70, resizable: false, format: statusFormatter, editor: Slick.TextEditor },
         { field: "start", minWidth: 90 },
         { field: "finish", minWidth: 90 },
-        { field: "effort-driven", sortable: false, width: 100, minWidth: 20, maxWidth: 100, cssClass: "cell-effort-driven", format: Slick.CheckmarkFormatter }
+        { field: "effortDriven", sortable: false, width: 100, minWidth: 20, maxWidth: 100, cssClass: "cell-effort-driven", format: Slick.CheckmarkFormatter }
     ];
 
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 100; i++) {
         var d = (data[i] = {});
 
         d["title"] = "Task " + i;
@@ -58,7 +58,7 @@ requires_scripts:
         d["percentComplete"] = Math.min(100, Math.round(Math.random() * 110));
         d["start"] = "01/01/2022";
         d["finish"] = "01/05/2022";
-        d["effortDriven"] = (i % 4 == 0);
+        d["effortDriven"] = (i % 3 == 0);
     }
 
     grid = new Slick.Grid("#myGrid", data, columns, {
