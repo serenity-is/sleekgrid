@@ -1647,7 +1647,7 @@ export class Grid<TItem = any> implements EditorHost {
             return colsMetadata[cell].editor;
         }
 
-        return column.editor || (this._options.editorFactory && this._options.editorFactory.getEditor(column));
+        return column.editor || (this._options.editorFactory && this._options.editorFactory.getEditor(column, row));
     }
 
     getDataItemValueForColumn(item: TItem, columnDef: Column<TItem>): any {

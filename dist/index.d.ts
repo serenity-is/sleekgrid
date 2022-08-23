@@ -301,7 +301,7 @@ export interface EditorOptions {
 	cancelChanges?: () => void;
 }
 export interface EditorFactory {
-	getEditor(column: Column): EditorClass;
+	getEditor(column: Column, row?: number): EditorClass;
 }
 export interface EditCommand {
 	row: number;

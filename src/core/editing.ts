@@ -48,7 +48,7 @@ export interface EditorOptions {
 }
 
 export interface EditorFactory {
-    getEditor(column: Column): EditorClass;
+    getEditor(column: Column, row?: number): EditorClass;
 }
 
 export interface EditCommand {
