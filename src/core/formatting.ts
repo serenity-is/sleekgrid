@@ -34,7 +34,7 @@ export interface FormatterFactory<TItem = any> {
 export type AsyncPostRender<TItem = any> = (cellNode: HTMLElement, row: number, item: TItem, column: Column<TItem>, reRender: boolean) => void;
 export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number, column?: Column<TItem>) => void;
 
-export type CellStylesHash = { [row: number]: { [cell: number]: string } }
+export type CellStylesHash = { [row: number]: { [columnId: string]: string } }
 
 export function defaultColumnFormat(ctx: FormatterContext) {
     return escape(ctx.value);

@@ -766,8 +766,11 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private setupColumnReorder(): void {
-        if (this._jQuery)
+        const jQuerySortable = this._jQuery && (this._jQuery.fn as any)?.sortable;
+
+        if (jQuerySortable)
             (this._jQuery(this._layout.getHeaderCols()).filter(":ui-sortable") as any).sortable("destroy");
+
         var columnScrollTimer: number = null;
 
         var scrollColumnsRight = () => {
@@ -781,7 +784,7 @@ export class Grid<TItem = any> implements EditorHost {
         var canDragScroll: boolean;
 
         var hasGrouping = this._options.groupingPanel;
-        (this._jQuery([this._layout.getHeaderCols()]) as any).sortable({
+        jQuerySortable && (this._jQuery([this._layout.getHeaderCols()]) as any).sortable({
             containment: hasGrouping ? undefined : "parent",
             distance: 3,
             axis: hasGrouping ? undefined : "x",
@@ -873,7 +876,7 @@ export class Grid<TItem = any> implements EditorHost {
             return;
         }
 
-        const noJQueryDrag = !this._jQuery || !this._jQuery.fn || !(!this._jQuery.fn as any).drag;
+        const noJQueryDrag = !this._jQuery || !this._jQuery.fn || !(this._jQuery.fn as any).drag;
         columnElements.forEach((el, colIdx) => {
 
             if (colIdx < firstResizable || (this._options.forceFitColumns && colIdx >= lastResizable)) {
@@ -1080,7 +1083,7 @@ export class Grid<TItem = any> implements EditorHost {
             this.unregisterPlugin(this._plugins[i]);
         }
 
-        if (this._options.enableColumnReorder && this._jQuery) {
+        if (this._options.enableColumnReorder && this._jQuery && (this._jQuery.fn as any).sortable) {
             (this._jQuery(this._layout.getHeaderCols()).filter(":ui-sortable") as any).sortable("destroy");
         }
 

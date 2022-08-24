@@ -60,7 +60,7 @@ export function removeClass(el: Element, cls: string) {
         el.classList.remove(cls);
 }
 
-export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { ref?: (el?: HTMLElementTagNameMap[K]) => void, [key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void) }, ...children: (string | Node)[]): HTMLElementTagNameMap[K] {
+export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { ref?: (el?: HTMLElementTagNameMap[K]) => void, [key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void) | null | undefined }, ...children: (string | Node)[]): HTMLElementTagNameMap[K] {
     var el = document.createElement(tag);
     var k: string, v: any, c: Node | string;
     if (attr) {

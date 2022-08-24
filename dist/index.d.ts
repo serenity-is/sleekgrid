@@ -38,7 +38,7 @@ export declare type AsyncPostRender<TItem = any> = (cellNode: HTMLElement, row: 
 export declare type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number, column?: Column<TItem>) => void;
 export declare type CellStylesHash = {
 	[row: number]: {
-		[cell: number]: string;
+		[columnId: string]: string;
 	};
 };
 export declare function defaultColumnFormat(ctx: FormatterContext): any;
@@ -476,7 +476,7 @@ export declare function disableSelection(target: HTMLElement): void;
 export declare function removeClass(el: Element, cls: string): void;
 export declare function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: {
 	ref?: (el?: HTMLElementTagNameMap[K]) => void;
-	[key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void);
+	[key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void) | null | undefined;
 }, ...children: (string | Node)[]): HTMLElementTagNameMap[K];
 export declare function spacerDiv(width: string): HTMLDivElement;
 export declare function parsePx(str: string): number;
