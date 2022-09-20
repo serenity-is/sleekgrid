@@ -269,7 +269,10 @@ export class Grid<TItem = any> implements EditorHost {
         this.resizeCanvas();
         this._layout.bindAncestorScrollEvents();
 
-        this._container.addEventListener("resize", this.resizeCanvas);
+        if (this._jQuery)
+            $(this._container).on('resize', this.resizeCanvas);
+        else
+            this._container.addEventListener("resize", this.resizeCanvas);
 
         viewports.forEach(vp => {
             var scrollTicking = false;
