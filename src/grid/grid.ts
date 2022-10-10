@@ -1325,7 +1325,7 @@ export class Grid<TItem = any> implements EditorHost {
             this.updateCanvasWidth();
             this._layout.applyColumnWidths();
             this.handleScroll();
-            this.getSelectionModel()?.refreshSelections();
+            this.getSelectionModel()?.refreshSelections?.();
         }
     }
 
