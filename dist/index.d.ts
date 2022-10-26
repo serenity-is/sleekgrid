@@ -894,7 +894,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private invalidatePostProcessingResults;
 	private updateRowPositions;
 	private updateGrandTotals;
-	private render;
+	render: () => void;
 	private handleHeaderRowScroll;
 	private handleFooterRowScroll;
 	private handleMouseWheel;
