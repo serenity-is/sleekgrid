@@ -2457,7 +2457,7 @@ export class Grid<TItem = any> implements EditorHost {
         }
     }
 
-    private render = (): void => {
+    public render = (): void => {
         if (!this._initialized) { return; }
         var visible = this.getVisibleRange();
         var rendered = this.getRenderedRange();
