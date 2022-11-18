@@ -1,4 +1,4 @@
-import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize, parsePx } from "../core";
+import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize, parsePx, GroupTotals } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
@@ -2457,6 +2457,11 @@ export class Grid<TItem = any> implements EditorHost {
         }
     }
 
+    // for usage as fallback by the groupmetadataitemprovider
+    groupTotalsFormatter(p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: any): string {
+        return this._options.groupTotalsFormatter ? this._options.groupTotalsFormatter(p1, p2, grid ?? this) : "";
+    }
+
     public render = (): void => {
         if (!this._initialized) { return; }
         var visible = this.getVisibleRange();
@@ -2628,7 +2633,7 @@ export class Grid<TItem = any> implements EditorHost {
 
     private asyncPostProcessCleanupRows(): void {
         var cols = this._cols;
-        while (this._postProcessCleanupQueue.length > 0) {
+        while (this._postProcessCleanupQueue?.length > 0) {
             var groupId = this._postProcessCleanupQueue[0].groupId;
 
             // loop through all queue members with this groupID

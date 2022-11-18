@@ -894,6 +894,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private invalidatePostProcessingResults;
 	private updateRowPositions;
 	private updateGrandTotals;
+	groupTotalsFormatter(p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: any): string;
 	render: () => void;
 	private handleHeaderRowScroll;
 	private handleFooterRowScroll;
