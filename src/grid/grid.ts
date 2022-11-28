@@ -2117,7 +2117,9 @@ export class Grid<TItem = any> implements EditorHost {
         if (viewportLeft == null) {
             viewportLeft = this._scrollLeft;
         }
-
+        if (this._options.rtl) {
+            viewportLeft = Math.abs(viewportLeft);
+        }
         return {
             top: this.getRowFromPosition(viewportTop),
             bottom: this.getRowFromPosition(viewportTop + this._viewportInfo.height) + 1,
