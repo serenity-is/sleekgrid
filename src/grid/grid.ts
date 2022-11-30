@@ -231,7 +231,10 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private bindAncestorScroll(elem: HTMLElement) {
-        elem.addEventListener('scroll', this.handleActiveCellPositionChange);
+        if (this._jQuery)
+            this._jQuery(elem).on('scroll', this.handleActiveCellPositionChange);
+        else
+            elem.addEventListener('scroll', this.handleActiveCellPositionChange);
         this._boundAncestorScroll.push(elem);
     }
 
@@ -269,14 +272,19 @@ export class Grid<TItem = any> implements EditorHost {
         this.resizeCanvas();
         this._layout.bindAncestorScrollEvents();
 
-        if (this._jQuery)
-            $(this._container).on('resize', this.resizeCanvas);
-        else
-            this._container.addEventListener("resize", this.resizeCanvas);
+        const onEvent = <K extends keyof HTMLElementEventMap>(el: HTMLElement, type: K, 
+            listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any) => {
+            if (this._jQuery)
+                this._jQuery(el).on(type, listener as any);
+            else
+                el.addEventListener(type, listener);
+        }
+
+        onEvent(this._container, "resize", this.resizeCanvas);
 
         viewports.forEach(vp => {
             var scrollTicking = false;
-            vp.addEventListener("scroll", (e) => {
+            onEvent(vp, "scroll", (e) => {
                 if (!scrollTicking) {
                     scrollTicking = true;
 
@@ -294,32 +302,38 @@ export class Grid<TItem = any> implements EditorHost {
 
         this._layout.getHeaderCols().forEach(hs => {
             disableSelection(hs);
-            hs.addEventListener("contextmenu", this.handleHeaderContextMenu.bind(this));
-            hs.addEventListener("click", this.handleHeaderClick.bind(this));
-            hs.addEventListener("mouseenter", e => (e.target as HTMLElement).closest(".slick-header-column") &&
-                this.handleHeaderMouseEnter(e));
-            hs.addEventListener("mouseleave", e => (e.target as HTMLElement).closest(".slick-header-column") &&
-                this.handleHeaderMouseLeave(e));
+            onEvent(hs, "contextmenu", this.handleHeaderContextMenu.bind(this));
+            onEvent(hs, "click", this.handleHeaderClick.bind(this));
+            if (this._jQuery) {
+                this._jQuery(hs)
+                    .on('mouseenter', '.slick-header-column', this.handleHeaderMouseEnter.bind(this))
+                    .on('mouseleave', '.slick-header-column', this.handleHeaderMouseLeave.bind(this));
+            }
+            else {
+                // need to reimplement this similar to jquery events
+                hs.addEventListener("mouseenter", e => (e.target as HTMLElement).closest(".slick-header-column") &&
+                    this.handleHeaderMouseEnter(e));
+                hs.addEventListener("mouseleave", e => (e.target as HTMLElement).closest(".slick-header-column") &&
+                    this.handleHeaderMouseLeave(e));
+            }
         });
 
         this._layout.getHeaderRowCols().forEach(el => {
-            el.parentElement.addEventListener('scroll', this.handleHeaderRowScroll);
-            el.parentElement.addEventListener('scroll', this.handleHeaderRowScroll);
+            onEvent(el.parentElement, 'scroll', this.handleHeaderRowScroll);
         });
 
         this._layout.getFooterRowCols().forEach(el => {
-            el.parentElement.addEventListener('scroll', this.handleFooterRowScroll);
-            el.parentElement.addEventListener('scroll', this.handleFooterRowScroll);
+            onEvent(el.parentElement, 'scroll', this.handleFooterRowScroll);
         });
 
-        [this._focusSink1, this._focusSink2].forEach(fs => fs.addEventListener("keydown", this.handleKeyDown.bind(this)));
+        [this._focusSink1, this._focusSink2].forEach(fs => onEvent(fs, "keydown", this.handleKeyDown.bind(this)));
 
         var canvases = Array.from(this.getCanvases());
         canvases.forEach(canvas => {
-            canvas.addEventListener("keydown", this.handleKeyDown.bind(this))
-            canvas.addEventListener("click", this.handleClick.bind(this))
-            canvas.addEventListener("dblclick", this.handleDblClick.bind(this))
-            canvas.addEventListener("contextmenu", this.handleContextMenu.bind(this));
+            onEvent(canvas, "keydown", this.handleKeyDown.bind(this))
+            onEvent(canvas, "click", this.handleClick.bind(this))
+            onEvent(canvas, "dblclick", this.handleDblClick.bind(this))
+            onEvent(canvas, "contextmenu", this.handleContextMenu.bind(this));
         });
 
         if (this._jQuery && (this._jQuery.fn as any).drag) {
@@ -331,10 +345,18 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         canvases.forEach(canvas => {
-            canvas.addEventListener("mouseenter", e => (e.target as HTMLElement).closest(".slick-cell") &&
-                this.handleMouseEnter(e));
-            canvas.addEventListener("mouseleave", e => (e.target as HTMLElement).closest(".slick-cell") &&
-                this.handleMouseLeave(e));
+            if (this._jQuery) {
+                this._jQuery(canvas)
+                    .on('mouseenter', '.slick-cell', this.handleMouseEnter.bind(this))
+                    .on('mouseleave', '.slick-cell', this.handleMouseLeave.bind(this));
+            }
+            else {
+                // need to reimplement this similar to jquery events
+                canvas.addEventListener("mouseenter", e => (e.target as HTMLElement).closest(".slick-cell") &&
+                    this.handleMouseEnter(e));
+                canvas.addEventListener("mouseleave", e => (e.target as HTMLElement).closest(".slick-cell") &&
+                    this.handleMouseLeave(e));
+            }
         });
 
         // Work around http://crbug.com/312427.
@@ -667,8 +689,14 @@ export class Grid<TItem = any> implements EditorHost {
             headerTarget.appendChild(header);
 
             if ((this._options.enableColumnReorder || m.sortable) && this._options.useLegacyUI) {
-                header.addEventListener('mouseenter', addUiStateHover);
-                header.addEventListener('mouseleave', removeUiStateHover);
+                if (this._jQuery) {
+                    this._jQuery(header).on("mouseenter", addUiStateHover);
+                    this._jQuery(header).on("mouseleave", removeUiStateHover);
+                }
+                else {
+                    header.addEventListener('mouseenter', addUiStateHover);
+                    header.addEventListener('mouseleave', removeUiStateHover);
+                }
             }
 
             if (m.sortable) {
@@ -703,8 +731,7 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private setupColumnSort(): void {
-        this._layout.getHeaderCols().forEach(el => el.addEventListener("click", e => {
-
+        const handler = (e: MouseEvent) => {
             var tgt = e.target as Element;
             if (tgt.classList.contains("slick-resizable-handle")) {
                 return;
@@ -765,7 +792,14 @@ export class Grid<TItem = any> implements EditorHost {
                     }, e);
                 }
             }
-        }));
+        };
+
+        this._layout.getHeaderCols().forEach(el => {
+            if (this._jQuery)
+                this._jQuery(el).on('click', handler as any);
+            else
+                el.addEventListener("click", handler);
+        });
     }
 
     private setupColumnReorder(): void {

@@ -1,5 +1,3 @@
-import { FormatterContext } from "./formatting";
-
 export function addClass(el: Element, cls: string) {
     if (cls == null || !cls.length)
         return;
@@ -12,7 +10,6 @@ export function addClass(el: Element, cls: string) {
     else
         el.classList.add(cls);
 }
-
 
 const esc = {
     '<': '&lt;',
