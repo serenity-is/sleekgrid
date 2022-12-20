@@ -81,6 +81,15 @@ export const compatLayoutsFrozen = {
     })]
 }
 
+export const compatPluginsAutoTooltips = {
+    ...compatDefaults,
+    entryPoints: ['./src/plugins/autotooltips.ts'],
+    outfile: './dist/compat/plugins/slick.autotooltips.js',
+    plugins: [globalExternals(/\.\.\/(core|grid)/, {
+        Slick: [],
+    })]
+}
+
 export const sleekDefaults = {
     bundle: true,
     target: 'es6',
