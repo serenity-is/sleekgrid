@@ -12,7 +12,7 @@ export class AutoTooltips implements IPlugin {
     private _grid: Grid;
     private _options: AutoTooltipsOptions;
 
-    constructor(options: AutoTooltipsOptions) {
+    constructor(options?: AutoTooltipsOptions) {
         this._options = Object.assign({}, AutoTooltips.defaultOptions, options);
     }
 
