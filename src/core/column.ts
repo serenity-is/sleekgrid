@@ -51,6 +51,8 @@ export const columnDefaults: Partial<Column> = {
 
 export interface ColumnMetadata<TItem = any> {
     colspan: number | '*';
+    cssClasses?: string;
+    editor?: EditorClass;
     format?: ColumnFormat<TItem>;
     /** @deprecated */
     formatter?: CompatFormatter<TItem>;
@@ -62,10 +64,13 @@ export interface ColumnSort {
 }
 
 export interface ItemMetadata<TItem = any> {
+    cssClasses?: string;
     columns?: { [key: string]: ColumnMetadata<TItem> };
+    focusable?: boolean;
     format?: ColumnFormat<TItem>;
     /** @deprecated */
     formatter?: CompatFormatter<TItem>;
+    selectable?: boolean;
 }
 
 export function initializeColumns(columns: Column[], defaults: Partial<Column<any>>) {

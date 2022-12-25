@@ -1,10 +1,18 @@
 import esbuild from "esbuild";
-import { compatCore, compatEditors, compatFormatters, compatGrid, compatLayoutsFrozen, compatPluginsAutoTooltips, sleekIndex } from "./defines.js";
+import { compatCore, compatEditors, compatFormatters, compatGrid, compatLayoutsFrozen, compatPluginsAutoTooltips, compatDataGroupItemMetadataProvider, sleekIndex } from "./defines.js";
 import { existsSync, cpSync, mkdirSync } from "fs";
 import { resolve, join } from "path";
 import { fileURLToPath } from 'url';
 
-for (var esmOpt of [compatCore, compatGrid, compatFormatters, compatEditors, compatLayoutsFrozen, compatPluginsAutoTooltips, sleekIndex]) {
+for (var esmOpt of [
+        compatCore, 
+        compatGrid,
+        compatFormatters,
+        compatEditors, 
+        compatLayoutsFrozen, 
+        compatPluginsAutoTooltips, 
+        compatDataGroupItemMetadataProvider,
+        sleekIndex]) {
     await esbuild.build({
         ...esmOpt,
     }).catch(() => process.exit());

@@ -35,7 +35,7 @@ export const compatDefaults = {
     logLevel: 'info',
     sourcemap: true,
     footer: {
-        js: '["Editors", "Formatters", "Plugins"].forEach(ns => Slick._[ns] && (Slick[ns] = Object.assign(Slick[ns] || {}, Slick._[ns])) && delete Slick._[ns]); Object.assign(Slick, Slick._); delete Slick._;'
+        js: '["Data", "Editors", "Formatters", "Plugins"].forEach(ns => Slick._[ns] && (Slick[ns] = Object.assign(Slick[ns] || {}, Slick._[ns])) && delete Slick._[ns]); Object.assign(Slick, Slick._); delete Slick._;'
     }
 }
 
@@ -50,7 +50,7 @@ export const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escape", "defaultColumnFormat", "disableSelection", "Event", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "Range", "removeClass", "RowCell", "spacerDiv", "titleize"],
+        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escape", "defaultColumnFormat", "disableSelection", "Event", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "Range", "removeClass", "RowCell", "spacerDiv", "titleize"]
     })]
 }
 
@@ -59,7 +59,7 @@ export const compatFormatters = {
     entryPoints: ['./src/formatters/index.ts'],
     outfile: './dist/compat/slick.formatters.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: [ "escape" ],
+        Slick: [ "escape" ]
     })]
 }
 
@@ -68,7 +68,7 @@ export const compatEditors = {
     entryPoints: ['./src/editors/index.ts'],
     outfile: './dist/compat/slick.editors.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: [ "escape", "H", "keyCode", "parsePx" ],
+        Slick: [ "escape", "H", "keyCode", "parsePx" ]
     })]
 }
 
@@ -77,7 +77,7 @@ export const compatLayoutsFrozen = {
     entryPoints: ['./src/layouts/frozenlayout.ts'],
     outfile: './dist/compat/layouts/slick.frozenlayout.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["disableSelection", "H", "parsePx", "spacerDiv"],
+        Slick: ["disableSelection", "H", "parsePx", "spacerDiv"]
     })]
 }
 
@@ -86,7 +86,24 @@ export const compatPluginsAutoTooltips = {
     entryPoints: ['./src/plugins/autotooltips.ts'],
     outfile: './dist/compat/plugins/slick.autotooltips.js',
     plugins: [globalExternals(/\.\.\/(core|grid)/, {
-        Slick: [],
+        Slick: []
+    })]
+}
+
+const compatData = {
+    ...compatDefaults,
+    globalName: "Slick.Data._",
+    footer: {
+        js: 'Object.assign(Slick.Data, Slick.Data._); delete Slick.Data._;'
+    }
+}
+
+export const compatDataGroupItemMetadataProvider = {
+    ...compatData,
+    entryPoints: ['./src/data/groupitemmetadataprovider.ts'],
+    outfile: './dist/compat/slick.groupitemmetadataprovider.js',
+    plugins: [globalExternals(/\.\.\/(core|grid)/, {
+        Slick: [ "convertCompatFormatter", "Group" ]
     })]
 }
 

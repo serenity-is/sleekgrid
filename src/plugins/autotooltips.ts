@@ -9,14 +9,14 @@ export interface AutoTooltipsOptions {
 
 export class AutoTooltips implements IPlugin {
 
-    private _grid: Grid;
-    private _options: AutoTooltipsOptions;
+    private grid: Grid;
+    private options: AutoTooltipsOptions;
 
     constructor(options?: AutoTooltipsOptions) {
-        this._options = Object.assign({}, AutoTooltips.defaultOptions, options);
+        this.options = Object.assign({}, AutoTooltips.defaults, options);
     }
 
-    public static defaultOptions: AutoTooltipsOptions = {
+    public static defaults: AutoTooltipsOptions = {
         enableForCells: true,
         enableForHeaderCells: false,
         maxToolTipLength: null,
@@ -24,37 +24,37 @@ export class AutoTooltips implements IPlugin {
     }
 
     init(grid: Grid) {
-        this._grid = grid;
+        this.grid = grid;
 
-        if (this._options.enableForCells)
-            this._grid.onMouseEnter.subscribe(this.handleMouseEnter);
+        if (this.options.enableForCells)
+            this.grid.onMouseEnter.subscribe(this.handleMouseEnter);
 
-        if (this._options.enableForHeaderCells)
-            this._grid.onHeaderMouseEnter.subscribe(this.handleHeaderMouseEnter);
+        if (this.options.enableForHeaderCells)
+            this.grid.onHeaderMouseEnter.subscribe(this.handleHeaderMouseEnter);
     }
 
     destroy() {
-        if (this._options.enableForCells) 
-            this._grid.onMouseEnter.unsubscribe(this.handleMouseEnter);
+        if (this.options.enableForCells) 
+            this.grid.onMouseEnter.unsubscribe(this.handleMouseEnter);
 
-        if (this._options.enableForHeaderCells) 
-            this._grid.onHeaderMouseEnter.unsubscribe(this.handleHeaderMouseEnter);
+        if (this.options.enableForHeaderCells) 
+            this.grid.onHeaderMouseEnter.unsubscribe(this.handleHeaderMouseEnter);
     }
 
     private handleMouseEnter = (e: MouseEvent) => {
-        var cell = this._grid.getCellFromEvent(e);
+        var cell = this.grid.getCellFromEvent(e);
         if (!cell)
             return;
-        var node = this._grid.getCellNode(cell.row, cell.cell);
+        var node = this.grid.getCellNode(cell.row, cell.cell);
         if (!node)
             return;
         var text;
-        if (!node.title || this._options.replaceExisting) {
+        if (!node.title || this.options.replaceExisting) {
             if (node.clientWidth < node.scrollWidth) {
                 text = node.textContent?.trim() ?? "";
-                if (this._options.maxToolTipLength && 
-                    text.length > this._options.maxToolTipLength) {
-                    text = text.substring(0, this._options.maxToolTipLength - 3) + "...";
+                if (this.options.maxToolTipLength && 
+                    text.length > this.options.maxToolTipLength) {
+                    text = text.substring(0, this.options.maxToolTipLength - 3) + "...";
                 }
             } else {
                 text = "";

@@ -1,4 +1,4 @@
-import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize, parsePx, GroupTotals } from "../core";
+import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize, parsePx, GroupTotals, ColumnMetadata } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
@@ -1632,7 +1632,7 @@ export class Grid<TItem = any> implements EditorHost {
             if (itemMetadata) {
                 const colsMetadata = itemMetadata.columns;
                 if (colsMetadata) {
-                    var columnMetadata = colsMetadata[column.id] || colsMetadata[this.getColumnIndex(column.id)];
+                    var columnMetadata: ColumnMetadata = colsMetadata[column.id] || colsMetadata[this.getColumnIndex(column.id)];
                     if (columnMetadata) {
                         if (columnMetadata.format)
                             return columnMetadata.format;
@@ -1696,7 +1696,7 @@ export class Grid<TItem = any> implements EditorHost {
 
     private getEditor(row: number, cell: number): EditorClass {
         var column = this._cols[cell];
-        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
+        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row) as ItemMetadata;
         var colsMetadata = itemMetadata && itemMetadata.columns;
 
         if (colsMetadata && colsMetadata[column.id] && colsMetadata[column.id].editor !== undefined) {
@@ -1728,7 +1728,7 @@ export class Grid<TItem = any> implements EditorHost {
             rowCss += " " + this._options.addNewRowCssClass;
         }
 
-        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
+        var itemMetadata = this._data.getItemMetadata?.(row) as ItemMetadata;
 
         if (itemMetadata && itemMetadata.cssClasses) {
             rowCss += " " + itemMetadata.cssClasses;
@@ -1750,7 +1750,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         var colspan, m, cols = this._cols;
         for (var i = 0, ii = cols.length; i < ii; i++) {
-            var columnData = null;
+            var columnData: ColumnMetadata = null;
             m = cols[i];
             colspan = 1;
             if (itemMetadata && itemMetadata.columns) {
@@ -1783,7 +1783,7 @@ export class Grid<TItem = any> implements EditorHost {
         }
     }
 
-    private appendCellHtml(sb: string[], row: number, cell: number, colspan: number, item: TItem, metadata: any): void {
+    private appendCellHtml(sb: string[], row: number, cell: number, colspan: number, item: TItem, metadata: ColumnMetadata): void {
         var cols = this._cols, frozenCols = this._layout.getFrozenCols(), column = cols[cell];
         var klass = "slick-cell l" + cell + " r" + Math.min(cols.length - 1, cell + colspan - 1) +
             (column.cssClass ? " " + column.cssClass : "");
@@ -2322,7 +2322,7 @@ export class Grid<TItem = any> implements EditorHost {
                     continue;
                 }
 
-                var columnData = null;
+                var columnData: ColumnMetadata = null;
                 colspan = 1;
                 if (colsMetadata) {
                     columnData = colsMetadata[cols[i].id] || colsMetadata[i];
