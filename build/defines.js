@@ -90,21 +90,16 @@ export const compatPluginsAutoTooltips = {
     })]
 }
 
-const compatData = {
-    ...compatDefaults,
-    globalName: "Slick.Data._",
-    footer: {
-        js: 'Object.assign(Slick.Data, Slick.Data._); delete Slick.Data._;'
-    }
-}
-
 export const compatDataGroupItemMetadataProvider = {
-    ...compatData,
+    ...compatDefaults,
     entryPoints: ['./src/data/groupitemmetadataprovider.ts'],
     outfile: './dist/compat/slick.groupitemmetadataprovider.js',
     plugins: [globalExternals(/\.\.\/(core|grid)/, {
         Slick: [ "convertCompatFormatter", "Group" ]
-    })]
+    })],
+    footer: {
+        js: compatDefaults.footer.js + " Slick.Data = Slick.Data || {}; Slick.Data.GroupItemMetadataProvider = Slick.GroupItemMetadataProvider;"
+    }
 }
 
 export const sleekDefaults = {
