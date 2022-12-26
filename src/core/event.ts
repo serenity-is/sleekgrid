@@ -17,8 +17,6 @@ export interface IEventData {
 /***
  * An event object for passing data to event handlers and letting them control propagation.
  * <p>This is pretty much identical to how W3C and jQuery implement events.</p>
- * @class EventData
- * @constructor
  */
 export class EventData implements IEventData {
     private _isPropagationStopped = false;
@@ -34,8 +32,6 @@ export class EventData implements IEventData {
 
     /***
      * Returns whether stopPropagation was called on this event object.
-     * @method isPropagationStopped
-     * @return {Boolean}
      */
     isPropagationStopped(): boolean {
         return this._isPropagationStopped;
@@ -43,7 +39,6 @@ export class EventData implements IEventData {
 
     /***
      * Prevents the rest of the handlers from being executed.
-     * @method stopImmediatePropagation
      */
     stopImmediatePropagation() {
         this._isImmediatePropagationStopped = true;
@@ -51,8 +46,6 @@ export class EventData implements IEventData {
 
     /***
      * Returns whether stopImmediatePropagation was called on this event object.\
-     * @method isImmediatePropagationStopped
-     * @return {Boolean}
      */
     isImmediatePropagationStopped(): boolean {
         return this._isImmediatePropagationStopped;
@@ -61,8 +54,6 @@ export class EventData implements IEventData {
 
 /***
  * A simple publisher-subscriber implementation.
- * @class Event
- * @constructor
  */
 export class Event<TArgs = any, TEventData extends IEventData = IEventData> {
 
@@ -94,7 +85,6 @@ export class Event<TArgs = any, TEventData extends IEventData = IEventData> {
 
     /***
      * Fires an event notifying all subscribers.
-     * @method notify
      * @param args {Object} Additional data object to be passed to all handlers.
      * @param e {EventData}
      *      Optional.
