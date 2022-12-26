@@ -194,8 +194,8 @@ export class GroupItemMetadataProvider {
         const gcp = this.groupCellPosition();
         const result: ItemMetadata = {
             selectable: false,
-            focusable: opt.totalsFocusable,
-            cssClasses: opt.totalsCssClass + " " + opt.groupLevelPrefix + item?.level,
+            focusable: opt.groupFocusable,
+            cssClasses: opt.groupCssClass + " " + opt.groupLevelPrefix + item?.level,
             columns: {
                 [gcp.cell]: {
                     colspan: gcp.colspan,
