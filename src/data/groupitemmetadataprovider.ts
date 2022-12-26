@@ -115,7 +115,7 @@ export class GroupItemMetadataProvider {
             grid.getData().collapseGroup?.(item.groupingKey);
     }
 
-    handleGridKeyDown = function (e: KeyboardEvent, args: ArgsCell) {
+    handleGridKeyDown = (e: KeyboardEvent, args: ArgsCell) => {
         if (!this.options.enableExpandCollapse || 
             (e.key !== " " && e.key !== "-" && e.key !== "+"))
             return;
