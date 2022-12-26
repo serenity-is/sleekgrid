@@ -1,5 +1,5 @@
-import { ColumnFormat, CompatFormatter, escape } from "@/core";
-import { GroupItemMetadataProvider, } from "@/data/groupitemmetadataprovider"
+import { ColumnFormat, CompatFormatter, escape, Group } from "@/core";
+import { GroupItemMetadataProvider } from "@/data/groupitemmetadataprovider"
 
 describe("GroupItemMetadataProvider.defaults", () => {
     it("has expected default values", () => {
@@ -127,3 +127,185 @@ describe("GroupItemMetadataProvider.setOptions", () => {
         expect(options.groupCssClass).toBe("z");
     });
 });
+
+function mockEvent() {
+    var ev = {
+        stopImmediatePropagationCalls: 0,
+        stopImmediatePropagation: function() {
+            ev.stopImmediatePropagationCalls++;
+        },
+        preventDefaultCalls: 0,
+        preventDefault: function() {
+            ev.preventDefaultCalls++;
+        },
+        target: {
+            classNames: ["slick-group-toggle"],
+            classList: {
+                contains: function(s: string) {
+                    return ev.target?.classNames.indexOf(s) >= 0;
+                },
+                add: function(s: string) {
+                    ev.target.classNames.push(s);
+                },
+                remove: function(s: string) {
+                    var idx = ev.target.classNames.indexOf(s);
+                    expect(idx >= 0).toBe(true);
+                    ev.target.classNames.splice(idx, 1);
+                }
+            }
+        }
+    }
+    return ev;
+}
+
+function mockGrid() {
+    var grid = {
+        onClickList: <any[]>[],
+        onClick: {
+            subscribe: function(f: any) { grid.onClickList.push(f); },
+            unsubscribe: function(f: any) { 
+                var idx = grid.onClickList.indexOf(f);
+                expect(idx >= 0).toBe(true);
+                grid.onClickList.splice(idx, 1); 
+            }
+        },
+        onKeyDownList: <any[]>[],
+        onKeyDown: {
+            subscribe: function(f: any) { grid.onKeyDownList.push(f); },
+            unsubscribe: function(f: any) {
+                var idx = grid.onKeyDownList.indexOf(f);
+                expect(idx >= 0).toBe(true);
+                grid.onKeyDownList.splice(idx, 1);
+            }
+        },
+        getDataItemCalls: 0,
+        getRenderedRangeCalls: 0,
+        getRenderedRange: function() {
+            grid.getRenderedRangeCalls++;
+            return {
+                top: 5,
+                bottom: 13
+            }
+        },
+        getDataItem: function(row: number) {
+            grid.getDataItemCalls++;
+            if (row < 0)
+                return null;
+            if (row === 1 || row == 3) {
+                var group = new Group();
+                group.groupingKey = "gk" + row;
+                return group;
+            }
+
+            return {
+                __row: row
+            }
+        },
+        __data: {
+            setRefreshHintsCalls: <any[]>[],
+            setRefreshHints(obj: any) {
+                grid.__data.setRefreshHintsCalls.push(obj);
+            },
+            length: 999
+        },
+        getData: function() {
+            return grid.__data;
+        }
+    };
+    return grid;
+}
+
+describe("GroupItemMetadataProvider.init", () => {
+    
+    it("attaches to onClick", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        plugin.init(grid as any);
+        expect(grid.onClickList.length).toBe(1);
+        plugin.destroy();
+        expect(grid.onClickList.length).toBe(0);
+    });
+
+    it("attaches to onKeyDown", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        plugin.init(grid as any);
+        expect(grid.onKeyDownList.length).toBe(1);
+        plugin.destroy();
+        expect(grid.onKeyDownList.length).toBe(0);
+    });
+
+});
+
+describe("GroupItemMetadataProvider.handleGridClick", () => {
+    
+    it("ignores when args does not include grid", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        var event = mockEvent();
+        plugin.handleGridClick(event as any, {} as any);
+        expect(grid.getDataItemCalls).toBe(0);
+        expect(event.stopImmediatePropagationCalls).toBe(0);
+        expect(event.preventDefaultCalls).toBe(0);
+    });
+
+    it("uses initializing grid when args does not include grid", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        var event = mockEvent();
+        plugin.init(grid as any);
+        plugin.handleGridClick(event as any, { row: -1 } as any);
+        expect(grid.getDataItemCalls).toBe(1);
+        expect(event.stopImmediatePropagationCalls).toBe(0);
+        expect(event.preventDefaultCalls).toBe(0);
+    });
+
+    it("ignores when no item for args.row", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        var event = mockEvent();
+        plugin.init(grid as any);
+        plugin.handleGridClick(event as any, { row: -1 } as any);
+        expect(grid.getDataItemCalls).toBe(1);
+        expect(event.stopImmediatePropagationCalls).toBe(0);
+        expect(event.preventDefaultCalls).toBe(0);
+    });
+
+    it("ignores when item at args.row is not an instance of Group", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        var event = mockEvent();
+        plugin.init(grid as any);
+        plugin.handleGridClick(event as any, { row: 333 } as any);
+        expect(grid.getDataItemCalls).toBe(1);
+        expect(event.stopImmediatePropagationCalls).toBe(0);
+        expect(event.preventDefaultCalls).toBe(0);
+    });
+
+    it("ignores when event target does not contain toggle class", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        var event = mockEvent();
+        event.target.classNames = ["xyz"];
+        plugin.init(grid as any);
+        plugin.handleGridClick(event as any, { row: 1 } as any);
+        expect(grid.getDataItemCalls).toBe(1);
+        expect(event.stopImmediatePropagationCalls).toBe(0);
+        expect(event.preventDefaultCalls).toBe(0);
+    });
+
+    it("calls stopImmediatePropagation, preventDefault and setRefreshHints", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        var event = mockEvent();
+        plugin.init(grid as any);
+        plugin.handleGridClick(event as any, { row: 1 } as any);
+        expect(grid.getDataItemCalls).toBe(1);
+        expect(event.stopImmediatePropagationCalls).toBe(1);
+        expect(event.preventDefaultCalls).toBe(1);
+        expect(grid.__data.setRefreshHintsCalls.length).toBe(1);
+        expect(grid.__data.setRefreshHintsCalls[0]).toStrictEqual({ ignoreDiffsBefore: 5, ignoreDiffsAfter: 14 });
+    });
+
+});
+

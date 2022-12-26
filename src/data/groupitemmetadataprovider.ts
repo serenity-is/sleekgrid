@@ -90,7 +90,7 @@ export class GroupItemMetadataProvider {
     }
 
     handleGridClick = (e: MouseEvent, args: ArgsCell) => {
-        let grid = args?.grid;
+        let grid = args?.grid ?? this.grid;
         if (!grid)
             return;
         var item = grid.getDataItem(args.row);
@@ -120,7 +120,7 @@ export class GroupItemMetadataProvider {
             (e.key !== " " && e.key !== "-" && e.key !== "+"))
             return;
 
-        let grid = args?.grid;
+        let grid = args?.grid ?? this.grid;
         if (!grid)
             return;
             
