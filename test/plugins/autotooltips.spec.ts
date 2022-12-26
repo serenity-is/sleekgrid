@@ -1,20 +1,20 @@
 import { AutoTooltips } from "@/plugins/autotooltips"
 
-describe("AutoTooltips.defaultOptions", () => {
+describe("AutoTooltips.defaults", () => {
     it("enableForCells true", () => {
-        expect(AutoTooltips.defaultOptions.enableForCells).toBe(true);
+        expect(AutoTooltips.defaults.enableForCells).toBe(true);
     });
 
     it("enableForHeaders false", () => {
-        expect(AutoTooltips.defaultOptions.enableForHeaderCells).toBeFalsy();
+        expect(AutoTooltips.defaults.enableForHeaderCells).toBeFalsy();
     });
 
     it("maxToolTipLength null", () => {
-        expect(AutoTooltips.defaultOptions.maxToolTipLength).toBe(null);
+        expect(AutoTooltips.defaults.maxToolTipLength).toBe(null);
     });
 
     it("replaceExisting true", () => {
-        expect(AutoTooltips.defaultOptions.replaceExisting).toBe(true);
+        expect(AutoTooltips.defaults.replaceExisting).toBe(true);
     });
 });
 

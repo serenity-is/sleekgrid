@@ -1,14 +1,15 @@
 import { Column, ColumnFormat, CompatFormatter, convertCompatFormatter, FormatterContext, Group, GroupTotals, ItemMetadata } from "../core";
 import { ArgsCell, Grid } from "../grid";
 
-export interface GroupItemMetadataOptions {
-    enableExpandCollapse?: true;
+interface GroupItemMetadataOptions {
+    enableExpandCollapse?: boolean;
     groupCellCssClass?: string;
     groupCssClass?: string;
     groupIndentation?: number;
     groupFocusable?: boolean;
     groupFormat?: ColumnFormat<Group>;
     groupFormatter?: CompatFormatter<Group>;
+    groupLevelPrefix?: string;
     groupRowTotals?: boolean;
     groupTitleCssClass?: string;
     hasSummaryType?: (column: Column) => boolean;
@@ -25,20 +26,21 @@ export class GroupItemMetadataProvider {
     private grid: Grid;
     private options: GroupItemMetadataOptions;
 
-    constructor(opt: GroupItemMetadataOptions) {
+    constructor(opt?: GroupItemMetadataOptions) {
         this.options = Object.assign({}, GroupItemMetadataProvider.defaults, opt);
-        this.options.groupFormat ??= opt.groupFormatter != null ? convertCompatFormatter(opt.groupFormatter) : 
+        this.options.groupFormat ??= opt?.groupFormatter ? convertCompatFormatter(opt.groupFormatter) : 
             ctx => GroupItemMetadataProvider.defaultGroupFormat(ctx, this.options);
-        this.options.totalsFormat ??= opt.totalsFormatter != null ? convertCompatFormatter(opt.totalsFormatter) : 
+        this.options.totalsFormat ??= opt?.totalsFormatter ? convertCompatFormatter(opt.totalsFormatter) : 
             ctx => GroupItemMetadataProvider.defaultTotalsFormat(ctx, this.grid);
     }
 
-    public static defaults: GroupItemMetadataOptions = {
+    public static readonly defaults: GroupItemMetadataOptions = {
         enableExpandCollapse: true,
+        groupCellCssClass: "slick-group-cell",
         groupCssClass: "slick-group",
         groupFocusable: true,
         groupIndentation: 15,
-        groupCellCssClass: "slick-group-cell",
+        groupLevelPrefix: "slick-group-level-",
         groupTitleCssClass: "slick-group-title",
         hasSummaryType: (col: any) => col.summaryType && col.summaryType != -1,
         totalsCssClass: "slick-group-totals",
@@ -84,7 +86,7 @@ export class GroupItemMetadataProvider {
     }
 
     setOptions(value: GroupItemMetadataOptions) {
-        this.options = Object.assign({}, this.options, value);
+        Object.assign(this.options, value);
     }
 
     handleGridClick = (e: MouseEvent, args: ArgsCell) => {
@@ -193,7 +195,7 @@ export class GroupItemMetadataProvider {
         const result: ItemMetadata = {
             selectable: false,
             focusable: opt.totalsFocusable,
-            cssClasses: opt.totalsCssClass + " slick-group-level-" + item?.level,
+            cssClasses: opt.totalsCssClass + " " + opt.groupLevelPrefix + item?.level,
             columns: {
                 [gcp.cell]: {
                     colspan: gcp.colspan,
@@ -215,7 +217,7 @@ export class GroupItemMetadataProvider {
         return {
           selectable: false,
           focusable: opt.totalsFocusable,
-          cssClasses: opt.totalsCssClass + ' slick-group-level-' + item?.group?.level,
+          cssClasses: opt.totalsCssClass + " " + opt.groupLevelPrefix + item?.group?.level,
           format: opt.totalsFormat,
           editor: null
         };

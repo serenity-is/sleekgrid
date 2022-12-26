@@ -16,7 +16,7 @@ export class AutoTooltips implements IPlugin {
         this.options = Object.assign({}, AutoTooltips.defaults, options);
     }
 
-    public static defaults: AutoTooltipsOptions = {
+    public static readonly defaults: AutoTooltipsOptions = {
         enableForCells: true,
         enableForHeaderCells: false,
         maxToolTipLength: null,
