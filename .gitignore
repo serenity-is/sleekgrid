@@ -1,5 +1,6 @@
 .vs/
 _site
+/coverage
 /dist/**/*.js
 /dist/**/*.map
 /dist/**/*.min.js
