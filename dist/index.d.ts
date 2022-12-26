@@ -429,6 +429,8 @@ export interface Column<TItem = any> {
 export declare const columnDefaults: Partial<Column>;
 export interface ColumnMetadata<TItem = any> {
 	colspan: number | "*";
+	cssClasses?: string;
+	editor?: EditorClass;
 	format?: ColumnFormat<TItem>;
 	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
@@ -438,12 +440,15 @@ export interface ColumnSort {
 	sortAsc?: boolean;
 }
 export interface ItemMetadata<TItem = any> {
+	cssClasses?: string;
 	columns?: {
 		[key: string]: ColumnMetadata<TItem>;
 	};
+	focusable?: boolean;
 	format?: ColumnFormat<TItem>;
 	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
+	selectable?: boolean;
 }
 export declare function initializeColumns(columns: Column[], defaults: Partial<Column<any>>): void;
 export declare function titleize(str: string): string;
@@ -1160,6 +1165,63 @@ export declare namespace Editors {
 	const Checkbox: typeof CheckboxEditor;
 	const PercentComplete: typeof PercentCompleteEditor;
 	const LongText: typeof LongTextEditor;
+}
+export interface GroupItemMetadataProviderOptions {
+	enableExpandCollapse?: boolean;
+	groupCellCssClass?: string;
+	groupCssClass?: string;
+	groupIndentation?: number;
+	groupFocusable?: boolean;
+	groupFormat?: ColumnFormat<Group>;
+	groupFormatter?: CompatFormatter<Group>;
+	groupLevelPrefix?: string;
+	groupRowTotals?: boolean;
+	groupTitleCssClass?: string;
+	hasSummaryType?: (column: Column) => boolean;
+	toggleCssClass?: string;
+	toggleExpandedCssClass?: string;
+	toggleCollapsedCssClass?: string;
+	totalsCssClass?: string;
+	totalsFocusable?: boolean;
+	totalsFormat?: ColumnFormat<GroupTotals>;
+	totalsFormatter?: CompatFormatter<GroupTotals>;
+}
+export declare class GroupItemMetadataProvider {
+	private grid;
+	private options;
+	constructor(opt?: GroupItemMetadataProviderOptions);
+	static readonly defaults: GroupItemMetadataProviderOptions;
+	static defaultGroupFormat(ctx: FormatterContext, opt?: GroupItemMetadataProviderOptions): string;
+	static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): string;
+	init(grid: Grid): void;
+	destroy(): void;
+	getOptions(): GroupItemMetadataProviderOptions;
+	setOptions(value: GroupItemMetadataProviderOptions): void;
+	handleGridClick: (e: MouseEvent, args: ArgsCell) => void;
+	handleGridKeyDown: (e: KeyboardEvent, args: ArgsCell) => void;
+	groupCellPosition: () => {
+		cell: number;
+		colspan: number | "*";
+	};
+	getGroupRowMetadata: ((item: Group) => ItemMetadata);
+	getTotalsRowMetadata: ((item: GroupTotals) => ItemMetadata);
+}
+export interface AutoTooltipsOptions {
+	enableForCells?: boolean;
+	enableForHeaderCells?: boolean;
+	maxToolTipLength?: number;
+	replaceExisting?: boolean;
+}
+export declare class AutoTooltips implements IPlugin {
+	private grid;
+	private options;
+	constructor(options?: AutoTooltipsOptions);
+	static readonly defaults: AutoTooltipsOptions;
+	init(grid: Grid): void;
+	destroy(): void;
+	private handleMouseEnter;
+	private handleHeaderMouseEnter;
+	pluginName: string;
 }
 
 export {};
