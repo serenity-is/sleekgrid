@@ -2,7 +2,7 @@
 title: SleekGrid Home
 ---
 
-### Classic Samples (to check backwards compatibility)
+### Classic Samples (to check backward compatibility)
 
 {% assign classic_examples_pages = site.pages | where: "dir", "/examples/classic/" %}
 
