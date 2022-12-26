@@ -194,6 +194,7 @@ function mockGrid() {
             if (row === 1 || row == 3) {
                 var group = new Group();
                 group.groupingKey = "gk" + row;
+                group.collapsed = row === 1;
                 return group;
             }
 
@@ -205,6 +206,14 @@ function mockGrid() {
             setRefreshHintsCalls: <any[]>[],
             setRefreshHints(obj: any) {
                 grid.__data.setRefreshHintsCalls.push(obj);
+            },
+            collapseGroupCalls: <string[]>[],
+            collapseGroup(key: string) {
+                grid.__data.collapseGroupCalls.push(key);
+            },
+            expandGroupCalls: <string[]>[],
+            expandGroup(key: string) {
+                grid.__data.expandGroupCalls.push(key);
             },
             length: 999
         },
@@ -307,5 +316,39 @@ describe("GroupItemMetadataProvider.handleGridClick", () => {
         expect(grid.__data.setRefreshHintsCalls[0]).toStrictEqual({ ignoreDiffsBefore: 5, ignoreDiffsAfter: 14 });
     });
 
+    it("calls stopImmediatePropagation, preventDefault and setRefreshHints", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        var event = mockEvent();
+        plugin.init(grid as any);
+        plugin.handleGridClick(event as any, { row: 1 } as any);
+        expect(grid.getDataItemCalls).toBe(1);
+        expect(event.stopImmediatePropagationCalls).toBe(1);
+        expect(event.preventDefaultCalls).toBe(1);
+        expect(grid.__data.setRefreshHintsCalls.length).toBe(1);
+        expect(grid.__data.setRefreshHintsCalls[0]).toStrictEqual({ ignoreDiffsBefore: 5, ignoreDiffsAfter: 14 });
+    });
+
+    it("calls expandGroup if collapsed is true", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        var event = mockEvent();
+        plugin.init(grid as any);
+        plugin.handleGridClick(event as any, { row: 1 } as any);
+        expect(grid.__data.collapseGroupCalls.length).toBe(0);
+        expect(grid.__data.expandGroupCalls.length).toBe(1);
+        expect(grid.__data.expandGroupCalls[0]).toBe("gk1");
+    });
+
+    it("calls collapseGroup if collapsed is falsy", () => {
+        var plugin = new GroupItemMetadataProvider();
+        var grid = mockGrid();
+        var event = mockEvent();
+        plugin.init(grid as any);
+        plugin.handleGridClick(event as any, { row: 3 } as any);
+        expect(grid.__data.expandGroupCalls.length).toBe(0);
+        expect(grid.__data.collapseGroupCalls.length).toBe(1);
+        expect(grid.__data.collapseGroupCalls[0]).toBe("gk3");
+    });
 });
 
