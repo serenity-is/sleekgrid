@@ -1,7 +1,7 @@
 import { Column, ColumnFormat, CompatFormatter, convertCompatFormatter, FormatterContext, Group, GroupTotals, ItemMetadata } from "../core";
 import { ArgsCell, Grid } from "../grid";
 
-interface GroupItemMetadataOptions {
+export interface GroupItemMetadataProviderOptions {
     enableExpandCollapse?: boolean;
     groupCellCssClass?: string;
     groupCssClass?: string;
@@ -24,9 +24,9 @@ interface GroupItemMetadataOptions {
 
 export class GroupItemMetadataProvider {
     private grid: Grid;
-    private options: GroupItemMetadataOptions;
+    private options: GroupItemMetadataProviderOptions;
 
-    constructor(opt?: GroupItemMetadataOptions) {
+    constructor(opt?: GroupItemMetadataProviderOptions) {
         this.options = Object.assign({}, GroupItemMetadataProvider.defaults, opt);
         this.options.groupFormat ??= opt?.groupFormatter ? convertCompatFormatter(opt.groupFormatter) : 
             ctx => GroupItemMetadataProvider.defaultGroupFormat(ctx, this.options);
@@ -34,7 +34,7 @@ export class GroupItemMetadataProvider {
             ctx => GroupItemMetadataProvider.defaultTotalsFormat(ctx, this.grid);
     }
 
-    public static readonly defaults: GroupItemMetadataOptions = {
+    public static readonly defaults: GroupItemMetadataProviderOptions = {
         enableExpandCollapse: true,
         groupCellCssClass: "slick-group-cell",
         groupCssClass: "slick-group",
@@ -50,7 +50,7 @@ export class GroupItemMetadataProvider {
         totalsFocusable: false
     }
 
-    public static defaultGroupFormat(ctx: FormatterContext, opt?: GroupItemMetadataOptions) {
+    public static defaultGroupFormat(ctx: FormatterContext, opt?: GroupItemMetadataProviderOptions) {
         opt ??= GroupItemMetadataProvider.defaults;
         let item = ctx.item as Group;
         if (!opt.enableExpandCollapse)
@@ -85,7 +85,7 @@ export class GroupItemMetadataProvider {
         return this.options;
     }
 
-    setOptions(value: GroupItemMetadataOptions) {
+    setOptions(value: GroupItemMetadataProviderOptions) {
         Object.assign(this.options, value);
     }
 
