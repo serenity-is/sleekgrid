@@ -1,4 +1,4 @@
-import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, Event, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize, parsePx, GroupTotals, ColumnMetadata } from "../core";
+import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventEmitter, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize, parsePx, GroupTotals, ColumnMetadata } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
@@ -81,42 +81,42 @@ export class Grid<TItem = any> implements EditorHost {
     private _focusSink2: HTMLElement;
     private _groupingPanel: HTMLElement;
 
-    readonly onActiveCellChanged = new Event<ArgsCell>();
-    readonly onActiveCellPositionChanged = new Event<ArgsGrid>();
-    readonly onAddNewRow = new Event<ArgsAddNewRow>();
-    readonly onBeforeCellEditorDestroy = new Event<ArgsEditorDestroy>();
-    readonly onBeforeDestroy = new Event<ArgsGrid>();
-    readonly onBeforeEditCell = new Event<ArgsCellEdit>();
-    readonly onBeforeFooterRowCellDestroy = new Event<ArgsColumnNode>();
-    readonly onBeforeHeaderCellDestroy = new Event<ArgsColumnNode>();
-    readonly onBeforeHeaderRowCellDestroy = new Event<ArgsColumnNode>();
-    readonly onCellChange = new Event<ArgsCellChange>();
-    readonly onCellCssStylesChanged = new Event<ArgsCssStyle>();
-    readonly onClick = new Event<ArgsCell, MouseEvent>();
-    readonly onColumnsReordered = new Event<ArgsGrid>();
-    readonly onColumnsResized = new Event<ArgsGrid>();
-    readonly onCompositeEditorChange = new Event<ArgsGrid>();
-    readonly onContextMenu = new Event<ArgsGrid, UIEvent>();
-    readonly onDblClick = new Event<ArgsCell, MouseEvent>();
-    readonly onDrag = new Event<ArgsGrid, UIEvent>();
-    readonly onDragEnd = new Event<ArgsGrid, UIEvent>();
-    readonly onDragInit = new Event<ArgsGrid, UIEvent>();
-    readonly onDragStart = new Event<ArgsGrid, UIEvent>();
-    readonly onFooterRowCellRendered = new Event<ArgsColumnNode>();
-    readonly onHeaderCellRendered = new Event<ArgsColumnNode>();
-    readonly onHeaderClick = new Event<ArgsColumn>();
-    readonly onHeaderContextMenu = new Event<ArgsColumn>();
-    readonly onHeaderMouseEnter = new Event<ArgsColumn, MouseEvent>();
-    readonly onHeaderMouseLeave = new Event<ArgsColumn, MouseEvent>();
-    readonly onHeaderRowCellRendered = new Event<ArgsColumnNode>();
-    readonly onKeyDown = new Event<ArgsCell, KeyboardEvent>();
-    readonly onMouseEnter = new Event<ArgsGrid, MouseEvent>();
-    readonly onMouseLeave = new Event<ArgsGrid, MouseEvent>();
-    readonly onScroll = new Event<ArgsScroll>();
-    readonly onSelectedRowsChanged = new Event<ArgsSelectedRowsChange>();
-    readonly onSort = new Event<ArgsSort>();
-    readonly onValidationError = new Event<ArgsValidationError>();
-    readonly onViewportChanged = new Event<ArgsGrid>();
+    readonly onActiveCellChanged = new EventEmitter<ArgsCell>();
+    readonly onActiveCellPositionChanged = new EventEmitter<ArgsGrid>();
+    readonly onAddNewRow = new EventEmitter<ArgsAddNewRow>();
+    readonly onBeforeCellEditorDestroy = new EventEmitter<ArgsEditorDestroy>();
+    readonly onBeforeDestroy = new EventEmitter<ArgsGrid>();
+    readonly onBeforeEditCell = new EventEmitter<ArgsCellEdit>();
+    readonly onBeforeFooterRowCellDestroy = new EventEmitter<ArgsColumnNode>();
+    readonly onBeforeHeaderCellDestroy = new EventEmitter<ArgsColumnNode>();
+    readonly onBeforeHeaderRowCellDestroy = new EventEmitter<ArgsColumnNode>();
+    readonly onCellChange = new EventEmitter<ArgsCellChange>();
+    readonly onCellCssStylesChanged = new EventEmitter<ArgsCssStyle>();
+    readonly onClick = new EventEmitter<ArgsCell, MouseEvent>();
+    readonly onColumnsReordered = new EventEmitter<ArgsGrid>();
+    readonly onColumnsResized = new EventEmitter<ArgsGrid>();
+    readonly onCompositeEditorChange = new EventEmitter<ArgsGrid>();
+    readonly onContextMenu = new EventEmitter<ArgsGrid, UIEvent>();
+    readonly onDblClick = new EventEmitter<ArgsCell, MouseEvent>();
+    readonly onDrag = new EventEmitter<ArgsGrid, UIEvent>();
+    readonly onDragEnd = new EventEmitter<ArgsGrid, UIEvent>();
+    readonly onDragInit = new EventEmitter<ArgsGrid, UIEvent>();
+    readonly onDragStart = new EventEmitter<ArgsGrid, UIEvent>();
+    readonly onFooterRowCellRendered = new EventEmitter<ArgsColumnNode>();
+    readonly onHeaderCellRendered = new EventEmitter<ArgsColumnNode>();
+    readonly onHeaderClick = new EventEmitter<ArgsColumn>();
+    readonly onHeaderContextMenu = new EventEmitter<ArgsColumn>();
+    readonly onHeaderMouseEnter = new EventEmitter<ArgsColumn, MouseEvent>();
+    readonly onHeaderMouseLeave = new EventEmitter<ArgsColumn, MouseEvent>();
+    readonly onHeaderRowCellRendered = new EventEmitter<ArgsColumnNode>();
+    readonly onKeyDown = new EventEmitter<ArgsCell, KeyboardEvent>();
+    readonly onMouseEnter = new EventEmitter<ArgsGrid, MouseEvent>();
+    readonly onMouseLeave = new EventEmitter<ArgsGrid, MouseEvent>();
+    readonly onScroll = new EventEmitter<ArgsScroll>();
+    readonly onSelectedRowsChanged = new EventEmitter<ArgsSelectedRowsChange>();
+    readonly onSort = new EventEmitter<ArgsSort>();
+    readonly onValidationError = new EventEmitter<ArgsValidationError>();
+    readonly onViewportChanged = new EventEmitter<ArgsGrid>();
 
     constructor(container: JQuery | HTMLElement, data: any, columns: Column<TItem>[], options: GridOptions<TItem>) {
 
@@ -1158,8 +1158,8 @@ export class Grid<TItem = any> implements EditorHost {
                 continue;
             if (k.startsWith('on')) {
                 var ev: any = this[k];
-                if ((ev as Event)?.clear && (ev as Event)?.subscribe)
-                    (ev as Event)?.clear();
+                if ((ev as EventEmitter)?.clear && (ev as EventEmitter)?.subscribe)
+                    (ev as EventEmitter)?.clear();
             }
             delete this[k];
         }
@@ -1170,7 +1170,7 @@ export class Grid<TItem = any> implements EditorHost {
     // General
 
     private trigger<TArgs extends ArgsGrid, TEventData extends IEventData = IEventData>(
-        evt: Event<TArgs, TEventData>, args?: TArgs, e?: TEventData) {
+        evt: EventEmitter<TArgs, TEventData>, args?: TArgs, e?: TEventData) {
         e = e || new EventData() as any;
         args = args || {} as any;
         args.grid = this;

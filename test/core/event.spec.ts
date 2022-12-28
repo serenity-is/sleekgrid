@@ -1,4 +1,4 @@
-﻿import { Event, EventData, EventHandler, IEventData, patchEvent } from "@/core/event";
+﻿import { EventEmitter, EventData, EventSubscriber, IEventData, patchEvent } from "@/core/event";
 
 describe('EventData', () => {
     it('stopPropagation stops event propagation', () => {
@@ -22,7 +22,7 @@ describe('EventData', () => {
 
 describe('Event', () => {
     it('can subscribe to an event', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let isEventCalled = false;
 
         event.subscribe(() => {
@@ -35,7 +35,7 @@ describe('Event', () => {
     });
 
     it('can subscribe to an event more than once', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let isEventCalled = [false, false];
 
         event.subscribe(() => {
@@ -53,7 +53,7 @@ describe('Event', () => {
     });
 
     it('can send event data to subscribers', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let eventArgs: any;
 
         event.subscribe((eventData, args) => {
@@ -69,7 +69,7 @@ describe('Event', () => {
     });
 
     it('can unsubscribe from an event', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let callCount = 0;
 
         const handler = () => {
@@ -85,7 +85,7 @@ describe('Event', () => {
     });
 
     it('can unsubscribe from an specific event', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let callCount = 0;
 
         const handler = () => {
@@ -106,7 +106,7 @@ describe('Event', () => {
     });
 
     it('can send the scope to an event', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let callCount = 0;
 
         const scope = {
@@ -126,7 +126,7 @@ describe('Event', () => {
     });
 
     it('doesnt notify subscribers when event propagation is stopped', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         const eventData = new EventData();
         let callCount = 0;
 
@@ -143,7 +143,7 @@ describe('Event', () => {
     });
 
     it('doesnt notify subscribers when event immediate propagation is stopped', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         const eventData = new EventData();
         let callCount = 0;
 
@@ -160,7 +160,7 @@ describe('Event', () => {
     });
 
     it('sends EventDate as an new instance if it is not passed', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let eventData: any;
 
         event.subscribe((data, _) => {
@@ -175,7 +175,7 @@ describe('Event', () => {
     });
 
     it('sends scope as the Event itself if it is not passed', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let callCount = 0;
 
         const handler = function () {
@@ -191,7 +191,7 @@ describe('Event', () => {
     });
 
     it('notify returns last handlers returned value', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let callCount = 0;
 
         const normalReturnHandler = () => {
@@ -216,7 +216,7 @@ describe('Event', () => {
     });
 
     it('unsubscribe removes all handlers of the same reference', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let callCount = 0;
 
         const handler = () => {
@@ -235,7 +235,7 @@ describe('Event', () => {
     });
 
     it('clear removes all handlers', () => {
-        const event = new Event();
+        const event = new EventEmitter();
         let callCount = 0;
 
         const handler = () => {
@@ -256,10 +256,10 @@ describe('EventHandler', () => {
     it('automatically subscribes handler to the event', function () {
         let isEventCalled = false;
 
-        const event = new Event();
+        const event = new EventEmitter();
 
-        const eventHandler = new EventHandler();
-        eventHandler.subscribe(event, () => {
+        const subscriber = new EventSubscriber();
+        subscriber.subscribe(event, () => {
             isEventCalled = true;
         });
 
@@ -271,11 +271,11 @@ describe('EventHandler', () => {
     it('automatically subscribes multiple handlers to the event', function () {
         let isEventCalled = [false, false];
 
-        const event = new Event();
-        const eventHandler = new EventHandler();
+        const event = new EventEmitter();
+        const subscriber = new EventSubscriber();
 
-        eventHandler.subscribe(event, () => isEventCalled[0] = true);
-        eventHandler.subscribe(event, () => isEventCalled[1] = true);
+        subscriber.subscribe(event, () => isEventCalled[0] = true);
+        subscriber.subscribe(event, () => isEventCalled[1] = true);
 
         event.notify(null, null, null);
 
@@ -286,17 +286,17 @@ describe('EventHandler', () => {
     it('unsubscribes handler from event', function () {
         let eventCallCount = 0;
 
-        const event = new Event();
-        const eventHandler = new EventHandler();
+        const event = new EventEmitter();
+        const subscriber = new EventSubscriber();
 
         const handler = () => eventCallCount++;
 
-        eventHandler.subscribe(event, handler);
+        subscriber.subscribe(event, handler);
         event.notify(null, null, null);
 
         expect(eventCallCount).toBe(1);
 
-        eventHandler.unsubscribe(event, handler);
+        subscriber.unsubscribe(event, handler);
         event.notify(null, null, null);
 
         expect(eventCallCount).toBe(1);
@@ -305,19 +305,19 @@ describe('EventHandler', () => {
     it('unsubscribes all handlers of the same reference from event', function () {
         let eventCallCount = 0;
 
-        const event = new Event();
-        const eventHandler = new EventHandler();
+        const event = new EventEmitter();
+        const subscriber = new EventSubscriber();
 
         const handler = () => eventCallCount++;
 
-        eventHandler.subscribe(event, handler);
-        eventHandler.subscribe(event, handler);
-        eventHandler.subscribe(event, handler);
+        subscriber.subscribe(event, handler);
+        subscriber.subscribe(event, handler);
+        subscriber.subscribe(event, handler);
         event.notify(null, null, null);
 
         expect(eventCallCount).toBe(3);
 
-        eventHandler.unsubscribe(event, handler);
+        subscriber.unsubscribe(event, handler);
         event.notify(null, null, null);
 
         expect(eventCallCount).toBe(3);
@@ -326,22 +326,22 @@ describe('EventHandler', () => {
     it('unsubscribes handler from an specific event', function () {
         let eventCallCount = 0;
 
-        const event = new Event();
-        const otherEvent = new Event();
+        const event = new EventEmitter();
+        const otherEvent = new EventEmitter();
 
-        const eventHandler = new EventHandler();
+        const subscriber = new EventSubscriber();
 
         const handler = () => eventCallCount++;
 
-        eventHandler.subscribe(event, handler);
-        eventHandler.subscribe(otherEvent, handler);
+        subscriber.subscribe(event, handler);
+        subscriber.subscribe(otherEvent, handler);
 
         event.notify(null, null, null);
         otherEvent.notify(null, null, null);
 
         expect(eventCallCount).toBe(2);
 
-        eventHandler.unsubscribe(event, handler);
+        subscriber.unsubscribe(event, handler);
         event.notify(null, null, null);
         otherEvent.notify(null, null, null);
 
@@ -351,24 +351,24 @@ describe('EventHandler', () => {
     it('unsubscribes all handlers of the same reference from an specific event', function () {
         let eventCallCount = 0;
 
-        const event = new Event();
-        const otherEvent = new Event();
+        const event = new EventEmitter();
+        const otherEvent = new EventEmitter();
 
-        const eventHandler = new EventHandler();
+        const subscriber = new EventSubscriber();
 
         const handler = () => eventCallCount++;
 
-        eventHandler.subscribe(event, handler);
-        eventHandler.subscribe(event, handler);
-        eventHandler.subscribe(event, handler);
-        eventHandler.subscribe(otherEvent, handler);
+        subscriber.subscribe(event, handler);
+        subscriber.subscribe(event, handler);
+        subscriber.subscribe(event, handler);
+        subscriber.subscribe(otherEvent, handler);
 
         event.notify(null, null, null);
         otherEvent.notify(null, null, null);
 
         expect(eventCallCount).toBe(4);
 
-        eventHandler.unsubscribe(event, handler);
+        subscriber.unsubscribe(event, handler);
         event.notify(null, null, null);
         otherEvent.notify(null, null, null);
 
@@ -378,26 +378,26 @@ describe('EventHandler', () => {
     it('unsubscribes from all event and handlers', function () {
         let eventCallCount = 0;
 
-        const event = new Event();
-        const otherEvent = new Event();
+        const event = new EventEmitter();
+        const otherEvent = new EventEmitter();
 
-        const eventHandler = new EventHandler();
+        const subscriber = new EventSubscriber();
 
         const handler = () => eventCallCount++;
 
-        eventHandler.subscribe(event, handler);
-        eventHandler.subscribe(event, handler);
-        eventHandler.subscribe(event, handler);
-        eventHandler.subscribe(otherEvent, handler);
-        eventHandler.subscribe(otherEvent, handler);
-        eventHandler.subscribe(otherEvent, handler);
+        subscriber.subscribe(event, handler);
+        subscriber.subscribe(event, handler);
+        subscriber.subscribe(event, handler);
+        subscriber.subscribe(otherEvent, handler);
+        subscriber.subscribe(otherEvent, handler);
+        subscriber.subscribe(otherEvent, handler);
 
         event.notify(null, null, null);
         otherEvent.notify(null, null, null);
 
         expect(eventCallCount).toBe(6);
 
-        eventHandler.unsubscribeAll();
+        subscriber.unsubscribeAll();
         event.notify(null, null, null);
         otherEvent.notify(null, null, null);
 

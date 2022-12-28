@@ -1,4 +1,4 @@
-import type { Event, Range } from "../core";
+import type { EventEmitter, Range } from "../core";
 import type { Grid } from "./grid";
 
 export interface IPlugin {
@@ -24,7 +24,7 @@ export interface ViewportInfo {
 
 export interface SelectionModel extends IPlugin {
     setSelectedRanges(ranges: Range[]): void;
-    onSelectedRangesChanged: Event<Range[]>;
+    onSelectedRangesChanged: EventEmitter<Range[]>;
     refreshSelections?(): void;
 }
 

@@ -1,4 +1,4 @@
-export type Handler<TArgs, TEventData extends IEventData = IEventData> = (e: TEventData, args: TArgs) => void;
+export type EventListener<TArgs, TEventData extends IEventData = IEventData> = (e: TEventData, args: TArgs) => void;
 
 export interface IEventData {
     readonly type?: string;
@@ -55,9 +55,9 @@ export class EventData implements IEventData {
 /***
  * A simple publisher-subscriber implementation.
  */
-export class Event<TArgs = any, TEventData extends IEventData = IEventData> {
+export class EventEmitter<TArgs = any, TEventData extends IEventData = IEventData> {
 
-    private _handlers: Handler<TArgs, TEventData>[] = [];
+    private _handlers: EventListener<TArgs, TEventData>[] = [];
 
     /***
      * Adds an event handler to be called when the event is fired.
@@ -66,7 +66,7 @@ export class Event<TArgs = any, TEventData extends IEventData = IEventData> {
      * @method subscribe
      * @param fn {Function} Event handler.
      */
-    subscribe(fn: Handler<TArgs, TEventData>) {
+    subscribe(fn: EventListener<TArgs, TEventData>) {
         this._handlers.push(fn);
     }
 
@@ -75,7 +75,7 @@ export class Event<TArgs = any, TEventData extends IEventData = IEventData> {
      * @method unsubscribe
      * @param fn {Function} Event handler to be removed.
      */
-    unsubscribe(fn: Handler<TArgs, TEventData>) {
+    unsubscribe(fn: EventListener<TArgs, TEventData>) {
         for (var i = this._handlers.length - 1; i >= 0; i--) {
             if (this._handlers[i] === fn) {
                 this._handlers.splice(i, 1);
@@ -112,15 +112,15 @@ export class Event<TArgs = any, TEventData extends IEventData = IEventData> {
     }
 }
 
-interface EventHandlerEntry<TArgs = any, TEventData extends IEventData = IEventData> {
-    event: Event<TArgs, TEventData>;
-    handler: Handler<TArgs, TEventData>;
+interface EventSubscriberEntry<TArgs = any, TEventData extends IEventData = IEventData> {
+    event: EventEmitter<TArgs, TEventData>;
+    handler: EventListener<TArgs, TEventData>;
 }
 
-export class EventHandler<TArgs = any, TEventData extends IEventData = IEventData>  {
-    private _handlers: EventHandlerEntry<TArgs, TEventData>[] = [];
+export class EventSubscriber<TArgs = any, TEventData extends IEventData = IEventData>  {
+    private _handlers: EventSubscriberEntry<TArgs, TEventData>[] = [];
 
-    subscribe(event: Event<TArgs, TEventData>, handler: Handler<TArgs, TEventData>): this {
+    subscribe(event: EventEmitter<TArgs, TEventData>, handler: EventListener<TArgs, TEventData>): this {
         this._handlers.push({
             event: event,
             handler: handler
@@ -130,7 +130,7 @@ export class EventHandler<TArgs = any, TEventData extends IEventData = IEventDat
         return this;
     }
 
-    unsubscribe(event: Event<TArgs, TEventData>, handler: Handler<TArgs, TEventData>): this {
+    unsubscribe(event: EventEmitter<TArgs, TEventData>, handler: EventListener<TArgs, TEventData>): this {
         var i = this._handlers.length;
         while (i--) {
             if (this._handlers[i].event === event &&
@@ -144,7 +144,7 @@ export class EventHandler<TArgs = any, TEventData extends IEventData = IEventDat
         return this;
     }
 
-    unsubscribeAll(): EventHandler<TArgs, TEventData> {
+    unsubscribeAll(): EventSubscriber<TArgs, TEventData> {
         var i = this._handlers.length;
         while (i--) {
             this._handlers[i].event.unsubscribe(this._handlers[i].handler);

@@ -168,7 +168,7 @@ function mockGrid() {
                 expect(idx >= 0).toBe(true);
                 grid.onClickList.splice(idx, 1); 
             }
-        },
+        } as any,
         onKeyDownList: <any[]>[],
         onKeyDown: {
             subscribe: function(f: any) { grid.onKeyDownList.push(f); },
@@ -177,7 +177,7 @@ function mockGrid() {
                 expect(idx >= 0).toBe(true);
                 grid.onKeyDownList.splice(idx, 1);
             }
-        },
+        } as any,
         getDataItemCalls: 0,
         getRenderedRangeCalls: 0,
         getRenderedRange: function() {
@@ -219,9 +219,12 @@ function mockGrid() {
         },
         getData: function() {
             return grid.__data;
-        }
+        },
+        getActiveCell: <any>null,
+        getColumns: <any>null,
+        groupTotalsFormatter: <any>null
     };
-    return grid;
+    return grid satisfies typeof GroupItemMetadataProvider.prototype["grid"];
 }
 
 describe("GroupItemMetadataProvider.init", () => {
@@ -229,7 +232,7 @@ describe("GroupItemMetadataProvider.init", () => {
     it("attaches to onClick", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
-        plugin.init(grid as any);
+        plugin.init(grid);
         expect(grid.onClickList.length).toBe(1);
         plugin.destroy();
         expect(grid.onClickList.length).toBe(0);
@@ -238,7 +241,7 @@ describe("GroupItemMetadataProvider.init", () => {
     it("attaches to onKeyDown", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
-        plugin.init(grid as any);
+        plugin.init(grid);
         expect(grid.onKeyDownList.length).toBe(1);
         plugin.destroy();
         expect(grid.onKeyDownList.length).toBe(0);
@@ -262,7 +265,7 @@ describe("GroupItemMetadataProvider.handleGridClick", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
         var event = mockEvent();
-        plugin.init(grid as any);
+        plugin.init(grid);
         plugin.handleGridClick(event as any, { row: -1 } as any);
         expect(grid.getDataItemCalls).toBe(1);
         expect(event.stopImmediatePropagationCalls).toBe(0);
@@ -273,7 +276,7 @@ describe("GroupItemMetadataProvider.handleGridClick", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
         var event = mockEvent();
-        plugin.init(grid as any);
+        plugin.init(grid);
         plugin.handleGridClick(event as any, { row: -1 } as any);
         expect(grid.getDataItemCalls).toBe(1);
         expect(event.stopImmediatePropagationCalls).toBe(0);
@@ -284,7 +287,7 @@ describe("GroupItemMetadataProvider.handleGridClick", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
         var event = mockEvent();
-        plugin.init(grid as any);
+        plugin.init(grid);
         plugin.handleGridClick(event as any, { row: 333 } as any);
         expect(grid.getDataItemCalls).toBe(1);
         expect(event.stopImmediatePropagationCalls).toBe(0);
@@ -296,7 +299,7 @@ describe("GroupItemMetadataProvider.handleGridClick", () => {
         var grid = mockGrid();
         var event = mockEvent();
         event.target.classNames = ["xyz"];
-        plugin.init(grid as any);
+        plugin.init(grid);
         plugin.handleGridClick(event as any, { row: 1 } as any);
         expect(grid.getDataItemCalls).toBe(1);
         expect(event.stopImmediatePropagationCalls).toBe(0);
@@ -307,7 +310,7 @@ describe("GroupItemMetadataProvider.handleGridClick", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
         var event = mockEvent();
-        plugin.init(grid as any);
+        plugin.init(grid);
         plugin.handleGridClick(event as any, { row: 1 } as any);
         expect(grid.getDataItemCalls).toBe(1);
         expect(event.stopImmediatePropagationCalls).toBe(1);
@@ -320,7 +323,7 @@ describe("GroupItemMetadataProvider.handleGridClick", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
         var event = mockEvent();
-        plugin.init(grid as any);
+        plugin.init(grid);
         plugin.handleGridClick(event as any, { row: 1 } as any);
         expect(grid.getDataItemCalls).toBe(1);
         expect(event.stopImmediatePropagationCalls).toBe(1);
@@ -333,7 +336,7 @@ describe("GroupItemMetadataProvider.handleGridClick", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
         var event = mockEvent();
-        plugin.init(grid as any);
+        plugin.init(grid);
         plugin.handleGridClick(event as any, { row: 1 } as any);
         expect(grid.__data.collapseGroupCalls.length).toBe(0);
         expect(grid.__data.expandGroupCalls.length).toBe(1);
@@ -344,7 +347,7 @@ describe("GroupItemMetadataProvider.handleGridClick", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
         var event = mockEvent();
-        plugin.init(grid as any);
+        plugin.init(grid);
         plugin.handleGridClick(event as any, { row: 3 } as any);
         expect(grid.__data.expandGroupCalls.length).toBe(0);
         expect(grid.__data.collapseGroupCalls.length).toBe(1);

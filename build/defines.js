@@ -42,7 +42,10 @@ export const compatDefaults = {
 export const compatCore = {
     ...compatDefaults,
     entryPoints: ['./src/core/index.ts'],
-    outfile: './dist/compat/slick.core.js'
+    outfile: './dist/compat/slick.core.js',
+    footer: {
+        js: compatDefaults.footer.js + " Slick.Event = Slick.EventEmitter; Slick.EventHandler = Slick.EventSubscriber;"
+    }    
 }
 
 export const compatGrid = {
@@ -50,7 +53,7 @@ export const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escape", "defaultColumnFormat", "disableSelection", "Event", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "Range", "removeClass", "RowCell", "spacerDiv", "titleize"]
+        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escape", "defaultColumnFormat", "disableSelection", "EventEmitter", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "Range", "removeClass", "RowCell", "spacerDiv", "titleize"]
     })]
 }
 

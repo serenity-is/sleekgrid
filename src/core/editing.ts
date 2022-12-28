@@ -1,5 +1,5 @@
 import { Column, ColumnMetadata } from "./column";
-import { Event, IEventData } from "./event";
+import { EventEmitter, IEventData } from "./event";
 
 export interface Position {
     bottom?: number;
@@ -25,7 +25,7 @@ export interface EditorHost {
     getActiveCell(): RowCell;
     navigateNext(): boolean;
     navigatePrev(): boolean;
-    onCompositeEditorChange: Event<any>;
+    onCompositeEditorChange: EventEmitter<any>;
 }
 
 interface CompositeEditorOptions {

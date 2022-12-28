@@ -153,7 +153,7 @@ export declare class GroupTotals<TEntity = any> extends NonDataRow {
 	 */
 	max?: any;
 }
-export type Handler<TArgs, TEventData extends IEventData = IEventData> = (e: TEventData, args: TArgs) => void;
+export type EventListener<TArgs, TEventData extends IEventData = IEventData> = (e: TEventData, args: TArgs) => void;
 export interface IEventData {
 	readonly type?: string;
 	currentTarget?: EventTarget | null;
@@ -195,7 +195,7 @@ export declare class EventData implements IEventData {
 /***
  * A simple publisher-subscriber implementation.
  */
-export declare class Event<TArgs = any, TEventData extends IEventData = IEventData> {
+export declare class EventEmitter<TArgs = any, TEventData extends IEventData = IEventData> {
 	private _handlers;
 	/***
 	 * Adds an event handler to be called when the event is fired.
@@ -204,13 +204,13 @@ export declare class Event<TArgs = any, TEventData extends IEventData = IEventDa
 	 * @method subscribe
 	 * @param fn {Function} Event handler.
 	 */
-	subscribe(fn: Handler<TArgs, TEventData>): void;
+	subscribe(fn: EventListener<TArgs, TEventData>): void;
 	/***
 	 * Removes an event handler added with <code>subscribe(fn)</code>.
 	 * @method unsubscribe
 	 * @param fn {Function} Event handler to be removed.
 	 */
-	unsubscribe(fn: Handler<TArgs, TEventData>): void;
+	unsubscribe(fn: EventListener<TArgs, TEventData>): void;
 	/***
 	 * Fires an event notifying all subscribers.
 	 * @param args {Object} Additional data object to be passed to all handlers.
@@ -226,11 +226,11 @@ export declare class Event<TArgs = any, TEventData extends IEventData = IEventDa
 	notify(args?: any, e?: TEventData, scope?: object): any;
 	clear(): void;
 }
-export declare class EventHandler<TArgs = any, TEventData extends IEventData = IEventData> {
+export declare class EventSubscriber<TArgs = any, TEventData extends IEventData = IEventData> {
 	private _handlers;
-	subscribe(event: Event<TArgs, TEventData>, handler: Handler<TArgs, TEventData>): this;
-	unsubscribe(event: Event<TArgs, TEventData>, handler: Handler<TArgs, TEventData>): this;
-	unsubscribeAll(): EventHandler<TArgs, TEventData>;
+	subscribe(event: EventEmitter<TArgs, TEventData>, handler: EventListener<TArgs, TEventData>): this;
+	unsubscribe(event: EventEmitter<TArgs, TEventData>, handler: EventListener<TArgs, TEventData>): this;
+	unsubscribeAll(): EventSubscriber<TArgs, TEventData>;
 }
 /** @deprecated */
 export declare const keyCode: {
@@ -271,7 +271,7 @@ export interface EditorHost {
 	getActiveCell(): RowCell;
 	navigateNext(): boolean;
 	navigatePrev(): boolean;
-	onCompositeEditorChange: Event<any>;
+	onCompositeEditorChange: EventEmitter<any>;
 }
 export interface CompositeEditorOptions {
 	formValues: any;
@@ -496,7 +496,7 @@ export interface ViewportInfo {
 }
 export interface SelectionModel extends IPlugin {
 	setSelectedRanges(ranges: Range[]): void;
-	onSelectedRangesChanged: Event<Range[]>;
+	onSelectedRangesChanged: EventEmitter<Range[]>;
 	refreshSelections?(): void;
 }
 export interface ViewRange {
@@ -719,42 +719,42 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private _focusSink1;
 	private _focusSink2;
 	private _groupingPanel;
-	readonly onActiveCellChanged: Event<ArgsCell, IEventData>;
-	readonly onActiveCellPositionChanged: Event<ArgsGrid, IEventData>;
-	readonly onAddNewRow: Event<ArgsAddNewRow, IEventData>;
-	readonly onBeforeCellEditorDestroy: Event<ArgsEditorDestroy, IEventData>;
-	readonly onBeforeDestroy: Event<ArgsGrid, IEventData>;
-	readonly onBeforeEditCell: Event<ArgsCellEdit, IEventData>;
-	readonly onBeforeFooterRowCellDestroy: Event<ArgsColumnNode, IEventData>;
-	readonly onBeforeHeaderCellDestroy: Event<ArgsColumnNode, IEventData>;
-	readonly onBeforeHeaderRowCellDestroy: Event<ArgsColumnNode, IEventData>;
-	readonly onCellChange: Event<ArgsCellChange, IEventData>;
-	readonly onCellCssStylesChanged: Event<ArgsCssStyle, IEventData>;
-	readonly onClick: Event<ArgsCell, MouseEvent>;
-	readonly onColumnsReordered: Event<ArgsGrid, IEventData>;
-	readonly onColumnsResized: Event<ArgsGrid, IEventData>;
-	readonly onCompositeEditorChange: Event<ArgsGrid, IEventData>;
-	readonly onContextMenu: Event<ArgsGrid, UIEvent>;
-	readonly onDblClick: Event<ArgsCell, MouseEvent>;
-	readonly onDrag: Event<ArgsGrid, UIEvent>;
-	readonly onDragEnd: Event<ArgsGrid, UIEvent>;
-	readonly onDragInit: Event<ArgsGrid, UIEvent>;
-	readonly onDragStart: Event<ArgsGrid, UIEvent>;
-	readonly onFooterRowCellRendered: Event<ArgsColumnNode, IEventData>;
-	readonly onHeaderCellRendered: Event<ArgsColumnNode, IEventData>;
-	readonly onHeaderClick: Event<ArgsColumn, IEventData>;
-	readonly onHeaderContextMenu: Event<ArgsColumn, IEventData>;
-	readonly onHeaderMouseEnter: Event<ArgsColumn, MouseEvent>;
-	readonly onHeaderMouseLeave: Event<ArgsColumn, MouseEvent>;
-	readonly onHeaderRowCellRendered: Event<ArgsColumnNode, IEventData>;
-	readonly onKeyDown: Event<ArgsCell, KeyboardEvent>;
-	readonly onMouseEnter: Event<ArgsGrid, MouseEvent>;
-	readonly onMouseLeave: Event<ArgsGrid, MouseEvent>;
-	readonly onScroll: Event<ArgsScroll, IEventData>;
-	readonly onSelectedRowsChanged: Event<ArgsSelectedRowsChange, IEventData>;
-	readonly onSort: Event<ArgsSort, IEventData>;
-	readonly onValidationError: Event<ArgsValidationError, IEventData>;
-	readonly onViewportChanged: Event<ArgsGrid, IEventData>;
+	readonly onActiveCellChanged: EventEmitter<ArgsCell, IEventData>;
+	readonly onActiveCellPositionChanged: EventEmitter<ArgsGrid, IEventData>;
+	readonly onAddNewRow: EventEmitter<ArgsAddNewRow, IEventData>;
+	readonly onBeforeCellEditorDestroy: EventEmitter<ArgsEditorDestroy, IEventData>;
+	readonly onBeforeDestroy: EventEmitter<ArgsGrid, IEventData>;
+	readonly onBeforeEditCell: EventEmitter<ArgsCellEdit, IEventData>;
+	readonly onBeforeFooterRowCellDestroy: EventEmitter<ArgsColumnNode, IEventData>;
+	readonly onBeforeHeaderCellDestroy: EventEmitter<ArgsColumnNode, IEventData>;
+	readonly onBeforeHeaderRowCellDestroy: EventEmitter<ArgsColumnNode, IEventData>;
+	readonly onCellChange: EventEmitter<ArgsCellChange, IEventData>;
+	readonly onCellCssStylesChanged: EventEmitter<ArgsCssStyle, IEventData>;
+	readonly onClick: EventEmitter<ArgsCell, MouseEvent>;
+	readonly onColumnsReordered: EventEmitter<ArgsGrid, IEventData>;
+	readonly onColumnsResized: EventEmitter<ArgsGrid, IEventData>;
+	readonly onCompositeEditorChange: EventEmitter<ArgsGrid, IEventData>;
+	readonly onContextMenu: EventEmitter<ArgsGrid, UIEvent>;
+	readonly onDblClick: EventEmitter<ArgsCell, MouseEvent>;
+	readonly onDrag: EventEmitter<ArgsGrid, UIEvent>;
+	readonly onDragEnd: EventEmitter<ArgsGrid, UIEvent>;
+	readonly onDragInit: EventEmitter<ArgsGrid, UIEvent>;
+	readonly onDragStart: EventEmitter<ArgsGrid, UIEvent>;
+	readonly onFooterRowCellRendered: EventEmitter<ArgsColumnNode, IEventData>;
+	readonly onHeaderCellRendered: EventEmitter<ArgsColumnNode, IEventData>;
+	readonly onHeaderClick: EventEmitter<ArgsColumn, IEventData>;
+	readonly onHeaderContextMenu: EventEmitter<ArgsColumn, IEventData>;
+	readonly onHeaderMouseEnter: EventEmitter<ArgsColumn, MouseEvent>;
+	readonly onHeaderMouseLeave: EventEmitter<ArgsColumn, MouseEvent>;
+	readonly onHeaderRowCellRendered: EventEmitter<ArgsColumnNode, IEventData>;
+	readonly onKeyDown: EventEmitter<ArgsCell, KeyboardEvent>;
+	readonly onMouseEnter: EventEmitter<ArgsGrid, MouseEvent>;
+	readonly onMouseLeave: EventEmitter<ArgsGrid, MouseEvent>;
+	readonly onScroll: EventEmitter<ArgsScroll, IEventData>;
+	readonly onSelectedRowsChanged: EventEmitter<ArgsSelectedRowsChange, IEventData>;
+	readonly onSort: EventEmitter<ArgsSort, IEventData>;
+	readonly onValidationError: EventEmitter<ArgsValidationError, IEventData>;
+	readonly onViewportChanged: EventEmitter<ArgsGrid, IEventData>;
 	constructor(container: JQuery | HTMLElement, data: any, columns: Column<TItem>[], options: GridOptions<TItem>);
 	private bindAncestorScroll;
 	init(): void;
@@ -1177,13 +1177,13 @@ export interface GroupItemMetadataProviderOptions {
 	totalsFormatter?: CompatFormatter<GroupTotals>;
 }
 export declare class GroupItemMetadataProvider {
-	private grid;
+	protected grid: Pick<Grid, "getActiveCell" | "getColumns" | "getData" | "getDataItem" | "getRenderedRange" | "onClick" | "onKeyDown" | "groupTotalsFormatter">;
 	private options;
 	constructor(opt?: GroupItemMetadataProviderOptions);
 	static readonly defaults: GroupItemMetadataProviderOptions;
 	static defaultGroupFormat(ctx: FormatterContext, opt?: GroupItemMetadataProviderOptions): string;
-	static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): string;
-	init(grid: Grid): void;
+	static defaultTotalsFormat(ctx: FormatterContext, grid?: typeof this.prototype["grid"]): string;
+	init(grid: typeof this.grid): void;
 	destroy(): void;
 	getOptions(): GroupItemMetadataProviderOptions;
 	setOptions(value: GroupItemMetadataProviderOptions): void;
