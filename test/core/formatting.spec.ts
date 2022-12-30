@@ -1,4 +1,9 @@
-import { defaultColumnFormat, applyFormatterResultToCellNode } from "@/core/formatting";
+import {
+    defaultColumnFormat,
+    applyFormatterResultToCellNode,
+    convertCompatFormatter,
+    CompatFormatter, FormatterContext
+} from "@/core/formatting";
 import { escape } from "@/core/util";
 
 describe('defaultFormatter', () => {
@@ -207,5 +212,53 @@ describe('applyFormatterResultToCellNode', () => {
         }, undefined, cellNode);
 
         expect(cellNode.dataset.fmtcls).toBe('a b c');
+    });
+});
+
+describe('convertCompatFormatter', () => {
+    it('should return null if compat formatter is null', () => {
+        expect(convertCompatFormatter(null)).toBe(null);
+    });
+
+    it('should convert a compat formatter that returns an CompatFormatterResult to ColumnFormatter', () => {
+        const compatFormatterRetObj: CompatFormatter = (_value, _row, _column, _dataContext, _grid) => ({
+            text: 'test',
+            addClasses: 'd e f',
+            toolTip: 'test'
+        });
+
+        const formatter = convertCompatFormatter(compatFormatterRetObj);
+
+        expect(formatter).not.toBe(compatFormatterRetObj);
+        expect(formatter).toBeInstanceOf(Function);
+
+        const fmtCtx: FormatterContext = {
+            escape: (value) => value,
+        };
+
+        const result = formatter(fmtCtx);
+
+        expect(result).toBe('test');
+        expect(fmtCtx.addClass).toBe('d e f');
+        expect(fmtCtx.tooltip).toBe('test');
+    });
+
+    it('should convert compat formatter that returns string to ColumnFormatter', () => {
+        const compatFormatterRetStr: CompatFormatter = (_value, _row, _column, _dataContext, _grid) => 'test';
+
+        const formatter = convertCompatFormatter(compatFormatterRetStr);
+
+        expect(formatter).not.toBe(compatFormatterRetStr);
+        expect(formatter).toBeInstanceOf(Function);
+
+        const fmtCtx: FormatterContext = {
+            escape: (value) => value,
+        };
+
+        const result = formatter(fmtCtx);
+
+        expect(result).toBe('test');
+        expect(fmtCtx.addClass).toBe(undefined);
+        expect(fmtCtx.tooltip).toBe(undefined);
     });
 });
