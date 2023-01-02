@@ -124,7 +124,7 @@ export class Grid<TItem = any> implements EditorHost {
         this._colDefaults = Object.assign({}, columnDefaults);
 
         this._options = options = Object.assign({}, gridDefaults, options);
-        options.jQuery = this._jQuery = options.jQuery === void 0 ? (typeof jQuery !== "undefined" ? jQuery : void 0) : void 0;
+        options.jQuery = this._jQuery = options.jQuery === void 0 ? (typeof jQuery !== "undefined" ? jQuery : void 0) : options.jQuery;
 
         if (this._jQuery && container instanceof this._jQuery)
             this._container = container[0];
