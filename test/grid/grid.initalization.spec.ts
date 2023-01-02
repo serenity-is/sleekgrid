@@ -1,6 +1,6 @@
 ﻿import { Column, columnDefaults } from "@/core/column";
 import { Grid } from "@/grid/grid";
-import { gridDefaults, GridOptions } from "@/grid";
+import { BasicLayout, gridDefaults, GridOptions, LayoutHost } from "@/grid";
 
 function threeCols(): Column[] {
     return [{
@@ -86,19 +86,41 @@ describe('Grid columns', () => {
 });
 
 describe('options', () => {
-    // it('should be able to set jQuery from options', () => {
-    //     const mockJQuery = {
-    //         foo: true
-    //     };
-    //
-    //     const gridOptions: GridOptions = {
-    //         jQuery: mockJQuery as any,
-    //     };
-    //
-    //     new Grid(document.createElement("div"), [], [], gridOptions);
-    //
-    //     expect(gridOptions.jQuery).toStrictEqual(mockJQuery);
-    // });
+    it('should be able to set jQuery from options', () => {
+        function MockJQueryStatic(el: HTMLElement) {
+            this.el = el;
+
+            this.empty = () => this;
+            this.on = () => this;
+
+            return this;
+        }
+
+        Object.defineProperty(MockJQueryStatic.prototype, 0, {
+            get: function () {
+                return this.el;
+            },
+            enumerable: false,
+            configurable: true
+        });
+
+        MockJQueryStatic.fn = {
+            mousewheel: function () {
+                return this;
+            }
+        };
+
+        const gridOptions: GridOptions = {
+            jQuery: MockJQueryStatic as any
+        };
+
+        const container = new (MockJQueryStatic as any)(document.createElement("div"));
+        const grid = new Grid(container as any, [], [], gridOptions);
+
+        expect(container).toBeInstanceOf(MockJQueryStatic);
+        expect(grid.getContainerNode()).toBe(container[0]);
+        expect(gridOptions.jQuery).toStrictEqual(MockJQueryStatic);
+    });
 
     it('should throw an error if container is null', () => {
         expect(() => new Grid(null, [], [], {})).toThrow();
@@ -110,18 +132,6 @@ describe('options', () => {
 
         expect(container.classList.contains("slick-container")).toBe(true);
     });
-
-    // it('should setup for compat d&d plugin if createPreHeaderPanel is true', () => {
-    //     const gridOptions: GridOptions = {
-    //         createPreHeaderPanel: true,
-    //         groupingPanel: true
-    //     };
-    //
-    //     const grid = new Grid(document.createElement("div"), [], [], gridOptions);
-    //
-    //     expect(gridOptions.createPreHeaderPanel).toBe(true);
-    //     expect(gridOptions.groupingPanel).toBe(true);
-    // });
 
     it('should set default options', () => {
         const gridOptions: GridOptions = {}
@@ -239,11 +249,11 @@ describe('layout', () => {
         expect(container.style.position).toBe("relative");
     });
 
-    it('should append slick-focus-sink to the container', () => {
+    it('should append two elements with slick-focus-sink classes to the container', () => {
         const container = document.createElement("div");
         new Grid(container, [], [], {});
 
-        expect(container.querySelector(".slick-focus-sink")).not.toBeNull();
+        expect(container.querySelectorAll(".slick-focus-sink")).toHaveLength(2);
     });
 
     it('should append slick-grouping-panel to the container if groupingPanel is true', () => {
@@ -259,6 +269,147 @@ describe('layout', () => {
 
         expect(container.querySelector(".slick-grouping-panel")).not.toBeNull();
         expect(container.querySelector(".slick-preheader-panel")).not.toBeNull();
+    });
 
+    it('should not append slick-preheader-panel if groupingPanel is false', () => {
+        const container = document.createElement("div");
+        new Grid(container, [], [], { groupingPanel: false, createPreHeaderPanel: true });
+
+        expect(container.querySelector(".slick-grouping-panel")).toBeNull();
+        expect(container.querySelector(".slick-preheader-panel")).toBeNull();
+    });
+
+    it('should hide slick-grouping-panel if showGroupingPanel is false', () => {
+        const container = document.createElement("div");
+        new Grid(container, [], [], { groupingPanel: true, showGroupingPanel: false });
+
+        expect(container.querySelector<HTMLElement>(".slick-grouping-panel")?.style.display).toBe("none");
+    });
+
+    it('should bind grid instance to the layout functions', () => {
+        let layoutHostGrid: LayoutHost = null;
+
+        const layoutEngine = new BasicLayout();
+        const oldInit = layoutEngine.init;
+
+        layoutEngine.init = function(grid: LayoutHost) {
+            layoutHostGrid = grid;
+
+            oldInit(grid);
+        };
+
+        const container = document.createElement("div");
+        const grid = new Grid(container, [{c1: 1}], [{field: "c1"}], { layoutEngine: layoutEngine });
+
+        expect(layoutHostGrid.getCellFromPoint(0, 0)).toEqual(grid.getCellFromPoint(0, 0));
+        expect(layoutHostGrid.getColumns()).toEqual(grid.getColumns());
+        expect(layoutHostGrid.getContainerNode()).toEqual(grid.getContainerNode());
+        expect(layoutHostGrid.getDataLength()).toEqual(grid.getDataLength());
+        expect(layoutHostGrid.getDataLength()).toEqual(grid.getDataLength());
+        expect(layoutHostGrid.getOptions()).toEqual(grid.getOptions());
+    });
+
+    it('should add viewport classes to every viewport node', () => {
+        const layoutEngine = new BasicLayout();
+        const viewportNodes = [document.createElement("div"), document.createElement("div")];
+
+        layoutEngine.getViewportNodes = () => {
+            return viewportNodes;
+        };
+
+        const container = document.createElement("div");
+        new Grid(container, [], [], {
+            layoutEngine: layoutEngine,
+            viewportClass: "test-viewport-class"
+        });
+
+        expect(viewportNodes[0].classList.contains("test-viewport-class")).toBe(true);
+        expect(viewportNodes[1].classList.contains("test-viewport-class")).toBe(true);
+    });
+});
+
+describe('data event bindings', () => {
+    it('should bind onRowCountChanged event of the data', () => {
+        let onRowCountChangedSubscribeCalls = 0;
+        const data = {
+            onRowCountChanged: {
+                subscribe: () => {onRowCountChangedSubscribeCalls++;}
+            }
+        };
+
+        new Grid(document.createElement("div"), data, [], {});
+
+        expect(onRowCountChangedSubscribeCalls).toBe(1);
+    });
+
+    it('should bind onRowsChanged event of the data', () => {
+        let onRowsChangedSubscribeCalls = 0;
+        const data = {
+            onRowsChanged: {
+                subscribe: () => {onRowsChangedSubscribeCalls++;}
+            }
+        };
+
+        new Grid(document.createElement("div"), data, [], {});
+
+        expect(onRowsChangedSubscribeCalls).toBe(1);
+    });
+
+    it('should bind onDataChanged event of the data', () => {
+        let onDataChangedSubscribeCalls = 0;
+        const data = {
+            onDataChanged: {
+                subscribe: () => {onDataChangedSubscribeCalls++;}
+            }
+        };
+
+        new Grid(document.createElement("div"), data, [], {});
+
+        expect(onDataChangedSubscribeCalls).toBe(1);
+    });
+
+    it('should unbind onRowCountChanged event of the data', () => {
+        let onRowCountChangedUnsubscribeCalls = 0;
+        const data = {
+            onRowCountChanged: {
+                subscribe: () => {},
+                unsubscribe: () => {onRowCountChangedUnsubscribeCalls++;}
+            }
+        };
+
+        const grid = new Grid(document.createElement("div"), data, [], {});
+        grid.destroy();
+
+        expect(onRowCountChangedUnsubscribeCalls).toBe(1);
+    });
+
+    it('should unbind onRowsChanged event of the data', () => {
+        let onRowsChangedUnsubscribeCalls = 0;
+        const data = {
+            onRowsChanged: {
+                subscribe: () => {},
+                unsubscribe: () => {onRowsChangedUnsubscribeCalls++;}
+            }
+        };
+
+        const grid = new Grid(document.createElement("div"), data, [], {});
+        grid.destroy();
+
+        expect(onRowsChangedUnsubscribeCalls).toBe(1);
+    });
+
+    it('should unbind onDataChanged event of the data', () => {
+        let onDataChangedUnsubscribeCalls = 0;
+        const data = {
+            onDataChanged: {
+                subscribe: () => {},
+                unsubscribe: () => {onDataChangedUnsubscribeCalls++;}
+            }
+        };
+
+        const grid = new Grid(document.createElement("div"), data, [], {});
+        grid.destroy();
+
+        expect(onDataChangedUnsubscribeCalls).toBe(1);
     });
 });
