@@ -340,7 +340,7 @@ export function getVBoxDelta(el: HTMLElement): number {
     var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
     var delta = 0;
     for (var val of p)
-        delta += delta += parsePx(style.getPropertyValue(val)) || 0;
+        delta += parsePx(style.getPropertyValue(val)) || 0;
     return delta;
 }
 
