@@ -346,11 +346,11 @@ export function getVBoxDelta(el: HTMLElement): number {
 
 export function getInnerWidth(el: HTMLElement): number {
     var style = getComputedStyle(el);
-    var width = parseFloat(style.width);
+    var width = parsePx(style.width) ?? 0;
     if (style.boxSizing != 'border-box')
-        return width;
+        return Math.max(0, width);
 
-    var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
+    var p = ["border-left-width", "border-right-width", "padding-left", "padding-right"];
     for (var val of p)
         width -= parsePx(style.getPropertyValue(val)) || 0;
 
