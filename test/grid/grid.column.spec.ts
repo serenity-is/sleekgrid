@@ -1,4 +1,4 @@
-import { Grid } from "@/grid";
+import { BasicLayout, Grid } from "@/grid";
 import { Column } from "@/core";
 
 const getTestColumns = (): Column[] => ([{
@@ -94,5 +94,153 @@ describe('updateColumnHeader', () => {
         expect(columns[0].name).not.toBe('foo');
         expect(columns[0].toolTip).not.toBe('foo');
         expect(grid.getHeaderColumn(columns[0].id)?.title).not.toBe('foo');
+    });
+});
+
+describe('getColumnIndex', () => {
+    it('should return the column index', () => {
+        const columns = getTestColumns();
+        const grid = new Grid(document.createElement('div'), [], columns, {});
+
+        expect(grid.getColumnIndex(columns[0].id)).toBe(0);
+        expect(grid.getColumnIndex(columns[1].id)).toBe(1);
+    });
+
+    it('should return the column index after the index change', () => {
+        const columns = getTestColumns();
+        const grid = new Grid(document.createElement('div'), [], columns, {});
+
+        grid.setColumns([columns[1], columns[0]]);
+
+        expect(grid.getColumnIndex(columns[0].id)).toBe(1);
+        expect(grid.getColumnIndex(columns[1].id)).toBe(0);
+    });
+
+    it('should not be aware of the indexes of the not visible columns', () => {
+        const columns = getTestColumns();
+        columns[0].visible = false;
+        const grid = new Grid(document.createElement('div'), [], columns, {});
+
+        expect(grid.getColumnIndex(columns[0].id)).toBeFalsy();
+        expect(grid.getColumnIndex(columns[1].id)).toBe(0);
+    });
+});
+
+describe('getInitialColumnIndex', () => {
+    it('should return the initial column index', () => {
+        const layoutEngine = new BasicLayout();
+        layoutEngine.reorderViewColumns = (viewCols, _opt) => {
+            return [...viewCols].reverse();
+        }
+
+        const columns = getTestColumns();
+        const grid = new Grid(document.createElement('div'), [], columns, { layoutEngine });
+
+        expect(grid.getInitialColumnIndex(columns[0].id)).toBe(0);
+        expect(grid.getInitialColumnIndex(columns[1].id)).toBe(1);
+
+        expect(grid.getColumnIndex(columns[0].id)).toBe(1);
+        expect(grid.getColumnIndex(columns[1].id)).toBe(0);
+    });
+
+    it('should be aware of the indexes of the not visible columns', () => {
+        const layoutEngine = new BasicLayout();
+        layoutEngine.reorderViewColumns = (viewCols, _opt) => {
+            return [...viewCols].reverse();
+        }
+
+        const columns = getTestColumns();
+        columns[0].visible = false;
+        const grid = new Grid(document.createElement('div'), [], columns, { layoutEngine });
+
+        expect(grid.getInitialColumnIndex(columns[0].id)).toBe(0);
+        expect(grid.getInitialColumnIndex(columns[1].id)).toBe(1);
+
+        expect(grid.getColumnIndex(columns[0].id)).toBeFalsy();
+        expect(grid.getColumnIndex(columns[1].id)).toBe(0);
+    });
+});
+
+describe('getInitialColumns', () => {
+    it('should return initial columns', () => {
+        const columns = getTestColumns();
+        const grid = new Grid(document.createElement('div'), [], columns, {});
+
+        expect(grid.getInitialColumns()).toBe(columns);
+    });
+
+    it('should return initial columns after the index change', () => {
+        const layoutEngine = new BasicLayout();
+        layoutEngine.reorderViewColumns = (viewCols, _opt) => {
+            return [...viewCols].reverse();
+        }
+
+        const columns = getTestColumns();
+        const grid = new Grid(document.createElement('div'), [], columns, { layoutEngine });
+
+        expect(grid.getInitialColumns()).toBe(columns);
+    });
+
+    it('should return initial columns even though column was not visible', () => {
+        const columns = getTestColumns();
+        columns[0].visible = false;
+        const grid = new Grid(document.createElement('div'), [], columns, {});
+
+        expect(grid.getInitialColumns()).toBe(columns);
+    })
+});
+
+describe('getColumns', () => {
+    it('should return the columns', () => {
+        const columns = getTestColumns();
+        const grid = new Grid(document.createElement('div'), [], columns, {});
+
+        expect(grid.getColumns()).toStrictEqual(columns);
+    });
+
+    it('should return the columns after the index change', () => {
+        const layoutEngine = new BasicLayout();
+        layoutEngine.reorderViewColumns = (viewCols, _opt) => {
+            return [...viewCols].reverse();
+        }
+
+        const columns = getTestColumns();
+        const grid = new Grid(document.createElement('div'), [], columns, { layoutEngine });
+
+
+        expect(grid.getColumns()).toStrictEqual([...columns].reverse());
+    });
+
+    it('should not return not visible columns', () => {
+        const columns = getTestColumns();
+        columns[0].visible = false;
+        const grid = new Grid(document.createElement('div'), [], columns, {});
+
+        expect(grid.getColumns()).toEqual([columns[1]]);
+    });
+});
+
+describe('setColumns', () => {
+    it('should set initial columns', () => {
+        const columns = getTestColumns();
+        const grid = new Grid(document.createElement('div'), [], columns, {});
+
+        const newColumns = getTestColumns();
+        newColumns[0].name = 'foo';
+        grid.setColumns(newColumns);
+
+        expect(grid.getInitialColumns()).toBe(newColumns);
+    });
+
+    it('should set columns', () => {
+        const columns = getTestColumns();
+        const grid = new Grid(document.createElement('div'), [], columns, {});
+
+        const newColumns = getTestColumns();
+        newColumns[0].name = 'foo';
+        newColumns[1].visible = false;
+        grid.setColumns(newColumns);
+
+        expect(grid.getColumns()).toStrictEqual([newColumns[0]]);
     });
 });
