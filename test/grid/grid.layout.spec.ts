@@ -480,5 +480,3 @@ describe('headers', () => {
         });
     });
 });
-
-describe('grouping & drag', () => {});
