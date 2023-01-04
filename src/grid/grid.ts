@@ -467,7 +467,7 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     getViewportNode(columnIdOrIdx?: string | number, row?: number): HTMLElement {
-        return this._layout.getViewportNodeFor(row || 0, this.colIdOrIdxToCell(columnIdOrIdx || 0));
+        return this._layout.getViewportNodeFor(this.colIdOrIdxToCell(columnIdOrIdx || 0), row || 0);
     }
 
     private getViewports(): HTMLElement[] {
