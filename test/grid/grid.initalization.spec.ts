@@ -183,6 +183,20 @@ describe('options', () => {
 
         expect(grid.getOptions().leaveSpaceForNewRows).toBe(false);
     });
+
+    it('should not initialize grid if explicitInitialization is true', () => {
+        const gridOptions: GridOptions = {
+            explicitInitialization: true
+        };
+
+        const oldInit = Grid.prototype.init;
+        Grid.prototype.init = () => {
+            throw new Error("Grid was initialized");
+        };
+
+         new Grid(document.createElement("div"), [{"c1": 1}], [{field: "c1"}], gridOptions);
+         Grid.prototype.init = oldInit;
+    });
 });
 
 describe('layout', () => {
