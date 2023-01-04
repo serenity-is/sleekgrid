@@ -149,6 +149,26 @@ describe('canvas', () => {
 
         expect(grid.getActiveCanvasNode()).toBeFalsy();
     });
+
+    it('should get removed from the document tree on destroy', () => {
+        const layoutEngine = new BasicLayout();
+        const canvasNodes = [document.createElement('div'), document.createElement('div')];
+        layoutEngine.getCanvasNodes = () => canvasNodes;
+
+        const documentFragment = document.createDocumentFragment();
+        canvasNodes.forEach(canvasNode => documentFragment.appendChild(canvasNode));
+        expect(documentFragment.childNodes.length).toBe(2);
+
+        const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+
+        expect(canvasNodes[0].parentNode).toBe(documentFragment);
+        expect(canvasNodes[1].parentNode).toBe(documentFragment);
+
+        grid.destroy();
+
+        expect(canvasNodes[0].parentNode).toBeFalsy();
+        expect(canvasNodes[1].parentNode).toBeFalsy();
+    });
 });
 
 describe('viewport', () => {
