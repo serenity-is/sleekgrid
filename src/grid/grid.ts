@@ -474,8 +474,7 @@ export class Grid<TItem = any> implements EditorHost {
         return this._layout.getViewportNodes();
     }
 
-    getActiveViewportNode(e?: IEventData): HTMLElement {
-        this.setActiveViewportNode(e);
+    getActiveViewportNode(): HTMLElement {
         return this._activeViewportNode;
     }
 
