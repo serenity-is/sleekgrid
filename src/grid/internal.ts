@@ -20,7 +20,7 @@ export function absBox(elem: HTMLElement): Position {
 
     // walk up the tree
     var offsetParent = elem.offsetParent;
-    while ((elem = elem.parentNode as HTMLElement) != document.body) {
+    while ((elem = elem.parentNode as HTMLElement) != document.body && elem != null) {
         if (box.visible && elem.scrollHeight != elem.offsetHeight && getComputedStyle(elem).overflowY !== "visible") {
             box.visible = box.bottom > elem.scrollTop && box.top < elem.scrollTop + elem.clientHeight;
         }
@@ -140,8 +140,8 @@ export function getScrollBarDimensions(recalc?: boolean): { width: number; heigh
 export function simpleArrayEquals(arr1: number[], arr2: number[]) {
     if (!Array.isArray(arr1) || !Array.isArray(arr2) || arr1.length !== arr2.length)
         return false;
-    arr1.sort();
-    arr2.sort();
+    arr1 = arr1.slice().sort();
+    arr2 = arr2.slice().sort();
     for (var i = 0; i < arr1.length; i++) {
         if (arr1[i] !== arr2[i])
             return false;
@@ -340,17 +340,17 @@ export function getVBoxDelta(el: HTMLElement): number {
     var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
     var delta = 0;
     for (var val of p)
-        delta += delta += parsePx(style.getPropertyValue(val)) || 0;
+        delta += parsePx(style.getPropertyValue(val)) || 0;
     return delta;
 }
 
 export function getInnerWidth(el: HTMLElement): number {
     var style = getComputedStyle(el);
-    var width = parseFloat(style.width);
+    var width = parsePx(style.width) ?? 0;
     if (style.boxSizing != 'border-box')
-        return width;
+        return Math.max(0, width);
 
-    var p = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
+    var p = ["border-left-width", "border-right-width", "padding-left", "padding-right"];
     for (var val of p)
         width -= parsePx(style.getPropertyValue(val)) || 0;
 

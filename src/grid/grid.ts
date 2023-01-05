@@ -272,7 +272,7 @@ export class Grid<TItem = any> implements EditorHost {
         this.resizeCanvas();
         this._layout.bindAncestorScrollEvents();
 
-        const onEvent = <K extends keyof HTMLElementEventMap>(el: HTMLElement, type: K, 
+        const onEvent = <K extends keyof HTMLElementEventMap>(el: HTMLElement, type: K,
             listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any) => {
             if (this._jQuery)
                 this._jQuery(el).on(type, listener as any);
@@ -400,18 +400,21 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     setSelectionModel(model: SelectionModel): void {
-        if (this._selectionModel) {
-            this._selectionModel.onSelectedRangesChanged.unsubscribe(this.handleSelectedRangesChanged);
-            if (this._selectionModel.destroy) {
-                this._selectionModel.destroy();
-            }
-        }
+        this.unregisterSelectionModel();
 
         this._selectionModel = model;
         if (this._selectionModel) {
             this._selectionModel.init(this);
             this._selectionModel.onSelectedRangesChanged.subscribe(this.handleSelectedRangesChanged);
         }
+    }
+
+    private unregisterSelectionModel(): void {
+        if (!this._selectionModel)
+            return;
+
+        this._selectionModel.onSelectedRangesChanged.unsubscribe(this.handleSelectedRangesChanged);
+        this._selectionModel.destroy?.();
     }
 
     getScrollBarDimensions(): { width: number; height: number; } {
@@ -445,7 +448,7 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     getCanvasNode(columnIdOrIdx?: string | number, row?: number): HTMLElement {
-        return this._layout.getCanvasNodeFor(row || 0, this.colIdOrIdxToCell(columnIdOrIdx || 0));
+        return this._layout.getCanvasNodeFor(this.colIdOrIdxToCell(columnIdOrIdx || 0), row || 0);
     }
 
     getCanvases(): JQuery | HTMLElement[] {
@@ -453,8 +456,7 @@ export class Grid<TItem = any> implements EditorHost {
         return this._jQuery ? this._jQuery(canvases) : canvases;
     }
 
-    getActiveCanvasNode(e?: IEventData): HTMLElement {
-        this.setActiveCanvasNode(e);
+    getActiveCanvasNode(): HTMLElement {
         return this._activeCanvasNode;
     }
 
@@ -465,15 +467,14 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     getViewportNode(columnIdOrIdx?: string | number, row?: number): HTMLElement {
-        return this._layout.getViewportNodeFor(row || 0, this.colIdOrIdxToCell(columnIdOrIdx || 0));
+        return this._layout.getViewportNodeFor(this.colIdOrIdxToCell(columnIdOrIdx || 0), row || 0);
     }
 
     private getViewports(): HTMLElement[] {
         return this._layout.getViewportNodes();
     }
 
-    getActiveViewportNode(e?: IEventData): HTMLElement {
-        this.setActiveViewportNode(e);
+    getActiveViewportNode(): HTMLElement {
         return this._activeViewportNode;
     }
 
@@ -676,7 +677,7 @@ export class Grid<TItem = any> implements EditorHost {
             } else {
                 hrc.innerHTML = "";
             }
-        }); 
+        });
 
         var cols = this._cols, frozenCols = this._layout.getFrozenCols();
         for (var i = 0; i < cols.length; i++) {
@@ -1144,7 +1145,9 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         this.unbindAncestorScrollEvents();
-        this._jQuery(this._container).off(".slickgrid");
+        this.unbindFromData();
+        this.unregisterSelectionModel();
+        this._jQuery?.(this._container).off(".slickgrid");
         this.removeCssRules();
 
         var canvasNodes = this._layout.getCanvasNodes();
