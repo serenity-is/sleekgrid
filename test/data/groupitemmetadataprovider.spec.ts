@@ -19,6 +19,16 @@ describe("GroupItemMetadataProvider.defaults", () => {
         expect(GroupItemMetadataProvider.defaults.toggleCollapsedCssClass).toBe("collapsed");
         expect(GroupItemMetadataProvider.defaults.toggleExpandedCssClass).toBe("expanded");
     });
+
+    it("hasSummaryType returns true if the column has summaryType and not 0 or -1", () => {
+        expect(GroupItemMetadataProvider.defaults.hasSummaryType).toBeTruthy();
+        expect(GroupItemMetadataProvider.defaults.hasSummaryType({})).toBeFalsy();
+        expect(GroupItemMetadataProvider.defaults.hasSummaryType({ summaryType: null } as any)).toBeFalsy();
+        expect(GroupItemMetadataProvider.defaults.hasSummaryType({ summaryType: -1 } as any)).toBeFalsy(); // -1 is assumed to be disabled
+        expect(GroupItemMetadataProvider.defaults.hasSummaryType({ summaryType: 0 } as any)).toBeFalsy(); // 0 is assumed to be none
+        expect(GroupItemMetadataProvider.defaults.hasSummaryType({ summaryType: 1 } as any)).toBeTruthy();
+        expect(GroupItemMetadataProvider.defaults.hasSummaryType({ summaryType: 3 } as any)).toBeTruthy();
+    });
 });
 
 describe("GroupItemMetadataProvider constructor", () => {
