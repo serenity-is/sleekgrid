@@ -159,7 +159,7 @@ export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
         return [footerRowColsL, footerRowColsR];
     }
 
-    const getCanvasNodeFor = (row: number, cell: number) => {
+    const getCanvasNodeFor = (cell: number, row: number) => {
         if (row == null && cell == null)
             return canvasTopL;
 
@@ -187,7 +187,7 @@ export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
         return scrollContainerY;
     }
 
-    function getViewportNodeFor(row: number, cell: number) {
+    function getViewportNodeFor(cell: number, row: number) {
         if (row == null && cell == null)
             return canvasTopL;
 
