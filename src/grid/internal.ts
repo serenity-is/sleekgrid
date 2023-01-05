@@ -140,8 +140,8 @@ export function getScrollBarDimensions(recalc?: boolean): { width: number; heigh
 export function simpleArrayEquals(arr1: number[], arr2: number[]) {
     if (!Array.isArray(arr1) || !Array.isArray(arr2) || arr1.length !== arr2.length)
         return false;
-    arr1.sort();
-    arr2.sort();
+    arr1 = arr1.slice().sort();
+    arr2 = arr2.slice().sort();
     for (var i = 0; i < arr1.length; i++) {
         if (arr1[i] !== arr2[i])
             return false;
