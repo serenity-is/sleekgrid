@@ -20,7 +20,7 @@ export function absBox(elem: HTMLElement): Position {
 
     // walk up the tree
     var offsetParent = elem.offsetParent;
-    while ((elem = elem.parentNode as HTMLElement) != document.body) {
+    while ((elem = elem.parentNode as HTMLElement) != document.body && elem != null) {
         if (box.visible && elem.scrollHeight != elem.offsetHeight && getComputedStyle(elem).overflowY !== "visible") {
             box.visible = box.bottom > elem.scrollTop && box.top < elem.scrollTop + elem.clientHeight;
         }
