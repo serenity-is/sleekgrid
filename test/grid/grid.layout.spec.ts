@@ -119,7 +119,7 @@ describe('canvas', () => {
 
         const cellNode = grid.getCellNode(0, 0)
 
-        grid.setActiveCanvasNode({
+        grid.getActiveCanvasNode({
             target: cellNode
         });
 
@@ -135,7 +135,7 @@ describe('canvas', () => {
 
         const grid = new Grid(container, [], [], {});
 
-        grid.setActiveCanvasNode({
+        grid.getActiveCanvasNode({
             target: container
         });
 
@@ -145,7 +145,7 @@ describe('canvas', () => {
     it('should not set active canvas if event is null', () => {
         const grid = new Grid(document.createElement('div'), [], [], {});
 
-        grid.setActiveCanvasNode(null);
+        grid.getActiveCanvasNode(null);
 
         expect(grid.getActiveCanvasNode()).toBeFalsy();
     });
@@ -256,7 +256,7 @@ describe('viewport', () => {
 
         const cellNode = grid.getCellNode(0, 0)
 
-        grid.setActiveViewportNode({
+        grid.getActiveViewportNode({
             target: cellNode
         });
 
@@ -272,7 +272,7 @@ describe('viewport', () => {
 
         const grid = new Grid(container, [], [], {});
 
-        grid.setActiveViewportNode({
+        grid.getActiveViewportNode({
             target: container
         });
 
@@ -282,7 +282,7 @@ describe('viewport', () => {
     it('should not set active viewport if event is null', () => {
         const grid = new Grid(document.createElement('div'), [], [], {});
 
-        grid.setActiveViewportNode(null);
+        grid.getActiveCanvasNode(null);
 
         expect(grid.getActiveViewportNode()).toBeFalsy();
     });

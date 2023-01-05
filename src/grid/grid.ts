@@ -456,14 +456,11 @@ export class Grid<TItem = any> implements EditorHost {
         return this._jQuery ? this._jQuery(canvases) : canvases;
     }
 
-    getActiveCanvasNode(): HTMLElement {
-        return this._activeCanvasNode;
-    }
-
-    setActiveCanvasNode(e?: IEventData): void {
-        if (e) {
+    getActiveCanvasNode(e?: IEventData): HTMLElement {
+        if (e) { // compatibility with celldecorator plugin
             this._activeCanvasNode = (e.target as HTMLElement).closest('.grid-canvas');
         }
+        return this._activeCanvasNode;
     }
 
     getViewportNode(columnIdOrIdx?: string | number, row?: number): HTMLElement {
@@ -474,14 +471,12 @@ export class Grid<TItem = any> implements EditorHost {
         return this._layout.getViewportNodes();
     }
 
-    getActiveViewportNode(): HTMLElement {
-        return this._activeViewportNode;
-    }
-
-    setActiveViewportNode(e?: IEventData) {
-        if (e) {
+    getActiveViewportNode(e?: IEventData): HTMLElement {
+        if (e) { // compatibility with celldecorator plugin
             this._activeViewportNode = (e.target as HTMLElement).closest('.slick-viewport');
         }
+
+        return this._activeViewportNode;
     }
 
     private getAvailableWidth() {
