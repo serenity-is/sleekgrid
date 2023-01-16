@@ -175,7 +175,7 @@ export class GroupItemMetadataProvider {
         }
 
         result.colspan = 0;
-        for (var idx = result.cell + 1; idx <= cols.length; idx++) {
+        for (var idx = result.cell + 1; idx < cols.length; idx++) {
             var col2 = cols[idx];
             if (!this.options.hasSummaryType?.(col2) &&
                 (!!(col1?.frozen) === !!(col2?.frozen))) {
