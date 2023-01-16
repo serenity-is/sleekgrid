@@ -64,7 +64,7 @@ export class GroupItemMetadataProvider {
     public static defaultTotalsFormat(ctx: FormatterContext, grid?: typeof this.prototype["grid"]) {
         var item = ctx.item as GroupTotals;
         if (!item.__groupTotals && (item as any).totals)
-            ctx.item = ctx.item.totals;
+            item = (item as any).totals;
         return (ctx.column?.groupTotalsFormatter?.(item, ctx.column)) ??
             (grid?.groupTotalsFormatter?.(item, ctx.column)) ?? "";
     }
