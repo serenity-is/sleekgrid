@@ -645,6 +645,7 @@ export interface GridOptions<TItem = any> {
 	syncColumnCellResize?: boolean;
 	topPanelHeight?: number;
 	useLegacyUI?: boolean;
+	useCssVars?: boolean;
 	viewportClass?: string;
 }
 export declare const gridDefaults: GridOptions;
