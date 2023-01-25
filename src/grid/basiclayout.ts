@@ -29,7 +29,7 @@ export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
         headerRowSpacer = spacerDiv(spacerW);
         var headerRow = H('div', { class: 'slick-headerrow' + uisd, style: !options.showHeaderRow && 'display: none' }, headerRowCols, headerRowSpacer);
 
-        topPanel = H('div', { class: 'slick-top-panel', style: 'width: 10000px' })
+        topPanel = H('div', { class: 'slick-top-panel', style: 'width: 10000px' });
         var topPanelS = H('div', { class: 'slick-top-panel-scroller' + uisd, style: !options.showTopPanel && 'display: none' }, topPanel);
 
         canvas = H('div', { class: "grid-canvas", tabIndex: "0", hideFocus: '' })
@@ -47,14 +47,33 @@ export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
     }
 
     function applyColumnWidths() {
-        var x = 0, w, rule, cols = host.getColumns();
-        for (var i = 0; i < cols.length; i++) {
-            w = cols[i].width;
-            rule = host.getColumnCssRules(i);
-            const rtl = host.getOptions().rtl;
-            rule[rtl ? 'right' : 'left'].style[rtl ? 'right' : 'left'] = x + "px";
-            rule[rtl ? 'left' : 'right'].style[rtl ? 'left' : 'right'] = (canvasWidth - x - w) + "px";
-            x += w;
+        var x = 0, w, rule, cols = host.getColumns(), opts = host.getOptions(), rtl = opts.rtl;
+
+        if (opts.useCssVars) {
+            var styles = host.getContainerNode().style;
+            for (var i = 0; i < cols.length; i++) {
+                w = cols[i].width;
+                var prop = "--l" + i;
+                var oldVal = styles.getPropertyValue(prop);
+                var newVal = x + "px";
+                if (oldVal !== newVal) 
+                    styles.setProperty(prop, newVal);
+                prop = "--r" + i;
+                oldVal = styles.getPropertyValue(prop);
+                newVal = (canvasWidth - x - w) + "px"
+                if (oldVal !== newVal) 
+                    styles.setProperty(prop, newVal);
+                x += w;
+            }
+        }
+        else {
+            for (var i = 0; i < cols.length; i++) {
+                w = cols[i].width;
+                rule = host.getColumnCssRules(i);
+                rule[rtl ? 'right' : 'left'].style[rtl ? 'right' : 'left'] = x + "px";
+                rule[rtl ? 'left' : 'right'].style[rtl ? 'left' : 'right'] = (canvasWidth - x - w) + "px";
+                x += w;
+            }
         }
     }
 

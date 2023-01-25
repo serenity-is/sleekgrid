@@ -71,6 +71,7 @@ export interface GridOptions<TItem = any> {
     syncColumnCellResize?: boolean;
     topPanelHeight?: number;
     useLegacyUI?: boolean;
+    useCssVars?: boolean;
     viewportClass?: string;
 }
 
@@ -109,7 +110,6 @@ export const gridDefaults: GridOptions = {
     groupingPanelHeight: 30,
     headerRowHeight: 30,
     leaveSpaceForNewRows: false,
-    useLegacyUI: true,
     minBuffer: 3,
     multiColumnSort: false,
     multiSelect: true,
@@ -123,5 +123,7 @@ export const gridDefaults: GridOptions = {
     showHeaderRow: false,
     showTopPanel: false,
     suppressActiveCellChangeOnEdit: false,
-    topPanelHeight: 30
+    topPanelHeight: 30,
+    useLegacyUI: true,
+    useCssVars: false
 }

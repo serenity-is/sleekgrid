@@ -153,6 +153,11 @@ export class Grid<TItem = any> implements EditorHost {
             (document.body.classList.contains('rtl') || (typeof getComputedStyle != "undefined" &&
                 getComputedStyle(this._container).direction == 'rtl'));
 
+        if (this._options.rtl)
+            this._container.classList.add('rtl');
+        else 
+            this._container.classList.add('ltr');
+
         this.validateAndEnforceOptions();
         this._colDefaults.width = options.defaultColumnWidth;
 
@@ -1050,9 +1055,26 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private createCssRules() {
+        var cellHeight = (this._options.rowHeight - this._cellHeightDiff);
+
+        if (this._options.useCssVars && this.getColumns().length > 50)
+            this._options.useCssVars = false;
+
+        this._container.classList.toggle('sleek-vars', !!this._options.useCssVars);
+
+        if (this._options.useCssVars) {
+            var style = this._container.style;
+            style.setProperty("--sleek-row-height", this._options.rowHeight + "px");
+            style.setProperty("--sleek-cell-height", cellHeight + "px");
+            style.setProperty("--sleek-top-panel-height", this._options.topPanelHeight + "px");
+            style.setProperty("--sleek-grouping-panel-height", this._options.groupingPanelHeight + "px");
+            style.setProperty("--sleek-headerrow-height", this._options.headerRowHeight + "px");
+            style.setProperty("--sleek-footerrow-height", this._options.footerRowHeight + "px");
+            return;
+        }
+
         var el = this._styleNode = document.createElement('style');
         el.dataset.uid = this._uid;
-        var rowHeight = (this._options.rowHeight - this._cellHeightDiff);
         var rules = [
             "." + this._uid + " { --slick-cell-height: " + this._options.rowHeight + "px; }",
             "." + this._uid + " .slick-group-header-column { " + (this._options.rtl ? 'right' : 'left') + ": 1000px; }",
@@ -1060,7 +1082,7 @@ export class Grid<TItem = any> implements EditorHost {
             "." + this._uid + " .slick-top-panel { height:" + this._options.topPanelHeight + "px; }",
             "." + this._uid + " .slick-grouping-panel { height:" + this._options.groupingPanelHeight + "px; }",
             "." + this._uid + " .slick-headerrow-columns { height:" + this._options.headerRowHeight + "px; }",
-            "." + this._uid + " .slick-cell { height:" + rowHeight + "px; }",
+            "." + this._uid + " .slick-cell { height:" + cellHeight + "px; }",
             "." + this._uid + " .slick-row { height:" + this._options.rowHeight + "px; }",
             "." + this._uid + " .slick-footerrow-columns { height:" + this._options.footerRowHeight + "px; }",
         ];
@@ -1076,6 +1098,9 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private getColumnCssRules(idx: number): { right: any; left: any; } {
+        if (this._options.useCssVars)
+            return null;
+
         if (!this._stylesheet) {
             var stylesheetFromUid = document.querySelector("style[data-uid='" + this._uid + "']") as any
             if (stylesheetFromUid && stylesheetFromUid.sheet) {
@@ -1121,7 +1146,8 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private removeCssRules() {
-        this._styleNode.remove();
+        this._styleNode?.remove();
+        this._styleNode = null;
         this._stylesheet = null;
     }
 
