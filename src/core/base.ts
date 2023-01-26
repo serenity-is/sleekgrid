@@ -6,7 +6,3 @@ export class NonDataRow {
 }
 
 export const preClickClassName = "slick-edit-preclick";
-
-//@ts-ignore
-typeof window !== "undefined" && window.Slick && (window.Slick.Map = Map);
-

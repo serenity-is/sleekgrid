@@ -1,4 +1,4 @@
-﻿import { Column, initializeColumns } from "@/core/column";
+﻿import { Column, initializeColumns, titleize } from "@/core/column";
 
 it('should set defaults of the columns', () => {
     const column: Column = {};
@@ -131,7 +131,7 @@ it('should use titleized field or id to generate name when its undefined', () =>
         { id: 'test', name: 'test abc' },
         { id: 'test abc', name: undefined, field: null },
         { id: null, name: undefined, field: 'test abcdef' },
-        { id: null, name: undefined, field: null },
+        { id: null, name: undefined, field: null }
     ];
 
     initializeColumns(columns, {});
@@ -140,4 +140,13 @@ it('should use titleized field or id to generate name when its undefined', () =>
     expect(columns[1].name).toBe('Test Abc');
     expect(columns[2].name).toBe('Test Abcdef');
     expect(columns[3].name).toBe('Col'); // auto-generated id
+
+
 });
+
+it('titleize should work with empty values', () => {
+    expect(titleize(null)).toBe(null);
+    expect(titleize(undefined)).toBe(undefined);
+    expect(titleize("")).toBe("");
+    expect(titleize(0 as any)).toBe(0);    
+})

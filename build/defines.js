@@ -44,7 +44,7 @@ export const compatCore = {
     entryPoints: ['./src/core/index.ts'],
     outfile: './dist/compat/slick.core.js',
     footer: {
-        js: compatDefaults.footer.js + " Slick.Event = Slick.EventEmitter; Slick.EventHandler = Slick.EventSubscriber;"
+        js: compatDefaults.footer.js + " Slick.Event = Slick.EventEmitter; Slick.EventHandler = Slick.EventSubscriber; typeof Map !== 'undefined' && (Slick.Map = Map);"
     }    
 }
 
