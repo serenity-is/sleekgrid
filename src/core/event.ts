@@ -137,7 +137,7 @@ export class EventSubscriber<TArgs = any, TEventData extends IEventData = IEvent
                 this._handlers[i].handler === handler) {
                 this._handlers.splice(i, 1);
                 event.unsubscribe(handler);
-                return;
+                return this;
             }
         }
 

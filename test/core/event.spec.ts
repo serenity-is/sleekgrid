@@ -1,4 +1,4 @@
-﻿import { EventEmitter, EventData, EventSubscriber, IEventData, patchEvent } from "@/core/event";
+﻿import { EventEmitter, EventData, EventSubscriber, IEventData, patchEvent, keyCode } from "@/core/event";
 
 describe('EventData', () => {
     it('stopPropagation stops event propagation', () => {
@@ -20,7 +20,7 @@ describe('EventData', () => {
     });
 });
 
-describe('Event', () => {
+describe('EventEmitter', () => {
     it('can subscribe to an event', () => {
         const event = new EventEmitter();
         let isEventCalled = false;
@@ -252,7 +252,19 @@ describe('Event', () => {
     });
 });
 
-describe('EventHandler', () => {
+describe('EventSubscriber', () => {
+
+    it('unsubcribe method can be chained', function () {
+        const event = new EventEmitter();
+        const subscriber = new EventSubscriber();
+        const handler = () => {};
+        subscriber.subscribe(event, handler);
+        const actual = subscriber.unsubscribe(event, handler);
+        expect(actual).toBe(subscriber);
+        const actual2 = subscriber.unsubscribe(event, handler);
+        expect(actual2).toBe(subscriber);
+    });
+
     it('automatically subscribes handler to the event', function () {
         let isEventCalled = false;
 
@@ -496,4 +508,8 @@ describe('patchEvent', () => {
         expect(calls).toBe(2);
     });
 
+});
+
+describe('keyCode', () => {
+    expect(keyCode.BACKSPACE).toBe(8);
 });

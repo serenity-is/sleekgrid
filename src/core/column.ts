@@ -103,22 +103,20 @@ export function initializeColumns(columns: Column[], defaults: Partial<Column<an
         usedIds[m.id] = true;
 
         if (m.name === void 0) {
-            m.name = titleize(m.field ?? m.id ?? '');
+            m.name = titleize(m.field ?? m.id);
             delete m.nameIsHtml;
         }
     }
-}
-
-function underscore(str: string) {
-    return (str ?? '').replace(/([A-Z]+)([A-Z][a-z])/, "$1_$2")
-        .replace(/([a-z\d])([A-Z])/, "$1_$2")
-        .replace(/[-\s]/, "_").toLowerCase();
 }
 
 export function titleize(str: string) {
     if (!str)
         return str;
 
-    return underscore(str).replace(/\s/, '_').split('_').filter(x => x.length)
+    str = ("" + str).replace(/([A-Z]+)([A-Z][a-z])/, "$1_$2")
+        .replace(/([a-z\d])([A-Z])/, "$1_$2")
+        .replace(/[-\s]/, "_").toLowerCase();
+
+    return str.replace(/\s/, '_').split('_').filter(x => x.length)
         .map(x => x.charAt(0).toUpperCase() + x.substring(1).toLowerCase()).join(' ');
 }
