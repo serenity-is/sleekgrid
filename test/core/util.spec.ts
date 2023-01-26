@@ -172,6 +172,30 @@ describe('H', () => {
 
         expect(element.hasAttribute('data-test')).toBe(false);
     });
+
+    it('should call ref method with the element reference', () => {
+        var divRef: HTMLSpanElement;
+        var spanRef: HTMLSpanElement;
+        var element = H('div', { ref: el => divRef = el }, 
+            H('span', { ref: el => spanRef = el }));
+        expect(divRef).toBeDefined();
+        expect(divRef === element).toBe(true);
+        expect(spanRef).toBeDefined();
+        expect(spanRef.tagName).toBe('SPAN');
+    });
+
+    it('converts className attribute to class', () => {
+        var element = H('div', { className: 'test' });
+        expect(element).toBeDefined();
+        expect(element.className).toBe('test');
+    });
+
+    it('can set className property via class', () => {
+        var element = H('div', { class: 'test' });
+        expect(element).toBeDefined();
+        expect(element.className).toBe('test');
+    });
+
 });
 
 describe('spacerDiv', () => {
@@ -196,13 +220,15 @@ describe('disableSelection', () => {
 
     it('should disable selection on the element', () => {
         const element: HTMLDivElement = document.createElement('div');
-        element.addEventListener = jest.fn();
+        var func: Function;
+        element.addEventListener = (_: any, listener: any) => func = listener;
 
         disableSelection(element);
 
         expect(element.getAttribute('unselectable')).toBe('on');
         expect(element.style.userSelect).toBe('none');
-        expect(element.addEventListener).toBeCalledWith('selectstart', expect.any(Function));
+        expect(func).toBeDefined();
+        expect(func()).toBe(false);
     });
 });
 
@@ -252,5 +278,9 @@ describe('escape', () => {
         expect(escape(1)).toBe('1');
         expect(escape(true)).toBe('true');
         expect(escape({})).toBe('[object Object]');
+    });
+
+    it('uses this.value if no argument passed', () => {
+        expect(escape.apply({ value: "&><" }, [])).toBe("&amp;&gt;&lt;");
     });
 });

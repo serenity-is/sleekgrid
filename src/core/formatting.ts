@@ -56,14 +56,14 @@ export function convertCompatFormatter(compatFormatter: CompatFormatter): Column
 }
 
 export function applyFormatterResultToCellNode(ctx: FormatterContext, html: string, node: HTMLElement) {
-    var oldFmtAtt = node.dataset?.fmtatt as string;
+    var oldFmtAtt = node.dataset.fmtatt as string;
     if (oldFmtAtt?.length > 0) {
         for (var k of oldFmtAtt.split(','))
             node.removeAttribute(k);
         delete node.dataset.fmtatt;
     }
 
-    var oldFmtCls = node.dataset?.fmtcls as string;
+    var oldFmtCls = node.dataset.fmtcls;
     if (oldFmtCls?.length && (ctx.addClass != oldFmtCls)) {
         removeClass(node, oldFmtCls);
         if (!ctx.addClass?.length)

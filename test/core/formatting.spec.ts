@@ -48,7 +48,7 @@ describe('defaultFormatter', () => {
 });
 
 describe('applyFormatterResultToCellNode', () => {
-    it('should remove old fmatt from element dataset', () => {
+    it('should remove old fmtatt from element dataset', () => {
         const cellNode = document.createElement('div');
         cellNode.dataset.fmtatt = 'a,b,c';
 
@@ -59,7 +59,7 @@ describe('applyFormatterResultToCellNode', () => {
         expect(cellNode.dataset.fmtatt).toBe(undefined);
     });
 
-    it('should remove old fmatt values from element attributes', () => {
+    it('should remove old fmtatt values from element attributes', () => {
         const cellNode = document.createElement('div');
         cellNode.dataset.fmtatt = 'a,b,c';
         cellNode.setAttribute('a', '1');
@@ -81,6 +81,17 @@ describe('applyFormatterResultToCellNode', () => {
         expect(cellNode.dataset.fmtcls).not.toBe(undefined);
 
         applyFormatterResultToCellNode({ escape }, '', cellNode);
+
+        expect(cellNode.dataset.fmtcls).toBe(undefined);
+    });
+
+    it('should remove old fmtcls from element dataset', () => {
+        const cellNode = document.createElement('div');
+        cellNode.dataset.fmtcls = 'a,b,c';
+
+        expect(cellNode.dataset.fmtcls).not.toBe(undefined);
+
+        applyFormatterResultToCellNode({ escape, addClass: "" }, '', cellNode);
 
         expect(cellNode.dataset.fmtcls).toBe(undefined);
     });

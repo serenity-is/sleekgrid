@@ -69,7 +69,7 @@ export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { ref?: 
                     continue;
                 }
 
-                var key = k === "cssClass" ? "class" : k;
+                var key = k === "className" ? "class" : k;
                 el.setAttribute(key, v === true ? '' : v as string);
             }
         }
