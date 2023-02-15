@@ -60,7 +60,7 @@ export class GroupItemMetadataProvider {
 <span class="${ctx.escape(opt.groupTitleCssClass)}" level="${ctx.escape(item.level)}">${item.title}</span>`;
     }
 
-    public static defaultTotalsFormat(ctx: FormatterContext, grid?: typeof this.prototype["grid"]) {
+    public static defaultTotalsFormat(ctx: FormatterContext, grid?: typeof this.prototype["grid"]): string {
         var item = ctx.item as GroupTotals;
         if (!item.__groupTotals && (item as any).totals)
             item = (item as any).totals;
