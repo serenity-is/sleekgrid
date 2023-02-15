@@ -22,7 +22,6 @@ export interface GroupItemMetadataProviderOptions {
     totalsFormatter?: CompatFormatter<GroupTotals>;
 }
 
-
 export class GroupItemMetadataProvider {
     protected grid: Pick<Grid, "getActiveCell" | "getColumns" | "getData" | "getDataItem" | "getRenderedRange" | "onClick" | "onKeyDown" | "groupTotalsFormatter">;
     private options: GroupItemMetadataProviderOptions;
@@ -66,7 +65,7 @@ export class GroupItemMetadataProvider {
         if (!item.__groupTotals && (item as any).totals)
             item = (item as any).totals;
         return (ctx.column?.groupTotalsFormatter?.(item, ctx.column)) ??
-            (grid?.groupTotalsFormatter?.(item, ctx.column)) ?? "";
+            ((grid ?? ctx.grid)?.groupTotalsFormatter?.(item, ctx.column)) ?? "";
     }
     
     init(grid: typeof this.grid) {
@@ -74,6 +73,8 @@ export class GroupItemMetadataProvider {
         grid.onClick.subscribe(this.handleGridClick);
         grid.onKeyDown.subscribe(this.handleGridKeyDown);
     }
+
+    readonly pluginName = "GroupItemMetadataProvider";
 
     destroy() {
         if (this.grid) {
