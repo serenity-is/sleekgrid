@@ -757,6 +757,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	readonly onValidationError: EventEmitter<ArgsValidationError, IEventData>;
 	readonly onViewportChanged: EventEmitter<ArgsGrid, IEventData>;
 	constructor(container: JQuery | HTMLElement, data: any, columns: Column<TItem>[], options: GridOptions<TItem>);
+	private createGroupingPanel;
 	private bindAncestorScroll;
 	init(): void;
 	private hasFrozenColumns;
