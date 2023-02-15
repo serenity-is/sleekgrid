@@ -333,6 +333,9 @@ export function removeUiStateHover() {
 }
 
 export function getVBoxDelta(el: HTMLElement): number {
+    if (!el)
+        return 0;
+        
     var style = getComputedStyle(el);
     if (style.boxSizing === 'border-box')
         return 0;
