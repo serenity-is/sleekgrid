@@ -195,14 +195,7 @@ export class Grid<TItem = any> implements EditorHost {
         this._scrollDims = getScrollBarDimensions();
 
         if (options.groupingPanel) {
-            this._container.appendChild(this._groupingPanel = H('div', {
-                class: "slick-grouping-panel",
-                style: "overflow:hidden; position:relative;" + (!options.showGroupingPanel ? " display: none" : "")
-            }));
-
-            if (options.createPreHeaderPanel) {
-                this._groupingPanel.appendChild(H('div', { class: 'slick-preheader-panel' }));
-            }
+            this.createGroupingPanel();
         }
 
         this._layout.init({
@@ -233,6 +226,20 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         this.bindToData();
+    }
+
+    private createGroupingPanel() {
+        if (this._groupingPanel || !this._focusSink1)
+            return;
+
+        this._focusSink1.insertAdjacentElement("afterend", this._groupingPanel = H('div', {
+            class: "slick-grouping-panel",
+            style: "overflow:hidden; position:relative;" + (!this._options.showGroupingPanel ? " display: none" : "")
+        }));
+
+        if (this._options.createPreHeaderPanel) {
+            this._groupingPanel.appendChild(H('div', { class: 'slick-preheader-panel' }));
+        }
     }
 
     private bindAncestorScroll(elem: HTMLElement) {
@@ -1416,6 +1423,11 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         this.makeActiveCellNormal();
+
+        if (args.groupingPanel && !this._options.groupingPanel)
+            this.createGroupingPanel();
+        else if (args.groupingPanel != void 0 && !args.groupingPanel && this._groupingPanel)
+            this._groupingPanel.remove();
 
         if (args.showColumnHeader !== undefined) {
             this.setColumnHeaderVisibility(args.showColumnHeader);
