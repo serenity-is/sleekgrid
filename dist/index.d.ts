@@ -1182,8 +1182,9 @@ export declare class GroupItemMetadataProvider {
 	constructor(opt?: GroupItemMetadataProviderOptions);
 	static readonly defaults: GroupItemMetadataProviderOptions;
 	static defaultGroupFormat(ctx: FormatterContext, opt?: GroupItemMetadataProviderOptions): string;
-	static defaultTotalsFormat(ctx: FormatterContext, grid?: typeof this.prototype["grid"]): string;
+	static defaultTotalsFormat(ctx: FormatterContext, grid?: typeof this.prototype["grid"]): any;
 	init(grid: typeof this.grid): void;
+	readonly pluginName = "GroupItemMetadataProvider";
 	destroy(): void;
 	getOptions(): GroupItemMetadataProviderOptions;
 	setOptions(value: GroupItemMetadataProviderOptions): void;
