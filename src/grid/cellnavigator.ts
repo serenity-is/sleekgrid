@@ -238,7 +238,7 @@ export class CellNavigator {
      * @return {boolean} Whether navigation resulted in a change of active cell.
      */
      navigate(dir: string, activeRow: number, activeCell: number, activePosX: number): GoToResult {
-        var tabbingDirections = {
+        var tabbingDirections: Record<string, number> = {
             up: -1,
             down: 1,
             prev: -1,
@@ -253,7 +253,7 @@ export class CellNavigator {
 
         this.host.setTabbingDirection(tabbingDirections[dir]);
 
-        var stepFunctions = {
+        var stepFunctions: Record<string, Function> = {
             up: this.gotoUp,
             down: this.gotoDown,
             prev: this.gotoPrev,

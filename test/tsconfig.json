@@ -1,5 +1,5 @@
 ﻿{
-  "extends": "../src/tsconfig.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
     "declaration": false,
@@ -8,7 +8,6 @@
     },
     "sourceMap": true,
     "types": [
-      "jquery",
       "jest"
     ]
   },

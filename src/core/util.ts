@@ -11,7 +11,7 @@ export function addClass(el: Element, cls: string) {
         el.classList.add(cls);
 }
 
-const esc = {
+const esc: Record<string, string> = {
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',

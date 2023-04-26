@@ -162,7 +162,8 @@ export class DateEditor extends TextEditor {
     init() {
         super.init();
 
-        ($(this._input) as any).datepicker({
+        // @ts-ignore
+        (($ as any)(this._input) as any).datepicker({
             showOn: "button",
             buttonImage: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-calendar' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E`,
             buttonImageOnly: true,
@@ -180,20 +181,23 @@ export class DateEditor extends TextEditor {
     }
 
     destroy() {
+        // @ts-ignore
         ($ as any).datepicker.dpDiv.stop(true, true);
-        ($(this._input) as any).datepicker("hide");
-        ($(this._input) as any).datepicker("destroy");
+        // @ts-ignore
+        (($ as any)(this._input) as any).datepicker("hide").datepicker('destroy')
         super.destroy();
     }
 
     show() {
         if (this._calendarOpen) {
+            // @ts-ignore
             ($ as any).datepicker.dpDiv.stop(true, true).show();
         }
     };
 
     hide() {
         if (this._calendarOpen) {
+            // @ts-ignore
             ($ as any).datepicker.dpDiv.stop(true, true).hide();
         }
     }
@@ -202,6 +206,7 @@ export class DateEditor extends TextEditor {
         if (!this._calendarOpen) {
             return;
         }
+        // @ts-ignore
         ($ as any).datepicker.dpDiv
             .css("top", position.top + 30)
             .css("left", position.left);
@@ -304,7 +309,8 @@ export class PercentCompleteEditor extends IntegerEditor {
         this._input.focus();
         this._input.select();
 
-        ($(slider) as any).slider({
+        // @ts-ignore
+        (($ as any)(slider) as any).slider({
             orientation: "vertical",
             range: "min",
             value: this._defaultValue,
@@ -317,10 +323,12 @@ export class PercentCompleteEditor extends IntegerEditor {
             }
         });
 
-        $(this._picker).find(".slick-editor-percentcomplete-buttons button")
-            .on("click", (e) => {
+        // @ts-ignore
+        ($ as any)(this._picker).find(".slick-editor-percentcomplete-buttons button")
+            .on("click", (e: any) => {
                 this._input.value = (e.target as HTMLButtonElement).dataset.val;
-                ($(slider) as any).slider("value", (e.target as HTMLButtonElement).dataset.val);
+                // @ts-ignore               
+                (($ as any)(slider) as any).slider("value", (e.target as HTMLButtonElement).dataset.val);
             });
     }
 

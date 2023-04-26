@@ -1,5 +1,3 @@
-/// <reference types="jquery" />
-
 /***
  * A base class that all special / non-data rows (like Group and GroupTotals) derive from.
  */
@@ -622,7 +620,7 @@ export interface GridOptions<TItem = any> {
 	groupingPanelHeight?: number;
 	groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
 	headerRowHeight?: number;
-	jQuery?: JQueryStatic;
+	jQuery?: any;
 	leaveSpaceForNewRows?: boolean;
 	layoutEngine?: LayoutEngine;
 	minBuffer?: number;
@@ -756,7 +754,10 @@ export declare class Grid<TItem = any> implements EditorHost {
 	readonly onSort: EventEmitter<ArgsSort, IEventData>;
 	readonly onValidationError: EventEmitter<ArgsValidationError, IEventData>;
 	readonly onViewportChanged: EventEmitter<ArgsGrid, IEventData>;
-	constructor(container: JQuery | HTMLElement, data: any, columns: Column<TItem>[], options: GridOptions<TItem>);
+	constructor(container: HTMLElement | {
+		jquery: string;
+		length: number;
+	}, data: any, columns: Column<TItem>[], options: GridOptions<TItem>);
 	private createGroupingPanel;
 	private bindAncestorScroll;
 	init(): void;
@@ -779,7 +780,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	getSelectionModel(): SelectionModel;
 	private colIdOrIdxToCell;
 	getCanvasNode(columnIdOrIdx?: string | number, row?: number): HTMLElement;
-	getCanvases(): JQuery | HTMLElement[];
+	getCanvases(): any | HTMLElement[];
 	getActiveCanvasNode(e?: IEventData): HTMLElement;
 	getViewportNode(columnIdOrIdx?: string | number, row?: number): HTMLElement;
 	private getViewports;
@@ -1183,7 +1184,7 @@ export declare class GroupItemMetadataProvider {
 	constructor(opt?: GroupItemMetadataProviderOptions);
 	static readonly defaults: GroupItemMetadataProviderOptions;
 	static defaultGroupFormat(ctx: FormatterContext, opt?: GroupItemMetadataProviderOptions): string;
-	static defaultTotalsFormat(ctx: FormatterContext, grid?: typeof this.prototype["grid"]): any;
+	static defaultTotalsFormat(ctx: FormatterContext, grid?: typeof this.prototype["grid"]): string;
 	init(grid: typeof this.grid): void;
 	readonly pluginName = "GroupItemMetadataProvider";
 	destroy(): void;

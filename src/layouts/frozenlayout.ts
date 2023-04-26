@@ -487,8 +487,8 @@ export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
                     x = 0;
                 w = cols[i].width;
                 rule = host.getColumnCssRules(i);
-                rule[s].style[s] = x + "px";
-                rule[e].style[e] = (((frozenCols > 0 && i >= frozenCols) ? canvasWidthR : canvasWidthL) - x - w) + "px";
+                (rule as any)[s].style[s] = x + "px";
+                (rule as any)[e].style[e] = (((frozenCols > 0 && i >= frozenCols) ? canvasWidthR : canvasWidthL) - x - w) + "px";
                 x += w;
             }
         }

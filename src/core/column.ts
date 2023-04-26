@@ -81,8 +81,8 @@ export function initializeColumns(columns: Column[], defaults: Partial<Column<an
 
         if (defaults != null) {
             for (var k in defaults) {
-                if (m[k] === undefined)
-                    m[k] = defaults[k];
+                if ((m as any)[k] === undefined)
+                    (m as any)[k] = (defaults as any)[k];
             }
         }
 

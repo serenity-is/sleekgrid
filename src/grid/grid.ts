@@ -16,7 +16,7 @@ export class Grid<TItem = any> implements EditorHost {
     private _activePosX: number;
     private _activeRow: number;
     private _activeViewportNode: HTMLElement;
-    private _cellCssClasses: CellStylesHash = {};
+    private _cellCssClasses: Record<string, CellStylesHash> = {};
     private _cellHeightDiff: number = 0;
     private _cellWidthDiff: number = 0;
     private _cellNavigator: CellNavigator;
@@ -39,7 +39,7 @@ export class Grid<TItem = any> implements EditorHost {
     private _initColById: { [key: string]: number };
     private _initCols: Column<TItem>[];
     private _initialized = false;
-    private _jQuery: JQueryStatic;
+    private _jQuery: any;
     private _jumpinessCoefficient: number;
     private _lastRenderTime: number;
     private _layout: LayoutEngine;
@@ -118,16 +118,17 @@ export class Grid<TItem = any> implements EditorHost {
     readonly onValidationError = new EventEmitter<ArgsValidationError>();
     readonly onViewportChanged = new EventEmitter<ArgsGrid>();
 
-    constructor(container: JQuery | HTMLElement, data: any, columns: Column<TItem>[], options: GridOptions<TItem>) {
+    constructor(container: HTMLElement | { jquery: string, length: number }, data: any, columns: Column<TItem>[], options: GridOptions<TItem>) {
 
         this._data = data;
         this._colDefaults = Object.assign({}, columnDefaults);
 
         this._options = options = Object.assign({}, gridDefaults, options);
+        // @ts-ignore
         options.jQuery = this._jQuery = options.jQuery === void 0 ? (typeof jQuery !== "undefined" ? jQuery : void 0) : options.jQuery;
 
-        if (this._jQuery && container instanceof this._jQuery)
-            this._container = container[0];
+        if (this._jQuery && container instanceof (this._jQuery as any))
+            this._container = (container as any)[0];
         else if (container instanceof Element)
             this._container = container as HTMLElement;
         else if (typeof container === "string")
@@ -155,7 +156,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         if (this._options.rtl)
             this._container.classList.add('rtl');
-        else 
+        else
             this._container.classList.add('ltr');
 
         this.validateAndEnforceOptions();
@@ -340,7 +341,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         [this._focusSink1, this._focusSink2].forEach(fs => onEvent(fs, "keydown", this.handleKeyDown.bind(this)));
 
-        var canvases = Array.from(this.getCanvases());
+        var canvases = Array.from<HTMLElement>(this.getCanvases());
         canvases.forEach(canvas => {
             onEvent(canvas, "keydown", this.handleKeyDown.bind(this))
             onEvent(canvas, "click", this.handleClick.bind(this))
@@ -364,9 +365,9 @@ export class Grid<TItem = any> implements EditorHost {
             }
             else {
                 // need to reimplement this similar to jquery events
-                canvas.addEventListener("mouseenter", e => (e.target as HTMLElement).closest(".slick-cell") &&
+                (canvas as HTMLElement).addEventListener("mouseenter", e => (e.target as HTMLElement).closest(".slick-cell") &&
                     this.handleMouseEnter(e));
-                canvas.addEventListener("mouseleave", e => (e.target as HTMLElement).closest(".slick-cell") &&
+                (canvas as HTMLElement).addEventListener("mouseleave", e => (e.target as HTMLElement).closest(".slick-cell") &&
                     this.handleMouseLeave(e));
             }
         });
@@ -448,8 +449,7 @@ export class Grid<TItem = any> implements EditorHost {
         return this._selectionModel;
     }
 
-    private colIdOrIdxToCell(columnIdOrIdx: string | number): number
-    {
+    private colIdOrIdxToCell(columnIdOrIdx: string | number): number {
         if (columnIdOrIdx == null)
             return null;
 
@@ -463,7 +463,7 @@ export class Grid<TItem = any> implements EditorHost {
         return this._layout.getCanvasNodeFor(this.colIdOrIdxToCell(columnIdOrIdx || 0), row || 0);
     }
 
-    getCanvases(): JQuery | HTMLElement[] {
+    getCanvases(): any | HTMLElement[] {
         var canvases = this._layout.getCanvasNodes();
         return this._jQuery ? this._jQuery(canvases) : canvases;
     }
@@ -1293,7 +1293,7 @@ export class Grid<TItem = any> implements EditorHost {
     private handleSelectedRangesChanged = (e: IEventData, ranges: Range[]): void => {
         var previousSelectedRows = this._selectedRows.slice(0); // shallow copy previously selected rows for later comparison
         this._selectedRows = [];
-        var hash = {}, cols = this._cols;
+        var hash: any = {}, cols = this._cols;
         for (var i = 0; i < ranges.length; i++) {
             for (var j = ranges[i].fromRow; j <= ranges[i].toRow; j++) {
                 if (!hash[j]) {  // prevent duplicates
@@ -1325,7 +1325,7 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         this._selectedRows = [];
-        var hash = {}, cols = this._cols;
+        hash = {}, cols = this._cols;
         for (var i = 0; i < ranges.length; i++) {
             for (var j = ranges[i].fromRow; j <= ranges[i].toRow; j++) {
                 if (!hash[j]) {  // prevent duplicates
@@ -1367,7 +1367,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         initializeColumns(initCols, this._colDefaults);
 
-        var initColById = {};
+        var initColById: any = {};
         var viewCols: Column[] = [];
         var viewColById: { [key: string]: number } = {};
         var i: number, m: Column;
@@ -1748,7 +1748,7 @@ export class Grid<TItem = any> implements EditorHost {
     getDataItemValueForColumn(item: TItem, columnDef: Column<TItem>): any {
         if (this._options.dataItemColumnValueExtractor)
             return this._options.dataItemColumnValueExtractor(item, columnDef);
-        return item[columnDef.field];
+        return (item as any)[columnDef.field];
     }
 
     private appendRowHtml(stringArrayL: string[], stringArrayR: string[], row: number, range: ViewRange, dataLength: number): void {
@@ -1835,7 +1835,7 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         for (var key in this._cellCssClasses) {
-            if (this._cellCssClasses[key][row] && this._cellCssClasses[key][row][column.id]) {
+            if (this._cellCssClasses[key][row] && (this._cellCssClasses[key][row] as any)[column.id]) {
                 klass += (" " + this._cellCssClasses[key][row][column.id]);
             }
         }
@@ -1902,7 +1902,7 @@ export class Grid<TItem = any> implements EditorHost {
             if (i !== this._activeRow && (i < rangeToKeep.top || i > rangeToKeep.bottom)
                 && !this._layout.isFrozenRow(i))
                 this.removeRowFromCache(i);
-            }
+        }
 
         this._options.enableAsyncPostRenderCleanup && this.startPostProcessingCleanup();
     }
@@ -2666,7 +2666,7 @@ export class Grid<TItem = any> implements EditorHost {
                 if (this._options.forceSyncScrolling ||
                     (this._options.forceSyncScrollInterval &&
                         (this._lastRenderTime < new Date().getTime() - this._options.forceSyncScrollInterval))) {
-                            this.render();
+                    this.render();
                 } else {
                     this._hRender = setTimeout(this.render, 50);
                 }
@@ -2968,7 +2968,7 @@ export class Grid<TItem = any> implements EditorHost {
             e.stopPropagation();
             e.preventDefault();
             try {
-                ((e as IEventData).originalEvent as JQueryKeyEventObject).keyCode = 0; // prevent default behaviour for special keys in IE browsers (F3, F5, etc.)
+                ((e as IEventData).originalEvent as any).keyCode = 0; // prevent default behaviour for special keys in IE browsers (F3, F5, etc.)
             }
             // ignore exceptions - setting the original event's keycode throws access denied exception for "Ctrl"
             // (hitting control key only, nothing else), "Shift" (maybe others)
@@ -3048,13 +3048,13 @@ export class Grid<TItem = any> implements EditorHost {
         column && this.trigger(this.onHeaderMouseLeave, { column }, e);
     }
 
-    private handleHeaderContextMenu(e: JQueryMouseEventObject): void {
+    private handleHeaderContextMenu(e: any): void {
         var header = e.target.closest(".slick-header-column");
         var column = this.getColumnFromNode(header);
         column && this.trigger(this.onHeaderContextMenu, { column }, e);
     }
 
-    private handleHeaderClick(e: JQueryMouseEventObject): void {
+    private handleHeaderClick(e: any): void {
         var header = e.target.closest(".slick-header-column");
         var column = this.getColumnFromNode(header);
         column && this.trigger(this.onHeaderClick, { column: column }, e);

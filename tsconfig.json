@@ -16,16 +16,15 @@
       "isolatedModules": true,
       "sourceMap": false,
       "skipLibCheck": false,
-      "outDir": "../dist",
-      "suppressImplicitAnyIndexErrors": true,
+      "outDir": "./dist",
       "moduleResolution": "Node",
       "target": "ESNext",
       "typeRoots": [
-        "../node_modules/@types"
+        "./node_modules/@types"
       ],
       "types": [
-        "jquery"
       ],
       "useDefineForClassFields": false
-    }
+    },
+    "include": ["src"]
   }
