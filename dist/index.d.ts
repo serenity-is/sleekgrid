@@ -620,7 +620,10 @@ export interface GridOptions<TItem = any> {
 	groupingPanelHeight?: number;
 	groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
 	headerRowHeight?: number;
-	jQuery?: any;
+	jQuery?: {
+		ready: any;
+		fn: any;
+	};
 	leaveSpaceForNewRows?: boolean;
 	layoutEngine?: LayoutEngine;
 	minBuffer?: number;
