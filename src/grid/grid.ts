@@ -235,7 +235,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         this._focusSink1.insertAdjacentElement("afterend", this._groupingPanel = H('div', {
             class: "slick-grouping-panel",
-            style: "overflow:hidden; position:relative;" + (!this._options.showGroupingPanel ? " display: none" : "")
+            style: (!this._options.showGroupingPanel ? "; display: none" : null)
         }));
 
         if (this._options.createPreHeaderPanel) {

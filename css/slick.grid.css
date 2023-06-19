@@ -170,6 +170,12 @@ classes should alter those!
   cursor: default;
 }
 
+.slick-grouping-panel {
+  overflow-y: hidden;
+  overflow-x: auto;
+  position: relative;
+}
+
 .slick-group-toggle {
   display: inline-block;
 }
