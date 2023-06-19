@@ -12,3 +12,5 @@ node_modules/
 *.orig
 *.log
 *.tgz
+
+/out/typedoc.json
