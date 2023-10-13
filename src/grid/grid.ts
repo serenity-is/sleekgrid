@@ -51,11 +51,13 @@ export class Grid<TItem = any> implements EditorHost {
     private _pagingActive: boolean = false;
     private _pagingIsLastPage: boolean = false;
     private _plugins: IPlugin[] = [];
+    private _postCleanupActive: boolean;
     private _postProcessCleanupQueue: PostProcessCleanupEntry[] = [];
-    private _postProcessedRows: any = {};
+    private _postProcessedRows: { [row: number]: { [cell: number]: string } } = {};
     private _postProcessFromRow: number = null;
     private _postProcessGroupId: number = 0;
     private _postProcessToRow: number = null;
+    private _postRenderActive: boolean;
     private _rowsCache: { [key: number]: CachedRow } = {};
     private _scrollDims: { width: number, height: number };
     private _scrollLeft: number = 0;
@@ -1380,9 +1382,15 @@ export class Grid<TItem = any> implements EditorHost {
 
         viewCols = this._layout.reorderViewColumns(viewCols, this._options);
 
+        this._postRenderActive = this._options.enableAsyncPostRender ?? false;
+        this._postCleanupActive = this._options.enableAsyncPostRenderCleanup ?? false;
         for (i = 0; i < viewCols.length; i++) {
             m = viewCols[i];
             viewColById[m.id] = i;
+            if (m.asyncPostRenderCleanup != null)
+                this._postCleanupActive = true;
+            if (m.asyncPostRender != null)
+                this._postRenderActive = true;
         }
 
         this._initCols = initCols;
@@ -1904,7 +1912,7 @@ export class Grid<TItem = any> implements EditorHost {
                 this.removeRowFromCache(i);
         }
 
-        this._options.enableAsyncPostRenderCleanup && this.startPostProcessingCleanup();
+        this.startPostProcessingCleanup();
     }
 
     invalidate(): void {
@@ -1922,23 +1930,26 @@ export class Grid<TItem = any> implements EditorHost {
             this.removeRowFromCache(parseInt(row, 10));
         }
 
-        this._options.enableAsyncPostRenderCleanup && this.startPostProcessingCleanup();
+        this.startPostProcessingCleanup();
     }
 
-    private queuePostProcessedRowForCleanup(cacheEntry: CachedRow, postProcessedRow: { [key: number]: any }, rowIdx: number): void {
+    private queuePostProcessedRowForCleanup(cacheEntry: CachedRow, row: number): void {
+
+        var postProcessedRow = this._postProcessedRows[row];
+        if (!postProcessedRow)
+            return;
+
         this._postProcessGroupId++;
 
         // store and detach node for later async cleanup
         for (var x in postProcessedRow) {
-            if (postProcessedRow.hasOwnProperty(x)) {
-                var columnIdx = parseInt(x, 10);
-                this._postProcessCleanupQueue.push({
-                    groupId: this._postProcessGroupId,
-                    cellNode: cacheEntry.cellNodesByColumnIdx[columnIdx | 0],
-                    columnIdx: columnIdx | 0,
-                    rowIdx: rowIdx
-                });
-            }
+            var columnIdx = parseInt(x, 10);
+            this._postProcessCleanupQueue.push({
+                groupId: this._postProcessGroupId,
+                cellNode: cacheEntry.cellNodesByColumnIdx[columnIdx | 0],
+                columnIdx: columnIdx | 0,
+                rowIdx: row
+            });
         }
 
         this._postProcessCleanupQueue.push({
@@ -1958,7 +1969,7 @@ export class Grid<TItem = any> implements EditorHost {
             columnIdx: columnIdx,
             rowIdx: rowIdx
         });
-        this._jQuery(cellnode).detach();
+        this._jQuery ? this._jQuery(cellnode).remove() : cellnode.remove();
     }
 
     private removeRowFromCache(row: number): void {
@@ -1967,8 +1978,8 @@ export class Grid<TItem = any> implements EditorHost {
             return;
         }
 
-        if (this._options.enableAsyncPostRenderCleanup && this._postProcessedRows[row]) {
-            this.queuePostProcessedRowForCleanup(cacheEntry, this._postProcessedRows[row], row);
+        if (this._postCleanupActive && this._postProcessedRows[row]) {
+            this.queuePostProcessedRowForCleanup(cacheEntry, row);
         }
         else {
             cacheEntry.rowNodeL?.parentElement?.removeChild(cacheEntry.rowNodeL);
@@ -1994,7 +2005,7 @@ export class Grid<TItem = any> implements EditorHost {
             }
         }
 
-        this._options.enableAsyncPostRenderCleanup && this.startPostProcessingCleanup();
+        this.startPostProcessingCleanup();
     }
 
     invalidateRow(row: number): void {
@@ -2033,10 +2044,6 @@ export class Grid<TItem = any> implements EditorHost {
         var d = this.getDataItem(row);
 
         for (var x in cacheEntry.cellNodesByColumnIdx) {
-            if (!cacheEntry.cellNodesByColumnIdx.hasOwnProperty(x)) {
-                continue;
-            }
-
             var cell = parseInt(x, 10);
             if (row === this._activeRow && cell === this._activeCell && this._currentEditor) {
                 this._currentEditor.loadValue(d);
@@ -2142,7 +2149,7 @@ export class Grid<TItem = any> implements EditorHost {
             }
         }
 
-        this._options.enableAsyncPostRenderCleanup && this.startPostProcessingCleanup();
+        this.startPostProcessingCleanup();
 
         vpi.virtualHeight = Math.max(this._options.rowHeight * numberOfRows, tempViewportH - this._scrollDims.height);
 
@@ -2269,7 +2276,7 @@ export class Grid<TItem = any> implements EditorHost {
         }
     }
 
-    private cleanUpCells(range: ViewRange, row: number): void {
+    private cleanUpCells(rangeToKeep: ViewRange, row: number): void {
         // Ignore frozen rows
         if (this._layout.isFrozenRow(row))
             return;
@@ -2279,10 +2286,6 @@ export class Grid<TItem = any> implements EditorHost {
         // Remove cells outside the range.
         var cellsToRemove = [], frozenCols = this._layout.getFrozenCols();
         for (var x in cacheEntry.cellNodesByColumnIdx) {
-            // I really hate it when people mess with Array.prototype.
-            if (!cacheEntry.cellNodesByColumnIdx.hasOwnProperty(x)) {
-                continue;
-            }
 
             var i = parseInt(x, 10);
 
@@ -2292,7 +2295,7 @@ export class Grid<TItem = any> implements EditorHost {
             }
 
             var colspan = cacheEntry.cellColSpans[i], cols = this._cols;
-            if (this._colLeft[i] > range.rightPx || this._colRight[Math.min(cols.length - 1, i + colspan - 1)] < range.leftPx) {
+            if (this._colLeft[i] > rangeToKeep.rightPx || this._colRight[Math.min(cols.length - 1, i + colspan - 1)] < rangeToKeep.leftPx) {
                 if (!(row == this._activeRow && i === this._activeCell)) {
                     cellsToRemove.push(i);
                 }
@@ -2304,7 +2307,7 @@ export class Grid<TItem = any> implements EditorHost {
         while ((cellToRemove = cellsToRemove.pop()) != null) {
             node = cacheEntry.cellNodesByColumnIdx[cellToRemove];
 
-            if (this._options.enableAsyncPostRenderCleanup && this._postProcessedRows[row] && this._postProcessedRows[row][cellToRemove]) {
+            if (this._postCleanupActive && this._postProcessedRows[row] && this._postProcessedRows[row][cellToRemove]) {
                 this.queuePostProcessedCellForCleanup(node, cellToRemove, row);
             } else {
                 node.parentElement.removeChild(node);
@@ -2472,7 +2475,7 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private startPostProcessing(): void {
-        if (!this._options.enableAsyncPostRender) {
+        if (!this._postRenderActive) {
             return;
         }
 
@@ -2481,12 +2484,12 @@ export class Grid<TItem = any> implements EditorHost {
         if (this._options.asyncPostRenderDelay < 0) {
             this.asyncPostProcessRows();
         } else {
-            this._hPostRender = setTimeout(this.asyncPostProcessRows.bind(this), this._options.asyncPostRenderDelay);
+            this._hPostRender = setTimeout(this.asyncPostProcessRows, this._options.asyncPostRenderDelay);
         }
     }
 
     private startPostProcessingCleanup(): void {
-        if (!this._options.enableAsyncPostRenderCleanup) {
+        if (!this._postCleanupActive) {
             return;
         }
 
@@ -2502,10 +2505,11 @@ export class Grid<TItem = any> implements EditorHost {
 
     private invalidatePostProcessingResults(row: number): void {
         if (this._options.enableAsyncPostRenderCleanup) {
-            // change status of columns to be re-rendered
-            for (var columnIdx in this._postProcessedRows[row]) {
-                if (this._postProcessedRows[row].hasOwnProperty(columnIdx)) {
-                    this._postProcessedRows[row][columnIdx] = 'C';
+            var postProcessed = this._postProcessedRows[row];
+            if (postProcessed) {
+                // change status of columns to be re-rendered
+                for (var columnIdx in postProcessed) {
+                    postProcessed[columnIdx] = 'C';
                 }
             }
         }
@@ -2680,7 +2684,7 @@ export class Grid<TItem = any> implements EditorHost {
         return !!(hScrollDist || vScrollDist);
     }
 
-    private asyncPostProcessRows(): void {
+    private asyncPostProcessRows = () => {
         var dataLength = this.getDataLength();
         var cols = this._cols;
         while (this._postProcessFromRow <= this._postProcessToRow) {
@@ -2696,10 +2700,6 @@ export class Grid<TItem = any> implements EditorHost {
 
             this.ensureCellNodesInRowsCache(row);
             for (var x in cacheEntry.cellNodesByColumnIdx) {
-                if (!cacheEntry.cellNodesByColumnIdx.hasOwnProperty(x)) {
-                    continue;
-                }
-
                 var columnIdx = parseInt(x, 10);
 
                 var m = cols[columnIdx];
@@ -2716,7 +2716,7 @@ export class Grid<TItem = any> implements EditorHost {
             }
 
             if (this._options.asyncPostRenderDelay >= 0) {
-                this._hPostRender = setTimeout(this.asyncPostProcessRows.bind(this), this._options.asyncPostRenderDelay);
+                this._hPostRender = setTimeout(this.asyncPostProcessRows, this._options.asyncPostRenderDelay);
                 return;
             }
         }
@@ -3911,5 +3911,4 @@ export class Grid<TItem = any> implements EditorHost {
         }
         this._selectionModel.setSelectedRanges(this.rowsToRanges(rows));
     }
-
 }
