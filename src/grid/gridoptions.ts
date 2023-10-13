@@ -82,7 +82,7 @@ export const gridDefaults: GridOptions = {
     asyncEditorLoadDelay: 100,
     asyncEditorLoading: false,
     asyncPostCleanupDelay: 40,
-    asyncPostRenderDelay: 50,
+    asyncPostRenderDelay: -1,
     autoEdit: true,
     autoHeight: false,
     cellFlashingCssClass: "flashing",
