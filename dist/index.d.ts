@@ -693,11 +693,13 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private _pagingActive;
 	private _pagingIsLastPage;
 	private _plugins;
+	private _postCleanupActive;
 	private _postProcessCleanupQueue;
 	private _postProcessedRows;
 	private _postProcessFromRow;
 	private _postProcessGroupId;
 	private _postProcessToRow;
+	private _postRenderActive;
 	private _rowsCache;
 	private _scrollDims;
 	private _scrollLeft;
