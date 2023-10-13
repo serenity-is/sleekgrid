@@ -1,14 +1,14 @@
 ---
-title: 'SlickGrid-ES6 Demo (in progress)'
-about: 'this is a reimplementation of <a href="https://dimitarchristoff.github.io/slickgrid-example">slickgrid-es6 sample</a>.'
+title: 'SlickGrid-ES6 Demo'
+about: 'This is a reimplementation of <a href="https://dimitarchristoff.github.io/slickgrid-example">slickgrid-es6 sample</a>.'
 fullwidth: true
 
 demonstrates:
-- general setup, sorting, resizing, filtering
-- editing, custom editors (money etc.)
-- custom renderers (computed columns like A * B), styling
-- custom preact components in cells and filters
-- ticking prices/updates via data view layer
+- General setup, sorting, resizing, filtering
+- Editing, custom editors (money etc.)
+- Custom renderers (computed columns like A * B), styling
+- Custom preact components in cells and filters
+- Ticking prices/updates via data view layer
 
 requires_scripts:
 - dist/compat/slick.editors.js
@@ -21,7 +21,7 @@ requires_slick_scripts:
 <script src="https://cdn.jsdelivr.net/npm/preact@10.10.0/dist/preact.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/preact@10.10.0/hooks/dist/hooks.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/preact@10.10.0/compat/dist/compat.umd.js"></script>
-<script>var React = preactCompat</script>
+<script>var React = preactCompat</script> <!-- Required for React Sparklines -->
 <script src="https://cdn.jsdelivr.net/npm/react-sparklines@1.7.0/build/index.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/flag-icons@6.6.4/css/flag-icons.min.css" rel="stylesheet">
 
@@ -159,7 +159,7 @@ requires_slick_scripts:
         dummy.innerHTML = '';
         historicRenderer(ctx.value, dummy);
         const html = dummy.innerHTML;
-        React.unmountComponentAtNode(dummy);
+        preact.render(null, dummy);
         return html;
     }
 
@@ -189,8 +189,6 @@ requires_slick_scripts:
         editable: true,
         enableAddRow: !true,
         enableCellNavigation: true,
-        // asyncEditorLoading: false,
-        enableAsyncPostRender: true,
         autoEdit: false,
         showHeaderRow: true,
         headerRowHeight: 32,
