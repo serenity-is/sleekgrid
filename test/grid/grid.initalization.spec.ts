@@ -68,19 +68,19 @@ describe('Grid columns', () => {
         gridColumns[0].width = 123;
 
         if (colDefaultFirstProperty)
-            gridColumns[0][colDefaultFirstProperty] = "123";
+            (gridColumns[0] as any)[colDefaultFirstProperty] = "123";
 
         new Grid(document.createElement("div"), [], gridColumns, { defaultColumnWidth: 456 });
 
         expect(gridColumns[0].width).toBe(123);
         if (colDefaultFirstProperty)
-            expect(gridColumns[0][colDefaultFirstProperty]).toBe("123");
+            expect((gridColumns[0] as any)[colDefaultFirstProperty]).toBe("123");
 
         for (let i = 1; i < gridColumns.length; i++)
         {
             expect(gridColumns[i].width).toBe(456);
             if (colDefaultFirstProperty)
-                expect(gridColumns[i][colDefaultFirstProperty]).toBe(columnDefaults[colDefaultFirstProperty]);
+                expect((gridColumns[i] as any)[colDefaultFirstProperty]).toBe((columnDefaults as any)[colDefaultFirstProperty]);
         }
     });
 });
@@ -220,7 +220,7 @@ describe('layout', () => {
         const container = document.createElement("div");
         new Grid(container, [], [], {});
 
-        expect(container.style.outline).toBe("0");
+        expect(container.style.outline).toBe("0px");
     });
 
     it('should add uid as a class to the container', () => {
