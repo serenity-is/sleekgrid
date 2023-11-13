@@ -1,6 +1,6 @@
 {
   "name": "@serenity-is/sleekgrid",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "A modern Data Grid / Spreadsheet component",
   "type": "module",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "css/**/*.css",
     "src/**/*.ts",
     "src/**/*.css",
-    "src/**/tsconfig.json"
+    "tsconfig.json"
   ],
   "scripts": {
     "prepare": "pnpm build && pnpm test && npx -yes dts-bundle-generator -o dist/index.d.ts src/index.ts --project=./tsconfig.json --no-banner",
