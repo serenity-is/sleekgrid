@@ -3737,7 +3737,7 @@ export class Grid<TItem = any> implements EditorHost {
             this.scrollCellIntoView(row, cell || 0, false);
     }
 
-    private canCellBeActive(row: number, cell: number): boolean {
+    canCellBeActive(row: number, cell: number): boolean {
         var cols = this._cols;
         if (!this._options.enableCellNavigation || row >= this.getDataLengthIncludingAddNew() ||
             row < 0 || cell >= cols.length || cell < 0) {

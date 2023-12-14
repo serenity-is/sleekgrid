@@ -102,6 +102,15 @@ export const compatPluginsRowMoveManager = {
     })]
 }
 
+export const compatPluginsRowSelectionModel = {
+    ...compatDefaults,
+    entryPoints: ['./src/plugins/rowselectionmodel.ts'],
+    outfile: './dist/compat/plugins/slick.rowselectionmodel.js',
+    plugins: [globalExternals(/\.\.\/(core|grid)/, {
+        Slick: ["EventEmitter", "EventSubscriber", "Range"]
+    })]
+}
+
 export const compatDataGroupItemMetadataProvider = {
     ...compatDefaults,
     entryPoints: ['./src/data/groupitemmetadataprovider.ts'],

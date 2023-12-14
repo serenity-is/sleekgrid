@@ -988,7 +988,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	getCellNode(row: number, cell: number): HTMLElement;
 	setActiveCell(row: number, cell: number): void;
 	setActiveRow(row: number, cell: number, suppressScrollIntoView?: boolean): void;
-	private canCellBeActive;
+	canCellBeActive(row: number, cell: number): boolean;
 	canCellBeSelected(row: number, cell: number): any;
 	gotoCell(row: number, cell: number, forceEdit?: boolean): void;
 	commitCurrentEdit(): boolean;
@@ -1235,7 +1235,7 @@ export declare class RowMoveManager implements IPlugin {
 	private handler;
 	onBeforeMoveRows: EventEmitter<ArgsMoveRows, IEventData>;
 	onMoveRows: EventEmitter<ArgsMoveRows, IEventData>;
-	constructor(options: RowMoveManagerOptions);
+	constructor(options?: RowMoveManagerOptions);
 	static readonly defaults: RowMoveManagerOptions;
 	init(grid: Grid): void;
 	destroy(): void;
@@ -1243,6 +1243,30 @@ export declare class RowMoveManager implements IPlugin {
 	private handleDragStart;
 	private handleDrag;
 	private handleDragEnd;
+}
+export interface RowSelectionModelOptions {
+	selectActiveRow?: boolean;
+}
+export declare class RowSelectionModel implements IPlugin, SelectionModel {
+	private grid;
+	private handler;
+	private inHandler;
+	private options;
+	private ranges;
+	onSelectedRangesChanged: EventEmitter<Range[], IEventData>;
+	constructor(options?: RowSelectionModelOptions);
+	static readonly defaults: RowSelectionModelOptions;
+	init(grid: Grid): void;
+	destroy(): void;
+	private wrapHandler;
+	private rowsToRanges;
+	getSelectedRows(): number[];
+	setSelectedRows(rows: number[]): void;
+	setSelectedRanges(ranges: Range[]): void;
+	getSelectedRanges(): Range[];
+	private handleActiveCellChange;
+	private handleKeyDown;
+	private handleClick;
 }
 
 export {};

@@ -3,8 +3,8 @@ import { cpSync, existsSync, mkdirSync } from "fs";
 import { join, resolve } from "path";
 import { fileURLToPath } from 'url';
 import {
-    compatCore, compatDataGroupItemMetadataProvider, compatEditors, compatFormatters, compatGrid,
-    compatLayoutsFrozen, compatPluginsAutoTooltips, compatPluginsRowMoveManager,
+    compatCore, compatDataGroupItemMetadataProvider, compatEditors, compatFormatters, compatGrid, compatLayoutsFrozen,
+    compatPluginsAutoTooltips, compatPluginsRowMoveManager, compatPluginsRowSelectionModel,
     sleekIndex, sleekGlobal
 } from "./defines.js";
 
@@ -17,6 +17,7 @@ for (var esmOpt of [
     compatDataGroupItemMetadataProvider,
     compatPluginsAutoTooltips,
     compatPluginsRowMoveManager,
+    compatPluginsRowSelectionModel,
     sleekIndex,
     sleekGlobal
 ]) {

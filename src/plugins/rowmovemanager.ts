@@ -26,7 +26,7 @@ export class RowMoveManager implements IPlugin {
     onBeforeMoveRows = new EventEmitter<ArgsMoveRows>();
     onMoveRows = new EventEmitter<ArgsMoveRows>();
 
-    constructor(options: RowMoveManagerOptions) {
+    constructor(options?: RowMoveManagerOptions) {
         this.options = Object.assign({}, RowMoveManager.defaults, options);
     }
 
