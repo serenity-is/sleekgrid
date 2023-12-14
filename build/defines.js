@@ -93,6 +93,15 @@ export const compatPluginsAutoTooltips = {
     })]
 }
 
+export const compatPluginsRowMoveManager = {
+    ...compatDefaults,
+    entryPoints: ['./src/plugins/rowmovemanager.ts'],
+    outfile: './dist/compat/plugins/slick.rowmovemanager.js',
+    plugins: [globalExternals(/\.\.\/(core|grid)/, {
+        Slick: ["EventEmitter", "EventSubscriber", "H"]
+    })]
+}
+
 export const compatDataGroupItemMetadataProvider = {
     ...compatDefaults,
     entryPoints: ['./src/data/groupitemmetadataprovider.ts'],

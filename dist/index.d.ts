@@ -1221,5 +1221,28 @@ export declare class AutoTooltips implements IPlugin {
 	private handleHeaderMouseEnter;
 	pluginName: string;
 }
+export interface RowMoveManagerOptions {
+	cancelEditOnDrag?: boolean;
+}
+export interface ArgsMoveRows {
+	rows: number[];
+	insertBefore: number;
+}
+export declare class RowMoveManager implements IPlugin {
+	private grid;
+	private options;
+	private dragging;
+	private handler;
+	onBeforeMoveRows: EventEmitter<ArgsMoveRows, IEventData>;
+	onMoveRows: EventEmitter<ArgsMoveRows, IEventData>;
+	constructor(options: RowMoveManagerOptions);
+	static readonly defaults: RowMoveManagerOptions;
+	init(grid: Grid): void;
+	destroy(): void;
+	private handleDragInit;
+	private handleDragStart;
+	private handleDrag;
+	private handleDragEnd;
+}
 
 export {};

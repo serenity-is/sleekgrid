@@ -5,3 +5,4 @@ export * from "./formatters";
 export * from "./editors";
 export * from "./data/groupitemmetadataprovider";
 export * from "./plugins/autotooltips";
+export * from "./plugins/rowmovemanager";
