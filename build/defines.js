@@ -107,14 +107,24 @@ export const compatDataGroupItemMetadataProvider = {
 
 export const sleekDefaults = {
     bundle: true,
-    target: 'es6',
+    entryPoints: ['./src/index.ts'],
     color: true,
-    logLevel: 'info'
+    logLevel: 'info',
+    target: 'es6',
+    sourcemap: true
 }
 
 export const sleekIndex = {
     ...sleekDefaults,
     format: 'esm',
-    entryPoints: ['./src/index.ts'],
+    minify: true,
     outfile: './dist/index.js'
+}
+
+export const sleekGlobal = {
+    ...sleekDefaults,
+    globalName: compatCore.globalName,
+    format: 'iife',
+    footer: compatCore.footer,
+    outfile: './wwwroot/index.global.js'
 }

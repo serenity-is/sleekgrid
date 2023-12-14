@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <Version>1.6.3</Version>
+    <Description>NuGet version of @serenity-is/sleekgrid NPM package</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <TSBuildInputs Include="src\**\*.ts;tsconfig.json;build\build.js;package.json" />
+  </ItemGroup>
+  <Target Name="TSBuild" Condition="'$(SkipNodeScripts)' != 'true'" AfterTargets="AfterBuild" Inputs="@(TSBuildInputs)" DependsOnTargets="NpmInstall"
+      Outputs="dist\index.d.ts;dist\index.js;dist\index.js.map;
+               wwwroot\index.global.d.ts;wwwroot\index.global.js;wwwroot\index.global.js.map;
+               wwwroot\index.global.min.js;wwwroot\index.global.min.js.map">
+    <Exec Command="pnpm build" />
+  </Target>
+</Project>

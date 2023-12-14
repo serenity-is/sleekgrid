@@ -8,7 +8,7 @@
   "module": "dist/index.js",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "main": "./dist/index.js",
       "import": "./dist/index.js"
     },
@@ -27,9 +27,10 @@
     "tsconfig.json"
   ],
   "scripts": {
-    "prepare": "pnpm build && pnpm test && npx -yes dts-bundle-generator -o dist/index.d.ts src/index.ts --project=./tsconfig.json --no-banner",
     "build": "node build/build",
     "doc": "typedoc --plugin typedoc-plugin-markdown --readme none --githubPages false --sourceLinkTemplate https://github.com/serenity-is/sleekgrid/blob/master/{path}#L{line} --readme none --out /Sandbox/serenity-is/SerenityIs/SerenityIs.Web/Docs/api/js/sleekgrid --json ./out/typedoc.json src",
+    "dts": "npx -yes dts-bundle-generator -o dist/index.d.ts src/index.ts --project=./tsconfig.json --no-banner",
+    "prepublishOnly": "pnpm build && pnpm test && pnpm dts",
     "test": "pnpm jest",
     "www": "pnpm build && cd docs && jekyll serve --livereload --config _config.yml,_config_local.yml"
   },

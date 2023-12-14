@@ -1,9 +1,15 @@
 .vs/
 _site
+obj/
+bin/
+/artifacts
 /coverage
 /dist/**/*.js
 /dist/**/*.map
 /dist/**/*.min.js
+/wwwroot/**/*.js
+/wwwroot/**/*.map
+/wwwroot/**/*.min.js
 .jekyll-*
 GemFile*
 node_modules/
