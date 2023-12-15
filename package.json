@@ -11,11 +11,9 @@
       "types": "./dist/index.d.ts",
       "main": "./dist/index.js",
       "import": "./dist/index.js"
-    },
-    "./build/defines": "./build/defines.js"
+    }
   },
   "files": [
-    "build/defines.js",
     "dist/**/*.ts",
     "dist/**/*.css",
     "dist/**/*.js",
