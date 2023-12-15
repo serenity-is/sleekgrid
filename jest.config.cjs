@@ -1,9 +1,5 @@
-const esbuildOptions = {
-    sourcemap: 'inline'
-}
-
 module.exports = {
-    testEnvironment: "@happy-dom/jest-environment",
+    testEnvironment: "jsdom",
     testMatch: ['<rootDir>/test/**/*.spec.ts'],
     moduleNameMapper: {
         "^@/(.*)$": "<rootDir>/src/$1",

@@ -19,11 +19,6 @@
       "outDir": "./dist",
       "moduleResolution": "Node",
       "target": "ESNext",
-      "typeRoots": [
-        "./node_modules/@types"
-      ],
-      "types": [
-      ],
       "useDefineForClassFields": false
     },
     "include": ["src"]

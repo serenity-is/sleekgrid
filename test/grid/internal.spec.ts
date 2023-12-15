@@ -178,7 +178,7 @@ describe('getMaxSupportedCssHeight', () => {
                 }
             });
 
-            expect(userAgent + ": " + getMaxSupportedCssHeight()).toBe(userAgent + ": " + 32000000); // concat to make it easier to debug
+            expect(userAgent + ": " + getMaxSupportedCssHeight()).toBe(userAgent + ": " + 4000000); // concat to make it easier to debug
 
             Object.defineProperty(window, 'navigator', {
                 value: oldNavigator

@@ -220,7 +220,7 @@ describe('layout', () => {
         const container = document.createElement("div");
         new Grid(container, [], [], {});
 
-        expect(container.style.outline).toBe("0px");
+        expect(container.style.outline).toBe("0");
     });
 
     it('should add uid as a class to the container', () => {
