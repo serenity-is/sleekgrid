@@ -25,7 +25,7 @@ abstract class BaseEditor {
     }
 
     setValue(val: string) {
-        this._input.value = val;
+        this._input.value = val ?? '';
     }
 
     loadValue(item: any) {
