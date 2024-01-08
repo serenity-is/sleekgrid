@@ -120,7 +120,7 @@ export class Grid<TItem = any> implements EditorHost {
     readonly onValidationError = new EventEmitter<ArgsValidationError>();
     readonly onViewportChanged = new EventEmitter<ArgsGrid>();
 
-    constructor(container: HTMLElement | { jquery: string, length: number }, data: any, columns: Column<TItem>[], options: GridOptions<TItem>) {
+    constructor(container: HTMLElement | ArrayLike<HTMLElement>, data: any, columns: Column<TItem>[], options: GridOptions<TItem>) {
 
         this._data = data;
         this._colDefaults = Object.assign({}, columnDefaults);
@@ -135,6 +135,8 @@ export class Grid<TItem = any> implements EditorHost {
             this._container = container as HTMLElement;
         else if (typeof container === "string")
             this._container = document.querySelector(container);
+        else if (container.length)
+            container = container[0];
 
         if (this._container == null) {
             throw new Error("SleekGrid requires a valid container, " + container + " does not exist in the DOM.");
