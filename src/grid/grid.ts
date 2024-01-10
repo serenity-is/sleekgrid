@@ -1644,7 +1644,7 @@ export class Grid<TItem = any> implements EditorHost {
     private scrollTo(y: number): void {
         const vpi = this._viewportInfo;
         y = Math.max(y, 0);
-        y = Math.min(y, vpi.virtualHeight - Math.round(this._jQuery(this._layout.getScrollContainerY()).height()) + ((vpi.hasHScroll || this.hasFrozenColumns()) ? this._scrollDims.height : 0));
+        y = Math.min(y, vpi.virtualHeight - Math.round(this._layout.getScrollContainerY().clientHeight) + ((vpi.hasHScroll || this.hasFrozenColumns()) ? this._scrollDims.height : 0));
 
         var oldOffset = this._pageOffset;
 
@@ -2984,7 +2984,7 @@ export class Grid<TItem = any> implements EditorHost {
             // if this click resulted in some cell child node getting focus,
             // don't steal it back - keyboard events will still bubble up
             // IE9+ seems to default DIVs to tabIndex=0 instead of -1, so check for cell clicks directly.
-            if (e.target != document.activeElement || this._jQuery(e.target).hasClass("slick-cell")) {
+            if (e.target != document.activeElement || (e.target as HTMLElement)?.classList?.contains?.("slick-cell")) {
                 this.setFocus();
             }
         }
