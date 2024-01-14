@@ -705,6 +705,7 @@ export class Grid<TItem = any> implements EditorHost {
 
             var header = H("div", {
                 class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default " : ""),
+                ["data-id"]: m.id,
                 id: "" + this._uid + m.id,
                 title: m.toolTip || "",
                 style: "width: " + (m.width - this._headerColumnWidthDiff) + "px"
@@ -833,91 +834,84 @@ export class Grid<TItem = any> implements EditorHost {
         });
     }
 
+    private static offset(el: HTMLElement | null) {
+        if (!el || !el.getBoundingClientRect)
+            return;
+        const box = el.getBoundingClientRect();
+        const docElem = document.documentElement;
+        return {
+            top: box.top + window.scrollY - docElem.clientTop,
+            left: box.left + window.scrollX - docElem.clientLeft
+        };
+    }
+
+    private sortableColInstances: any[];
+
     private setupColumnReorder(): void {
-        const jQuerySortable = this._jQuery && (this._jQuery.fn as any)?.sortable;
 
-        if (jQuerySortable)
-            (this._jQuery(this._layout.getHeaderCols()).filter(":ui-sortable") as any).sortable("destroy");
+        // @ts-ignore
+        if (typeof Sortable === "undefined")
+            return;
 
-        var columnScrollTimer: number = null;
+        this.sortableColInstances?.forEach(x => x.destroy());
+        let columnScrollTimer: number = null;
 
-        var scrollColumnsRight = () => {
-            this._layout.getScrollContainerX().scrollLeft = this._layout.getScrollContainerX().scrollLeft + 10;
-        }
+        const scrollColumnsLeft = () => this._layout.getScrollContainerX().scrollLeft = this._layout.getScrollContainerX().scrollLeft + 10;
+        const scrollColumnsRight = () => this._layout.getScrollContainerX().scrollLeft = this._layout.getScrollContainerX().scrollLeft - 10;
 
-        var scrollColumnsLeft = () => {
-            this._layout.getScrollContainerX().scrollLeft = this._layout.getScrollContainerX().scrollLeft - 10;
-        }
-
-        var canDragScroll: boolean;
-
-        var hasGrouping = this._options.groupingPanel;
-        jQuerySortable && (this._jQuery([this._layout.getHeaderCols()]) as any).sortable({
-            containment: hasGrouping ? undefined : "parent",
-            distance: 3,
-            axis: hasGrouping ? undefined : "x",
-            cursor: "default",
-            tolerance: "intersection",
-            helper: "clone",
-            placeholder: "slick-sortable-placeholder" + (this._options.useLegacyUI ? " ui-state-default" : "") + " slick-header-column",
-            forcePlaceholderSize: hasGrouping ? true : undefined,
-            appendTo: hasGrouping ? "body" : undefined,
-            start: (_: any, ui: any) => {
-                ui.placeholder.outerHeight(ui.helper.outerHeight());
-                ui.placeholder.outerWidth(ui.helper.outerWidth());
+        let canDragScroll;
+        const sortableOptions: any = {
+            animation: 50,
+            direction: 'horizontal',
+            chosenClass: 'slick-header-column-active',
+            ghostClass: 'slick-sortable-placeholder',
+            draggable: '.slick-header-column',
+            dragoverBubble: false,
+            revertClone: true,
+            scroll: !this.hasFrozenColumns(), // enable auto-scroll
+            onStart: (e: { item: any; originalEvent: MouseEvent; }) => {
                 canDragScroll = !this.hasFrozenColumns() ||
-                    (ui.placeholder.offset()[this._options.rtl ? 'right' : 'left'] + Math.round(ui.placeholder.width())) > this._jQuery(this._layout.getScrollContainerX()).offset()[this._options.rtl ? 'right' : 'left'];
-                this._jQuery(ui.helper).addClass("slick-header-column-active");
-            },
-            beforeStop: (_: any, ui: any) => {
-                this._jQuery(ui.helper).removeClass("slick-header-column-active");
-                if (hasGrouping) {
-                    var headerDraggableGroupBy = this._jQuery(this.getGroupingPanel());
-                    var hasDroppedColumn = headerDraggableGroupBy
-                        .find(".slick-dropped-grouping").length;
-                    if (hasDroppedColumn > 0) {
-                        headerDraggableGroupBy.find(".slick-dropped-placeholder").hide();
-                        headerDraggableGroupBy.find(".slick-dropped-grouping").show();
-                    }
-                }
-            },
-            sort: (e: IEventData) => {
-                if (canDragScroll && (e.originalEvent as any).pageX > this._container.clientWidth) {
+                    Grid.offset(e.item)!.left > Grid.offset(this._layout.getScrollContainerX())!.left;
+
+                if (canDragScroll && e.originalEvent && e.originalEvent.pageX > this._container.clientWidth) {
                     if (!(columnScrollTimer)) {
-                        columnScrollTimer = setInterval(
-                            scrollColumnsRight, 100);
+                        columnScrollTimer = setInterval(scrollColumnsRight, 100);
                     }
-                } else if (canDragScroll && (e.originalEvent as any).pageX < this._jQuery(this._layout.getScrollContainerX()).offset().left) {
+                } else if (canDragScroll && e.originalEvent && e.originalEvent.pageX < Grid.offset(this._layout.getScrollContainerX())!.left) {
                     if (!(columnScrollTimer)) {
-                        columnScrollTimer = setInterval(
-                            scrollColumnsLeft, 100);
+                        columnScrollTimer = setInterval(scrollColumnsLeft, 100);
                     }
                 } else {
                     clearInterval(columnScrollTimer);
                     columnScrollTimer = null;
                 }
             },
-            stop: (e: any) => {
-                var cancel = false;
+            onEnd: (e: MouseEvent & { item: any; originalEvent: MouseEvent; }) => {
+                const cancel = false;
                 clearInterval(columnScrollTimer);
                 columnScrollTimer = null;
-
-                if (cancel || !this.getEditorLock().commitCurrentEdit()) {
-                    (this._jQuery(e.target) as any).sortable("cancel");
+                if (cancel || !this.getEditorLock()?.commitCurrentEdit()) {
                     return;
                 }
 
                 var reorderedCols;
-                this._layout.getHeaderCols().forEach(el =>
-                    reorderedCols = sortToDesiredOrderAndKeepRest(this._initCols,
-                        (this._jQuery(el) as any).sortable("toArray").map((x: string) => x.substring(this._uid.length))));
+                this._layout.getHeaderCols().forEach((el, i) => reorderedCols = sortToDesiredOrderAndKeepRest(
+                    this._initCols,
+                    (this.sortableColInstances[i]?.toArray?.() ?? [])
+                ));
 
                 this.setColumns(reorderedCols);
                 this.trigger(this.onColumnsReordered, {});
                 e.stopPropagation();
                 this.setupColumnResize();
+                if (this._activeCellNode) {
+                    this.setFocus(); // refocus on active cell
+                }
             }
-        });
+        }
+
+        // @ts-ignore
+        this.sortableColInstances = this._layout.getHeaderCols().map(x => Sortable.create(x, sortableOptions));
     }
 
     private setupColumnResize(): void {
@@ -2608,8 +2602,8 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private handleMouseWheel(e: MouseEvent, delta: number, deltaX: number, deltaY: number): void {
-        deltaX = (typeof deltaX == "undefined" ? (e as any).originalEvent.deltaX : deltaX) || 0;
-        deltaY = (typeof deltaY == "undefined" ? (e as any).originalEvent.deltaY : deltaY) || 0;
+        deltaX = (typeof deltaX == "undefined" ? (e as any).originalEvent?.deltaX : deltaX) || 0;
+        deltaY = (typeof deltaY == "undefined" ? (e as any).originalEvent?.deltaY : deltaY) || 0;
         this._scrollTop = Math.max(0, this._layout.getScrollContainerY().scrollTop - (deltaY * this._options.rowHeight));
         this._scrollLeft = this._layout.getScrollContainerX().scrollLeft + (deltaX * 10);
         this.handleScroll(true);
@@ -3914,3 +3908,4 @@ export class Grid<TItem = any> implements EditorHost {
         this._selectionModel.setSelectedRanges(this.rowsToRanges(rows));
     }
 }
+
