@@ -1216,22 +1216,22 @@ export class Grid<TItem = any> implements EditorHost {
 
     /** Gets a column by its ID. May also return non visible columns */
     getColumnById(id: string): Column<TItem> {
-        return this._cols[this._colById[id]];
+        return id ? this._cols[this._colById[id]] : null;
     }
 
     /** Returns a column's index in the visible columns list by its column ID */
     getColumnIndex(id: string): number {
-        return this._colById[id];
+        return id ? this._colById[id] : null; 
     }
 
     /** Gets index of a column in the initial column list passed to the grid, or setColumns method. May include invisible cols and index does not have to match visible column order. */
     getInitialColumnIndex(id: string): number {
-        return this._initColById[id];
+        return id ? this._initColById[id] : null;
     }  
 
     /** Gets a view (e.g. visible) column by its column ID */
     getVisibleColumnById(id: string): Column<TItem> {
-        return this._cols[this._colById[id]];
+        return id ? this._cols[this._colById[id]] : null;
     }
 
     autosizeColumns(): void {
