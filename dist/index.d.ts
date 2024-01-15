@@ -759,10 +759,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	readonly onSort: EventEmitter<ArgsSort, IEventData>;
 	readonly onValidationError: EventEmitter<ArgsValidationError, IEventData>;
 	readonly onViewportChanged: EventEmitter<ArgsGrid, IEventData>;
-	constructor(container: HTMLElement | {
-		jquery: string;
-		length: number;
-	}, data: any, columns: Column<TItem>[], options: GridOptions<TItem>);
+	constructor(container: HTMLElement | ArrayLike<HTMLElement>, data: any, columns: Column<TItem>[], options: GridOptions<TItem>);
 	private createGroupingPanel;
 	private bindAncestorScroll;
 	init(): void;
@@ -805,6 +802,8 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private createColumnFooters;
 	private createColumnHeaders;
 	private setupColumnSort;
+	private static offset;
+	private sortableColInstances;
 	private setupColumnReorder;
 	private setupColumnResize;
 	private setOverflow;
@@ -816,15 +815,23 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private trigger;
 	getEditorLock(): EditorLock;
 	getEditController(): EditController;
+	/** Gets a column by its ID. May also return non visible columns */
+	getColumnById(id: string): Column<TItem>;
+	/** Returns a column's index in the visible columns list by its column ID */
 	getColumnIndex(id: string): number;
+	/** Gets index of a column in the initial column list passed to the grid, or setColumns method. May include invisible cols and index does not have to match visible column order. */
 	getInitialColumnIndex(id: string): number;
+	/** Gets a view (e.g. visible) column by its column ID */
+	getVisibleColumnById(id: string): Column<TItem>;
 	autosizeColumns(): void;
 	private applyColumnHeaderWidths;
 	setSortColumn(columnId: string, ascending: boolean): void;
 	setSortColumns(cols: ColumnSort[]): void;
 	getSortColumns(): ColumnSort[];
 	private handleSelectedRangesChanged;
+	/** Returns visible columns in order */
 	getColumns(): Column<TItem>[];
+	/** Returns list of columns passed to the grid constructor, or setColumns method. May include invisible columns and order does not match visible column order. */
 	getInitialColumns(): Column<TItem>[];
 	private updateViewColLeftRight;
 	private setInitialCols;

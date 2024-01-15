@@ -1214,12 +1214,24 @@ export class Grid<TItem = any> implements EditorHost {
         return this._editController;
     }
 
+    /** Gets a column by its ID. May also return non visible columns */
+    getColumnById(id: string): Column<TItem> {
+        return this._cols[this._colById[id]];
+    }
+
+    /** Returns a column's index in the visible columns list by its column ID */
     getColumnIndex(id: string): number {
         return this._colById[id];
     }
 
+    /** Gets index of a column in the initial column list passed to the grid, or setColumns method. May include invisible cols and index does not have to match visible column order. */
     getInitialColumnIndex(id: string): number {
         return this._initColById[id];
+    }  
+
+    /** Gets a view (e.g. visible) column by its column ID */
+    getVisibleColumnById(id: string): Column<TItem> {
+        return this._cols[this._colById[id]];
     }
 
     autosizeColumns(): void {
@@ -1339,10 +1351,12 @@ export class Grid<TItem = any> implements EditorHost {
         }
     }
 
+    /** Returns visible columns in order */
     getColumns(): Column<TItem>[] {
         return this._cols;
     }
 
+    /** Returns list of columns passed to the grid constructor, or setColumns method. May include invisible columns and order does not match visible column order. */
     getInitialColumns(): Column<TItem>[] {
         return this._initCols;
     }
