@@ -866,6 +866,8 @@ export class Grid<TItem = any> implements EditorHost {
             chosenClass: 'slick-header-column-active',
             ghostClass: 'slick-sortable-placeholder',
             draggable: '.slick-header-column',
+            filter: ".slick-resizable-handle",
+            preventOnFilter: false,
             dragoverBubble: false,
             revertClone: true,
             scroll: !this.hasFrozenColumns(), // enable auto-scroll
