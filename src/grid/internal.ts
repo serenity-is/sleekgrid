@@ -373,7 +373,10 @@ export interface CachedRow {
     // Column indices of cell nodes that have been rendered, but not yet indexed in
     // cellNodesByColumnIdx.  These are in the same order as cell nodes added at the
     // end of the row.
-    cellRenderQueue: number[]
+    cellRenderQueue: number[];
+
+    // Elements returned from formatters for cells in cellRenderQueue.
+    cellRenderContent: (Element | DocumentFragment)[];
 }
 
 export interface GoToResult {

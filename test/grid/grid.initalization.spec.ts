@@ -76,8 +76,7 @@ describe('Grid columns', () => {
         if (colDefaultFirstProperty)
             expect((gridColumns[0] as any)[colDefaultFirstProperty]).toBe("123");
 
-        for (let i = 1; i < gridColumns.length; i++)
-        {
+        for (let i = 1; i < gridColumns.length; i++) {
             expect(gridColumns[i].width).toBe(456);
             if (colDefaultFirstProperty)
                 expect((gridColumns[i] as any)[colDefaultFirstProperty]).toBe((columnDefaults as any)[colDefaultFirstProperty]);
@@ -88,12 +87,15 @@ describe('Grid columns', () => {
 describe('options', () => {
     it('should be able to set jQuery from options', () => {
         function MockJQueryStatic(el: HTMLElement) {
+
+            if (!(this instanceof MockJQueryStatic)) {
+                return new (MockJQueryStatic as any)(el);
+            }
+
             this.el = el;
-
-            this.empty = () => this;
-            this.on = () => this;
-
-            return this;
+            this.empty = function () { return this };
+            this.on = function () { return this }
+            this.remove = function () { return this }
         }
 
         Object.defineProperty(MockJQueryStatic.prototype, 0, {
@@ -114,10 +116,9 @@ describe('options', () => {
             jQuery: MockJQueryStatic as any
         };
 
-        const container = new (MockJQueryStatic as any)(document.createElement("div"));
+        const container = MockJQueryStatic(document.createElement("div"));
         const grid = new Grid(container as any, [], [], gridOptions);
 
-        expect(container).toBeInstanceOf(MockJQueryStatic);
         expect(grid.getContainerNode()).toBe(container[0]);
         expect(gridOptions.jQuery).toStrictEqual(MockJQueryStatic);
     });
@@ -194,8 +195,8 @@ describe('options', () => {
             throw new Error("Grid was initialized");
         };
 
-         new Grid(document.createElement("div"), [{"c1": 1}], [{field: "c1"}], gridOptions);
-         Grid.prototype.init = oldInit;
+        new Grid(document.createElement("div"), [{ "c1": 1 }], [{ field: "c1" }], gridOptions);
+        Grid.prototype.init = oldInit;
     });
 });
 
@@ -306,14 +307,14 @@ describe('layout', () => {
         const layoutEngine = new BasicLayout();
         const oldInit = layoutEngine.init;
 
-        layoutEngine.init = function(grid: LayoutHost) {
+        layoutEngine.init = function (grid: LayoutHost) {
             layoutHostGrid = grid;
 
             oldInit(grid);
         };
 
         const container = document.createElement("div");
-        const grid = new Grid(container, [{c1: 1}], [{field: "c1"}], { layoutEngine: layoutEngine });
+        const grid = new Grid(container, [{ c1: 1 }], [{ field: "c1" }], { layoutEngine: layoutEngine });
 
         expect(layoutHostGrid.getCellFromPoint(0, 0)).toEqual(grid.getCellFromPoint(0, 0));
         expect(layoutHostGrid.getColumns()).toEqual(grid.getColumns());
@@ -347,7 +348,7 @@ describe('data event bindings', () => {
         let onRowCountChangedSubscribeCalls = 0;
         const data = {
             onRowCountChanged: {
-                subscribe: () => {onRowCountChangedSubscribeCalls++;}
+                subscribe: () => { onRowCountChangedSubscribeCalls++; }
             }
         };
 
@@ -360,7 +361,7 @@ describe('data event bindings', () => {
         let onRowsChangedSubscribeCalls = 0;
         const data = {
             onRowsChanged: {
-                subscribe: () => {onRowsChangedSubscribeCalls++;}
+                subscribe: () => { onRowsChangedSubscribeCalls++; }
             }
         };
 
@@ -373,7 +374,7 @@ describe('data event bindings', () => {
         let onDataChangedSubscribeCalls = 0;
         const data = {
             onDataChanged: {
-                subscribe: () => {onDataChangedSubscribeCalls++;}
+                subscribe: () => { onDataChangedSubscribeCalls++; }
             }
         };
 
@@ -386,8 +387,8 @@ describe('data event bindings', () => {
         let onRowCountChangedUnsubscribeCalls = 0;
         const data = {
             onRowCountChanged: {
-                subscribe: () => {},
-                unsubscribe: () => {onRowCountChangedUnsubscribeCalls++;}
+                subscribe: () => { },
+                unsubscribe: () => { onRowCountChangedUnsubscribeCalls++; }
             }
         };
 
@@ -401,8 +402,8 @@ describe('data event bindings', () => {
         let onRowsChangedUnsubscribeCalls = 0;
         const data = {
             onRowsChanged: {
-                subscribe: () => {},
-                unsubscribe: () => {onRowsChangedUnsubscribeCalls++;}
+                subscribe: () => { },
+                unsubscribe: () => { onRowsChangedUnsubscribeCalls++; }
             }
         };
 
@@ -416,8 +417,8 @@ describe('data event bindings', () => {
         let onDataChangedUnsubscribeCalls = 0;
         const data = {
             onDataChanged: {
-                subscribe: () => {},
-                unsubscribe: () => {onDataChangedUnsubscribeCalls++;}
+                subscribe: () => { },
+                unsubscribe: () => { onDataChangedUnsubscribeCalls++; }
             }
         };
 

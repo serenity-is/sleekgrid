@@ -14,6 +14,7 @@ export interface GridOptions<TItem = any> {
     autoHeight?: boolean;
     cellFlashingCssClass?: string;
     cellHighlightCssClass?: string;
+    emptyNode?: (node: Element) => void;
     columns?: Column<TItem>[];
     createPreHeaderPanel?: boolean;
     dataItemColumnValueExtractor?: (item: TItem, column: Column<TItem>) => void;
@@ -56,6 +57,7 @@ export interface GridOptions<TItem = any> {
     multiSelect?: boolean;
     preHeaderPanelHeight?: number;
     renderAllCells?: boolean;
+    removeNode?: (node: Element) => void;
     rowHeight?: number;
     rtl?: boolean;
     selectedCellCssClass?: string;

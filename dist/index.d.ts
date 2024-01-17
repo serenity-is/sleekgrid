@@ -18,13 +18,14 @@ export interface FormatterContext<TItem = any> {
 	item?: TItem;
 	row?: number;
 	tooltip?: string;
-	/** when returning a formatter result, prefer ctx.escape() to avoid html injection attacks! */
+	/** when returning a formatter result, prefer ctx.escape() to avoid script injection attacks! */
 	value?: any;
 }
-export type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => string;
+export type FormatterResult = (string | Element | DocumentFragment);
+export type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => FormatterResult;
 export interface CompatFormatterResult {
 	addClasses?: string;
-	text?: string;
+	text?: FormatterResult;
 	toolTip?: string;
 }
 export type CompatFormatter<TItem = any> = (row: number, cell: number, value: any, column: Column<TItem>, item: TItem, grid?: any) => string | CompatFormatterResult;
@@ -41,7 +42,7 @@ export type CellStylesHash = {
 };
 export declare function defaultColumnFormat(ctx: FormatterContext): any;
 export declare function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat;
-export declare function applyFormatterResultToCellNode(ctx: FormatterContext, html: string, node: HTMLElement): void;
+export declare function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement): void;
 /***
  * Information about a group of rows.
  */
@@ -586,6 +587,7 @@ export interface GridOptions<TItem = any> {
 	autoHeight?: boolean;
 	cellFlashingCssClass?: string;
 	cellHighlightCssClass?: string;
+	emptyNode?: (node: Element) => void;
 	columns?: Column<TItem>[];
 	createPreHeaderPanel?: boolean;
 	dataItemColumnValueExtractor?: (item: TItem, column: Column<TItem>) => void;
@@ -631,6 +633,7 @@ export interface GridOptions<TItem = any> {
 	multiSelect?: boolean;
 	preHeaderPanelHeight?: number;
 	renderAllCells?: boolean;
+	removeNode?: (node: Element) => void;
 	rowHeight?: number;
 	rtl?: boolean;
 	selectedCellCssClass?: string;
@@ -672,6 +675,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private _currentEditor;
 	private _data;
 	private _editController;
+	private _emptyNode;
 	private _headerColumnWidthDiff;
 	private _hEditorLoader;
 	private _hPostRender;
@@ -700,6 +704,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private _postProcessGroupId;
 	private _postProcessToRow;
 	private _postRenderActive;
+	private _removeNode;
 	private _rowsCache;
 	private _scrollDims;
 	private _scrollLeft;
@@ -830,7 +835,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	setSortColumns(cols: ColumnSort[]): void;
 	getSortColumns(): ColumnSort[];
 	private handleSelectedRangesChanged;
-	/** Returns visible columns in order */
+	/** Returns only the visible columns in order */
 	getColumns(): Column<TItem>[];
 	/** Returns list of columns passed to the grid constructor, or setColumns method. May include invisible columns and order does not match visible column order. */
 	getInitialColumns(): Column<TItem>[];

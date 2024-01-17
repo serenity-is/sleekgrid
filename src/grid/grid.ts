@@ -1,4 +1,4 @@
-import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventEmitter, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize, parsePx, GroupTotals, ColumnMetadata } from "../core";
+import { addClass, applyFormatterResultToCellNode, escape, CellStylesHash, Column, columnDefaults, ColumnFormat, ColumnSort, convertCompatFormatter, defaultColumnFormat, disableSelection, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventEmitter, EventData, FormatterContext, H, IEventData, initializeColumns, ItemMetadata, Position, preClickClassName, Range, removeClass, RowCell, titleize, parsePx, GroupTotals, ColumnMetadata, FormatterResult } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
@@ -6,7 +6,6 @@ import { gridDefaults, GridOptions } from "./gridoptions";
 import { absBox, addUiStateHover, autosizeColumns, CachedRow, calcMinMaxPageXOnDragStart, getInnerWidth, getMaxSupportedCssHeight, getScrollBarDimensions, getVBoxDelta, PostProcessCleanupEntry, removeUiStateHover, shrinkOrStretchColumn, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
 import { LayoutEngine } from "./layout";
 import { IPlugin, SelectionModel, ViewportInfo, ViewRange } from "./types";
-
 
 export class Grid<TItem = any> implements EditorHost {
     private _absoluteColMinWidth: number;
@@ -30,6 +29,7 @@ export class Grid<TItem = any> implements EditorHost {
     private _currentEditor: Editor = null;
     private _data: any;
     private _editController: EditController;
+    private _emptyNode: (node: Element) => void;
     private _headerColumnWidthDiff: number = 0;
     private _hEditorLoader: number = null;
     private _hPostRender: number = null;
@@ -58,6 +58,7 @@ export class Grid<TItem = any> implements EditorHost {
     private _postProcessGroupId: number = 0;
     private _postProcessToRow: number = null;
     private _postRenderActive: boolean;
+    private _removeNode: (node: Element) => void;
     private _rowsCache: { [key: number]: CachedRow } = {};
     private _scrollDims: { width: number, height: number };
     private _scrollLeft: number = 0;
@@ -143,6 +144,9 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         this._container.classList.add('slick-container');
+
+        this._emptyNode = options.emptyNode ?? (this._jQuery ? (function(node: Element) { this(node).empty(); }).bind(this._jQuery) : (function(node: Element) { node.innerHTML = ""; }));
+        this._removeNode = options.removeNode ?? (this._jQuery ? (function(node: Element) { this(node).remove(); }).bind(this._jQuery) : (function(node: Element) { node.remove(); }));
 
         if (options?.createPreHeaderPanel) {
             // for compat, as draggable grouping plugin expects preHeaderPanel for grouping
@@ -660,12 +664,7 @@ export class Grid<TItem = any> implements EditorHost {
                     }
                 });
 
-            if (this._jQuery) {
-                this._jQuery(hc).empty();
-            }
-            else {
-                hc.innerHTML = '';
-            }
+            this._emptyNode(hc);
         });
 
         this._layout.updateHeadersWidth();
@@ -927,7 +926,8 @@ export class Grid<TItem = any> implements EditorHost {
         var j: number, c: Column<TItem>, pageX: number, minPageX: number, maxPageX: number, firstResizable: number, lastResizable: number, cols = this._cols;
         var firstResizable: number, lastResizable: number;
         columnElements.forEach((el, i) => {
-            el.querySelector(".slick-resizable-handle")?.remove();
+            var handle = el.querySelector(".slick-resizable-handle");
+            handle && this._removeNode(handle);
             if (cols[i].resizable) {
                 if (firstResizable === undefined) {
                     firstResizable = i;
@@ -1189,7 +1189,7 @@ export class Grid<TItem = any> implements EditorHost {
         if (this._jQuery)
             this._jQuery(canvasNodes).off("draginit dragstart dragend drag");
         else
-            canvasNodes.forEach(el => el.remove());
+            canvasNodes.forEach(el => this._removeNode(el));
 
         for (var k in this) {
             if (!Object.prototype.hasOwnProperty.call(this, k))
@@ -1470,7 +1470,7 @@ export class Grid<TItem = any> implements EditorHost {
         if (args.groupingPanel && !this._options.groupingPanel)
             this.createGroupingPanel();
         else if (args.groupingPanel != void 0 && !args.groupingPanel && this._groupingPanel)
-            this._groupingPanel.remove();
+            this._removeNode(this._groupingPanel);
 
         if (args.showColumnHeader !== undefined) {
             this.setColumnHeaderVisibility(args.showColumnHeader);
@@ -1884,7 +1884,7 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
-        var html: string;
+        var formatResult: FormatterResult;
         const ctx: FormatterContext = {
             cell,
             column,
@@ -1896,7 +1896,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         if (item) {
             ctx.value = this.getDataItemValueForColumn(item, column);
-            html = this.getFormatter(row, column)(ctx);
+            formatResult = this.getFormatter(row, column)(ctx);
         }
 
         klass = escape(klass);
@@ -1924,17 +1924,19 @@ export class Grid<TItem = any> implements EditorHost {
             if (toolTip != null && toolTip.length)
                 sb.push('tooltip="' + escape(toolTip) + '"');
 
-            if (html != null)
-                sb.push('>' + html + '</div>');
+            if (formatResult != null)
+                sb.push('>' + formatResult + '</div>');
             else
                 sb.push('></div>');
         }
-        else if (html != null)
-            sb.push('<div class="' + klass + '">' + html + '</div>');
+        else if (formatResult != null &&  !(formatResult instanceof Node))
+            sb.push('<div class="' + klass + '">' + formatResult + '</div>');
         else
             sb.push('<div class="' + klass + '"></div>');
 
-        this._rowsCache[row].cellRenderQueue.push(cell);
+        var cache = this._rowsCache[row];
+        cache.cellRenderQueue.push(cell);
+        cache.cellRenderContent.push(formatResult instanceof Node ? formatResult : void 0);
         this._rowsCache[row].cellColSpans[cell] = colspan;
     }
 
@@ -2004,7 +2006,7 @@ export class Grid<TItem = any> implements EditorHost {
             columnIdx: columnIdx,
             rowIdx: rowIdx
         });
-        this._jQuery ? this._jQuery(cellnode).remove() : cellnode.remove();
+        cellnode.remove(); // cleanup should be handled by postprocess
     }
 
     private removeRowFromCache(row: number): void {
@@ -2061,11 +2063,12 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private updateCellWithFormatter(cellNode: HTMLElement, row: number, cell: number): void {
-        var html: string;
+        var formatResult: string | Element | DocumentFragment;
         const ctx = this.getFormatterContext(row, cell);
         if (ctx.item)
-            html = this.getFormatter(row, ctx.column)(ctx);
-        applyFormatterResultToCellNode(ctx, html, cellNode);
+            formatResult = this.getFormatter(row, ctx.column)(ctx);
+        this._emptyNode(cellNode);
+        applyFormatterResultToCellNode(ctx, formatResult, cellNode);
     }
 
     updateRow(row: number): void {
@@ -2300,8 +2303,11 @@ export class Grid<TItem = any> implements EditorHost {
                 var lastChild = cacheEntry.rowNodeR?.lastElementChild ?? cacheEntry.rowNodeL?.lastElementChild;
                 while (lastChild && cacheEntry.cellRenderQueue.length) {
                     var columnIdx = cacheEntry.cellRenderQueue.pop();
+                    var element = cacheEntry.cellRenderContent.pop();
 
                     cacheEntry.cellNodesByColumnIdx[columnIdx] = lastChild as HTMLElement;
+                    if (element instanceof Node)
+                        lastChild.appendChild(element);
                     lastChild = lastChild.previousElementSibling;
 
                     if (lastChild == null)
@@ -2345,7 +2351,7 @@ export class Grid<TItem = any> implements EditorHost {
             if (this._postCleanupActive && this._postProcessedRows[row] && this._postProcessedRows[row][cellToRemove]) {
                 this.queuePostProcessedCellForCleanup(node, cellToRemove, row);
             } else {
-                node.parentElement.removeChild(node);
+                this._removeNode(node);
             }
 
             delete cacheEntry.cellColSpans[cellToRemove];
@@ -2363,6 +2369,7 @@ export class Grid<TItem = any> implements EditorHost {
         var cellsAdded;
         var colspan;
         var cols = this._cols;
+        var cellContents: Element[] = [];
 
         for (var row = range.top, btm = range.bottom; row <= btm; row++) {
             cacheEntry = this._rowsCache[row];
@@ -2432,7 +2439,10 @@ export class Grid<TItem = any> implements EditorHost {
             cacheEntry = this._rowsCache[processedRow];
             var columnIdx;
             while ((columnIdx = cacheEntry.cellRenderQueue.pop()) != null) {
+                var element = cacheEntry.cellRenderContent.pop();
                 node = x.lastElementChild as HTMLElement;
+                if (element instanceof Node)
+                    node.appendChild(element);
 
                 if (frozenCols > 0 && columnIdx >= frozenCols) {
                     cacheEntry.rowNodeR.appendChild(node);
@@ -2476,7 +2486,9 @@ export class Grid<TItem = any> implements EditorHost {
                 // Column indices of cell nodes that have been rendered, but not yet indexed in
                 // cellNodesByColumnIdx.  These are in the same order as cell nodes added at the
                 // end of the row.
-                cellRenderQueue: []
+                cellRenderQueue: [],
+
+                cellRenderContent: []
             };
 
             this.appendRowHtml(stringArrayL, stringArrayR, i, range, dataLength);
@@ -2495,13 +2507,16 @@ export class Grid<TItem = any> implements EditorHost {
         l.innerHTML = stringArrayL.join("");
         r.innerHTML = stringArrayR.join("");
 
+
         const layout = this._layout;
         for (var i = 0, ii = rows.length; i < ii; i++) {
             var row = rows[i];
-            var item = this._rowsCache[row];
-            item.rowNodeL = l.firstElementChild as HTMLElement;
-            item.rowNodeR = r.firstElementChild as HTMLElement;
-            layout.appendCachedRow(row, item.rowNodeL, item.rowNodeR);
+            var cache = this._rowsCache[row];
+            cache.rowNodeL = l.firstElementChild as HTMLElement;
+            cache.rowNodeR = r.firstElementChild as HTMLElement;
+            layout.appendCachedRow(row, cache.rowNodeL, cache.rowNodeR);
+            if (cache.cellRenderContent.some(x => x instanceof Node))
+                this.ensureCellNodesInRowsCache(row);
         }
 
         if (needToReselectCell) {
@@ -2771,7 +2786,7 @@ export class Grid<TItem = any> implements EditorHost {
                     var column = cols[entry.columnIdx];
                     if (column && column.asyncPostRenderCleanup) {
                         column.asyncPostRenderCleanup(entry.cellNode, entry.rowIdx, column);
-                        entry.cellNode.remove();
+                        this._removeNode(entry.cellNode);
                     }
                 }
             }

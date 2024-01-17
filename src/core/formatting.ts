@@ -12,15 +12,16 @@ export interface FormatterContext<TItem = any> {
     item?: TItem;
     row?: number;
     tooltip?: string;
-    /** when returning a formatter result, prefer ctx.escape() to avoid html injection attacks! */
+    /** when returning a formatter result, prefer ctx.escape() to avoid script injection attacks! */
     value?: any;
 }
 
-export type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => string;
+export type FormatterResult = (string | Element | DocumentFragment);
+export type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => FormatterResult;
 
 export interface CompatFormatterResult {
     addClasses?: string;
-    text?: string;
+    text?: FormatterResult;
     toolTip?: string;
 }
 
@@ -44,7 +45,7 @@ export function convertCompatFormatter(compatFormatter: CompatFormatter): Column
     if (compatFormatter == null)
         return null;
 
-    return function(ctx: FormatterContext): string {
+    return function(ctx: FormatterContext): FormatterResult {
         var fmtResult = compatFormatter(ctx.row, ctx.cell, ctx.value, ctx.column, ctx.item, ctx.grid);
         if (fmtResult != null && typeof fmtResult !== 'string' && Object.prototype.toString.call(fmtResult) === '[object Object]') {
             ctx.addClass = fmtResult.addClasses;
@@ -55,7 +56,7 @@ export function convertCompatFormatter(compatFormatter: CompatFormatter): Column
     }
 }
 
-export function applyFormatterResultToCellNode(ctx: FormatterContext, html: string, node: HTMLElement) {
+export function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement) {
     var oldFmtAtt = node.dataset.fmtatt as string;
     if (oldFmtAtt?.length > 0) {
         for (var k of oldFmtAtt.split(','))
@@ -79,6 +80,9 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: stri
 
     if (html == void 0)
         node.innerHTML = "";
+    else if (html instanceof Node) {
+        node.appendChild(html);
+    }
     else
         node.innerHTML = "" + html;
 
