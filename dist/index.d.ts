@@ -806,6 +806,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private sortableColInstances;
 	private setupColumnReorder;
 	private setupColumnResize;
+	columnsResized(invalidate?: boolean): void;
 	private setOverflow;
 	private measureCellPaddingAndBorder;
 	private createCssRules;

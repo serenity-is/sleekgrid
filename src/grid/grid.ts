@@ -1010,9 +1010,7 @@ export class Grid<TItem = any> implements EditorHost {
                         this.invalidateAllRows();
                     }
                 }
-                this.updateCanvasWidth(true);
-                this.render();
-                this.trigger(this.onColumnsResized);
+                this.columnsResized(false);
             }
 
             if (noJQueryDrag) {
@@ -1028,6 +1026,15 @@ export class Grid<TItem = any> implements EditorHost {
                     .on("dragend", dragEnd);
             }
         });
+    }
+
+    public columnsResized(invalidate = true) {
+        this.applyColumnHeaderWidths();
+        this._layout.applyColumnWidths();
+        invalidate && this.invalidateAllRows();
+        this.updateCanvasWidth(true);
+        this.render();
+        this.trigger(this.onColumnsResized);
     }
 
     private setOverflow(): void {
@@ -1223,13 +1230,13 @@ export class Grid<TItem = any> implements EditorHost {
 
     /** Returns a column's index in the visible columns list by its column ID */
     getColumnIndex(id: string): number {
-        return id ? this._colById[id] : null; 
+        return id ? this._colById[id] : null;
     }
 
     /** Gets index of a column in the initial column list passed to the grid, or setColumns method. May include invisible cols and index does not have to match visible column order. */
     getInitialColumnIndex(id: string): number {
         return id ? this._initColById[id] : null;
-    }  
+    }
 
     /** Gets a view (e.g. visible) column by its column ID */
     getVisibleColumnById(id: string): Column<TItem> {
@@ -1353,7 +1360,7 @@ export class Grid<TItem = any> implements EditorHost {
         }
     }
 
-    /** Returns visible columns in order */
+    /** Returns only the visible columns in order */
     getColumns(): Column<TItem>[] {
         return this._cols;
     }
@@ -1412,6 +1419,22 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     setColumns(columns: Column<TItem>[]): void {
+
+        if (columns &&
+            this._initCols &&
+            this._cols &&
+            columns.length === this._cols.length &&
+            this._initCols.length > this._cols.length &&
+            !columns.some(x => this._cols.indexOf(x) < 0) &&
+            !this._cols.some(x => columns.indexOf(x) < 0)) {
+            // probably called with grid.setColumns(grid.getColumns()) potentially changing orders / widths etc
+            // try to preserve initial columns
+            sortToDesiredOrderAndKeepRest(
+                this._initCols,
+                columns.map(x => x.id));
+            columns = this._initCols;
+        }
+
         this.setInitialCols(columns);
         this.updateViewColLeftRight();
 
