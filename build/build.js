@@ -187,39 +187,3 @@ if (existsSync(join(root, "docs/_config.yml"))) {
     existsSync(join(root, 'dist')) && cpSync(join(root, 'dist'), join(target, 'dist'), { force: true, recursive: true });
     existsSync(join(root, 'lib')) && cpSync(join(root, 'lib'), join(target, 'lib'), { force: true, recursive: true });
 }
-
-function writeIfDifferent(target, content) {
-    if (!existsSync(target) ||
-        readFileSync(target, 'utf8') != content) {
-        writeFileSync(target, content);
-    }
-}
-
-function copyIfDifferent(source, target) {
-    var content = readFileSync(source, 'utf8').replace(/^\/\/#\s*sourceMappingURL=.*\.map\s*$/mg, '');
-    writeIfDifferent(target, content);
-}
-
-const assetsSlick = resolve(join(root, '..', '..', 'src', 'Serenity.Assets', 'wwwroot', 'Scripts', 'SlickGrid'));
-
-if (existsSync(join(assetsSlick, 'slick.core.js'))) {
-    const minify = true;
-    for (var esmOpt of [
-        { file: 'layouts/slick.frozenlayout.js' },
-        { file: 'plugins/slick.autotooltips.js', minify },
-        { file: 'plugins/slick.rowmovemanager.js' },
-        { file: 'plugins/slick.rowselectionmodel.js' },
-        { file: 'slick.core.js', minify },
-        { file: 'slick.editors.js' },
-        { file: 'slick.formatters.js' },
-        { file: 'slick.grid.js', minify },
-        { file: 'slick.groupitemmetadataprovider.js', minify }
-    ]) {
-        var shouldMinify = esmOpt.minify;
-        var sourceFile = join('./dist/compat/' + esmOpt.file);
-        var targetFile = join(assetsSlick, esmOpt.file).replace('/plugins/', '/Plugins/');
-        copyIfDifferent(sourceFile, targetFile);
-        if (shouldMinify)
-            copyIfDifferent(sourceFile.replace(/\.js$/, '.min.js'), targetFile.replace(/\.js$/, '.min.js'));
-    }
-}
