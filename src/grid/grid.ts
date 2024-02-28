@@ -952,6 +952,7 @@ export class Grid<TItem = any> implements EditorHost {
             handle.draggable = true;
 
             var docDragOver: any = null;
+            var lastDragOverPos: any = null;
 
             const dragStart = (e: DragEvent) => {
                 if (!this.getEditorLock().commitCurrentEdit()) {
@@ -960,7 +961,10 @@ export class Grid<TItem = any> implements EditorHost {
                 }
 
                 if (noJQueryDrag) {
-                    docDragOver = (z: DragEvent) => z.preventDefault();
+                    docDragOver = (z: DragEvent) => {
+                        lastDragOverPos = { pageX: z.pageX, pageY: z.pageY };
+                        z.preventDefault();
+                    }
                     document.addEventListener('dragover', docDragOver);
                 }
 
@@ -981,12 +985,14 @@ export class Grid<TItem = any> implements EditorHost {
 
             const drag = (e: DragEvent) => {
                 if (noJQueryDrag) {
-                    if (!e.pageX && !e.clientX && !e.pageY && !e.clientY)
+                    var thisPageX = (!e.pageX && !e.pageY) ? lastDragOverPos?.pageX : e.pageX;
+                    var thisPageY = (!e.pageX && !e.pageY) ? lastDragOverPos?.pageY : e.pageY;
+                    if (!thisPageX && !e.clientX && !thisPageY && !e.clientY)
                         return;
                     e.dataTransfer.effectAllowed = 'none';
                     e.preventDefault();
                 }
-                shrinkOrStretchColumn(cols, colIdx, Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX, this._options.forceFitColumns, this._absoluteColMinWidth);
+                shrinkOrStretchColumn(cols, colIdx, Math.min(maxPageX, Math.max(minPageX, thisPageX)) - pageX, this._options.forceFitColumns, this._absoluteColMinWidth);
 
                 this._layout.afterHeaderColumnDrag();
 
