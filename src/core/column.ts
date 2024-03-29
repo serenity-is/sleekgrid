@@ -1,6 +1,6 @@
+import { EditorClass, ValidationResult } from "./editing";
 import type { AsyncPostCleanup, AsyncPostRender, ColumnFormat, CompatFormatter } from "./formatting";
 import { GroupTotals } from "./group";
-import { EditorClass, ValidationResult } from "./editing";
 
 export interface Column<TItem = any> {
     asyncPostRender?: AsyncPostRender<TItem>;

@@ -1,7 +1,7 @@
 import { escape } from "../core";
-import { PercentCompleteFormatter, PercentCompleteBarFormatter, YesNoFormatter, CheckboxFormatter, CheckmarkFormatter } from "./formatters";
+import { CheckboxFormatter, CheckmarkFormatter, PercentCompleteBarFormatter, PercentCompleteFormatter, YesNoFormatter } from "./formatters";
 
-export * from "./formatters"
+export * from "./formatters";
 
 export namespace Formatters {
     export function PercentComplete(_row: number, _cell: number, value: any) {

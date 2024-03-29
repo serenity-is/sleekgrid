@@ -1,6 +1,6 @@
-import { TextEditor, IntegerEditor, FloatEditor, DateEditor, YesNoSelectEditor, CheckboxEditor, PercentCompleteEditor, LongTextEditor } from "./editors";
+import { CheckboxEditor, DateEditor, FloatEditor, IntegerEditor, LongTextEditor, PercentCompleteEditor, TextEditor, YesNoSelectEditor } from "./editors";
 
-export * from "./editors"
+export * from "./editors";
 
 export namespace Editors {
     export const Text = TextEditor;

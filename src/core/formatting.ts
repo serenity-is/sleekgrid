@@ -1,5 +1,5 @@
-import { addClass, escape, removeClass } from "./util";
 import type { Column } from "./column";
+import { addClass, escape, removeClass } from "./util";
 
 export interface FormatterContext<TItem = any> {
     addAttrs?: { [key: string]: string; };

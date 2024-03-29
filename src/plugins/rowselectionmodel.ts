@@ -1,4 +1,4 @@
-import { EventEmitter, EventSubscriber, H, IEventData, Range } from "../core";
+import { EventEmitter, EventSubscriber, IEventData, Range } from "../core";
 import { ArgsCell, Grid, IPlugin, SelectionModel } from "../grid";
 
 export interface RowSelectionModelOptions {

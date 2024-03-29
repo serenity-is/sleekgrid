@@ -1,5 +1,5 @@
 import type { Column, EditCommand, EditorFactory, EditorLock } from "../core";
-import { ColumnFormat, CompatFormatter, defaultColumnFormat, FormatterFactory, GlobalEditorLock, GroupTotals } from "../core";
+import { ColumnFormat, CompatFormatter, FormatterFactory, GlobalEditorLock, GroupTotals, defaultColumnFormat } from "../core";
 import { LayoutEngine } from "./layout";
 
 export interface GridOptions<TItem = any> {
