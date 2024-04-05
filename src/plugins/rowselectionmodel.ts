@@ -1,4 +1,4 @@
-import { EventEmitter, EventSubscriber, IEventData, Range } from "../core";
+import { EventEmitter, EventSubscriber, IEventData, CellRange } from "../core";
 import { ArgsCell, Grid, IPlugin, SelectionModel } from "../grid";
 
 export interface RowSelectionModelOptions {
@@ -16,7 +16,7 @@ function getRowsRange(from: number, to: number): number[] {
     return rows;
 }
 
-function rangesToRows(ranges: Range[]) {
+function rangesToRows(ranges: CellRange[]) {
     let rows = [];
     for (let i = 0; i < ranges.length; i++) {
         for (let j = ranges[i].fromRow; j <= ranges[i].toRow; j++) {
@@ -31,8 +31,8 @@ export class RowSelectionModel implements IPlugin, SelectionModel {
     private handler = new EventSubscriber();
     private inHandler: boolean;
     private options: RowSelectionModelOptions;
-    private ranges: Range[];
-    onSelectedRangesChanged = new EventEmitter<Range[]>();
+    private ranges: CellRange[];
+    onSelectedRangesChanged = new EventEmitter<CellRange[]>();
 
     constructor(options?: RowSelectionModelOptions) {
         this.options = Object.assign({}, RowSelectionModel.defaults, options);
@@ -63,11 +63,11 @@ export class RowSelectionModel implements IPlugin, SelectionModel {
         }).bind(this);
     }
 
-    private rowsToRanges(rows: number[]): Range[] {
+    private rowsToRanges(rows: number[]): CellRange[] {
         let ranges = [];
         let lastCell = this.grid.getColumns().length - 1;
         for (let i = 0; i < rows.length; i++) {
-            ranges.push(new Range(rows[i], 0, rows[i], lastCell));
+            ranges.push(new CellRange(rows[i], 0, rows[i], lastCell));
         }
         return ranges;
     }
@@ -81,7 +81,7 @@ export class RowSelectionModel implements IPlugin, SelectionModel {
         this.setSelectedRanges(this.rowsToRanges(rows));
     }
 
-    setSelectedRanges(ranges: Range[]): void {
+    setSelectedRanges(ranges: CellRange[]): void {
         // simle check for: empty selection didn't change, prevent firing onSelectedRangesChanged
         if ((!this.ranges || this.ranges.length === 0) && (!ranges || ranges.length === 0))
             return;
@@ -89,13 +89,13 @@ export class RowSelectionModel implements IPlugin, SelectionModel {
         this.onSelectedRangesChanged.notify(this.ranges);
     }
 
-    getSelectedRanges(): Range[] {
+    getSelectedRanges(): CellRange[] {
         return this.ranges;
     }
 
     private handleActiveCellChange(_: IEventData, data: ArgsCell) {
         if (this.options.selectActiveRow && data.row != null) {
-            this.setSelectedRanges([new Range(data.row, 0, data.row, this.grid.getColumns().length - 1)]);
+            this.setSelectedRanges([new CellRange(data.row, 0, data.row, this.grid.getColumns().length - 1)]);
         }
     }
 

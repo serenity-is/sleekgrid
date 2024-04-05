@@ -5,7 +5,7 @@
  * @param toRow {Integer} Optional. Ending row. Defaults to <code>fromRow</code>.
  * @param toCell {Integer} Optional. Ending cell. Defaults to <code>fromCell</code>.
  */
-export class Range {
+export class CellRange {
 
     public fromRow: number;
     public fromCell: number;

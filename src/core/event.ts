@@ -1,5 +1,3 @@
-export type EventListener<TArgs, TEventData extends IEventData = IEventData> = (e: TEventData, args: TArgs) => void;
-
 export interface IEventData {
     readonly type?: string;
     currentTarget?: EventTarget | null;
@@ -57,7 +55,7 @@ export class EventData implements IEventData {
  */
 export class EventEmitter<TArgs = any, TEventData extends IEventData = IEventData> {
 
-    private _handlers: EventListener<TArgs, TEventData>[] = [];
+    private _handlers: ((e: TEventData, args: TArgs) => void)[];
 
     /***
      * Adds an event handler to be called when the event is fired.
@@ -66,7 +64,7 @@ export class EventEmitter<TArgs = any, TEventData extends IEventData = IEventDat
      * @method subscribe
      * @param fn {Function} Event handler.
      */
-    subscribe(fn: EventListener<TArgs, TEventData>) {
+    subscribe(fn: ((e: TEventData, args: TArgs) => void)) {
         this._handlers.push(fn);
     }
 
@@ -75,7 +73,7 @@ export class EventEmitter<TArgs = any, TEventData extends IEventData = IEventDat
      * @method unsubscribe
      * @param fn {Function} Event handler to be removed.
      */
-    unsubscribe(fn: EventListener<TArgs, TEventData>) {
+    unsubscribe(fn: ((e: TEventData, args: TArgs) => void)) {
         for (var i = this._handlers.length - 1; i >= 0; i--) {
             if (this._handlers[i] === fn) {
                 this._handlers.splice(i, 1);
@@ -114,13 +112,13 @@ export class EventEmitter<TArgs = any, TEventData extends IEventData = IEventDat
 
 interface EventSubscriberEntry<TArgs = any, TEventData extends IEventData = IEventData> {
     event: EventEmitter<TArgs, TEventData>;
-    handler: EventListener<TArgs, TEventData>;
+    handler: ((e: TEventData, args: TArgs) => void);
 }
 
 export class EventSubscriber<TArgs = any, TEventData extends IEventData = IEventData>  {
     private _handlers: EventSubscriberEntry<TArgs, TEventData>[] = [];
 
-    subscribe(event: EventEmitter<TArgs, TEventData>, handler: EventListener<TArgs, TEventData>): this {
+    subscribe(event: EventEmitter<TArgs, TEventData>, handler: ((e: TEventData, args: TArgs) => void)): this {
         this._handlers.push({
             event: event,
             handler: handler
@@ -130,7 +128,7 @@ export class EventSubscriber<TArgs = any, TEventData extends IEventData = IEvent
         return this;
     }
 
-    unsubscribe(event: EventEmitter<TArgs, TEventData>, handler: EventListener<TArgs, TEventData>): this {
+    unsubscribe(event: EventEmitter<TArgs, TEventData>, handler: ((e: TEventData, args: TArgs) => void)): this {
         var i = this._handlers.length;
         while (i--) {
             if (this._handlers[i].event === event &&

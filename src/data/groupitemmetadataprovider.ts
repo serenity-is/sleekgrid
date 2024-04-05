@@ -23,7 +23,7 @@ export interface GroupItemMetadataProviderOptions {
 }
 
 export class GroupItemMetadataProvider {
-    protected grid: Pick<Grid, "getActiveCell" | "getColumns" | "getData" | "getDataItem" | "getRenderedRange" | "onClick" | "onKeyDown" | "groupTotalsFormatter">;
+    protected grid: Grid;
     private options: GroupItemMetadataProviderOptions;
 
     constructor(opt?: GroupItemMetadataProviderOptions) {
@@ -60,7 +60,7 @@ export class GroupItemMetadataProvider {
 <span class="${ctx.escape(opt.groupTitleCssClass)}" level="${ctx.escape(item.level)}">${item.title}</span>`;
     }
 
-    public static defaultTotalsFormat(ctx: FormatterContext, grid?: typeof this.prototype["grid"]): string {
+    public static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): string {
         var item = ctx.item as GroupTotals;
         if (!item.__groupTotals && (item as any).totals)
             item = (item as any).totals;
@@ -68,7 +68,7 @@ export class GroupItemMetadataProvider {
             ((grid ?? ctx.grid)?.groupTotalsFormatter?.(item, ctx.column)) ?? "";
     }
     
-    init(grid: typeof this.grid) {
+    init(grid: Grid) {
         this.grid = grid;
         grid.onClick.subscribe(this.handleGridClick);
         grid.onKeyDown.subscribe(this.handleGridKeyDown);

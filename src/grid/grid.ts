@@ -1,4 +1,4 @@
-import { CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, Range, RowCell, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escape, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, CellRange, RowCell, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
@@ -1315,7 +1315,7 @@ export class Grid<TItem = any> implements EditorHost {
         return this._sortColumns;
     }
 
-    private handleSelectedRangesChanged = (e: IEventData, ranges: Range[]): void => {
+    private handleSelectedRangesChanged = (e: IEventData, ranges: CellRange[]): void => {
         var previousSelectedRows = this._selectedRows.slice(0); // shallow copy previously selected rows for later comparison
         this._selectedRows = [];
         var hash: any = {}, cols = this._cols;
@@ -1770,7 +1770,7 @@ export class Grid<TItem = any> implements EditorHost {
             cell,
             column,
             grid: this,
-            escape,
+            escape: escapeHtml,
             item,
             row
         }
@@ -1894,7 +1894,7 @@ export class Grid<TItem = any> implements EditorHost {
         const ctx: FormatterContext = {
             cell,
             column,
-            escape,
+            escape: escapeHtml,
             grid: this,
             item,
             row
@@ -1905,30 +1905,30 @@ export class Grid<TItem = any> implements EditorHost {
             formatResult = this.getFormatter(row, column)(ctx);
         }
 
-        klass = escape(klass);
+        klass = escapeHtml(klass);
 
         if (ctx.addClass?.length || ctx.addAttrs?.length || ctx.tooltip?.length) {
             if (ctx.addClass?.length)
-                klass += (" " + escape(ctx.addClass));
+                klass += (" " + escapeHtml(ctx.addClass));
 
             sb.push('<div class="' + klass + '"');
 
             if (ctx.addClass?.length)
-                sb.push(' data-fmtcls="' + escape(ctx.addClass) + '"');
+                sb.push(' data-fmtcls="' + escapeHtml(ctx.addClass) + '"');
 
             var attrs = ctx.addAttrs;
             if (attrs != null) {
                 var ks = [];
                 for (var k in attrs) {
-                    sb.push(k + '="' + escape(attrs[k]) + '"');
+                    sb.push(k + '="' + escapeHtml(attrs[k]) + '"');
                     ks.push(k);
                 }
-                sb.push(' data-fmtatt="' + escape(ks.join(',')) + '"');
+                sb.push(' data-fmtatt="' + escapeHtml(ks.join(',')) + '"');
             }
 
             var toolTip = ctx.tooltip;
             if (toolTip != null && toolTip.length)
-                sb.push('tooltip="' + escape(toolTip) + '"');
+                sb.push('tooltip="' + escapeHtml(toolTip) + '"');
 
             if (formatResult != null)
                 sb.push('>' + formatResult + '</div>');
@@ -3945,11 +3945,11 @@ export class Grid<TItem = any> implements EditorHost {
         return true;
     }
 
-    private rowsToRanges(rows: number[]): Range[] {
+    private rowsToRanges(rows: number[]): CellRange[] {
         var ranges = [];
         var lastCell = this._cols.length - 1;
         for (var i = 0; i < rows.length; i++) {
-            ranges.push(new Range(rows[i], 0, rows[i], lastCell));
+            ranges.push(new CellRange(rows[i], 0, rows[i], lastCell));
         }
         return ranges;
     }

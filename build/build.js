@@ -50,7 +50,7 @@ const compatCore = {
     entryPoints: ['./src/core/index.ts'],
     outfile: './dist/compat/slick.core.js',
     footer: {
-        js: compatDefaults.footer.js + " Slick.Event = Slick.EventEmitter; Slick.EventHandler = Slick.EventSubscriber; typeof Map !== 'undefined' && (Slick.Map = Map);"
+        js: compatDefaults.footer.js + " Slick.Event = Slick.EventEmitter; Slick.EventHandler = Slick.EventSubscriber; Slick.Range = Slick.CellRange; typeof Map !== 'undefined' && (Slick.Map = Map);"
     }    
 }
 
@@ -59,7 +59,7 @@ const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escape", "defaultColumnFormat", "disableSelection", "EventEmitter", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "Range", "removeClass", "RowCell", "spacerDiv", "titleize"]
+        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escapeHtml", "defaultColumnFormat", "disableSelection", "EventEmitter", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "CellRange", "removeClass", "RowCell", "spacerDiv", "titleize"]
     })]
 }
 
@@ -68,7 +68,7 @@ const compatFormatters = {
     entryPoints: ['./src/formatters/index.ts'],
     outfile: './dist/compat/slick.formatters.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: [ "escape" ]
+        Slick: [ "escapeHtml" ]
     })]
 }
 
@@ -77,7 +77,7 @@ const compatEditors = {
     entryPoints: ['./src/editors/index.ts'],
     outfile: './dist/compat/slick.editors.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: [ "escape", "H", "keyCode", "parsePx" ]
+        Slick: [ "escapeHtml", "H", "keyCode", "parsePx" ]
     })]
 }
 
@@ -113,7 +113,7 @@ const compatPluginsRowSelectionModel = {
     entryPoints: ['./src/plugins/rowselectionmodel.ts'],
     outfile: './dist/compat/plugins/slick.rowselectionmodel.js',
     plugins: [globalExternals(/\.\.\/(core|grid)/, {
-        Slick: ["EventEmitter", "EventSubscriber", "Range"]
+        Slick: ["EventEmitter", "EventSubscriber", "CellRange"]
     })]
 }
 

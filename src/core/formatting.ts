@@ -1,5 +1,5 @@
 import type { Column } from "./column";
-import { addClass, escape, removeClass } from "./util";
+import { addClass, escapeHtml, removeClass } from "./util";
 
 export interface FormatterContext<TItem = any> {
     addAttrs?: { [key: string]: string; };
@@ -38,7 +38,7 @@ export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number
 export type CellStylesHash = { [row: number]: { [columnId: string]: string } }
 
 export function defaultColumnFormat(ctx: FormatterContext) {
-    return escape(ctx.value);
+    return escapeHtml(ctx.value);
 }
 
 export function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat {

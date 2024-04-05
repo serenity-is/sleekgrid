@@ -23,7 +23,7 @@ function escFunc(a: string) {
     return esc[a];
 }
 
-export function escape(s: any) {
+export function escapeHtml(s: any) {
     if (!arguments.length)
         s = this.value;
 
