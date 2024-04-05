@@ -55,7 +55,7 @@ export class EventData implements IEventData {
  */
 export class EventEmitter<TArgs = any, TEventData extends IEventData = IEventData> {
 
-    private _handlers: ((e: TEventData, args: TArgs) => void)[];
+    private _handlers: ((e: TEventData, args: TArgs) => void)[] = [];
 
     /***
      * Adds an event handler to be called when the event is fired.

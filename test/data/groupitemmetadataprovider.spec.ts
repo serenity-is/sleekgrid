@@ -1,4 +1,4 @@
-import { ColumnFormat, CompatFormatter, escape, Group } from "@/core";
+import { ColumnFormat, CompatFormatter, escapeHtml as escape, Group } from "@/core";
 import { GroupItemMetadataProvider } from "@/data/groupitemmetadataprovider"
 
 describe("GroupItemMetadataProvider.defaults", () => {
@@ -69,6 +69,7 @@ describe("GroupItemMetadataProvider constructor", () => {
         expect(provider.getOptions().groupFormat).toBeDefined();
         expect(provider.getOptions().groupFormat({ escape })).toBe("compat");
     });
+
 
     it("uses defaultGroupFormat if none passed", () => {
         var old = GroupItemMetadataProvider.defaultGroupFormat;
@@ -234,7 +235,7 @@ function mockGrid() {
         getColumns: <any>null,
         groupTotalsFormatter: <any>null
     };
-    return grid satisfies typeof GroupItemMetadataProvider.prototype["grid"];
+    return grid as any;
 }
 
 describe("GroupItemMetadataProvider.init", () => {

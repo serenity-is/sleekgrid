@@ -1,4 +1,4 @@
-import { addClass, escape, removeClass, disableSelection, H, spacerDiv } from "@/core/util";
+import { addClass, escapeHtml as escape, removeClass, disableSelection, H, spacerDiv } from "@/core/util";
 
 describe('addClass', () => {
     it('should not do anything if classes to add is null or undefined', () => {

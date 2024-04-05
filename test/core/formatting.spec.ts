@@ -4,7 +4,7 @@ import {
     convertCompatFormatter,
     CompatFormatter, FormatterContext
 } from "@/core/formatting";
-import { escape } from "@/core/util";
+import { escapeHtml as escape } from "@/core/util";
 
 describe('defaultFormatter', () => {
     it('should encode & as &amp;', () => {
