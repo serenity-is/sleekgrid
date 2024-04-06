@@ -26,7 +26,7 @@
   ],
   "scripts": {
     "build": "node build/build",
-    "doc": "typedoc --plugin typedoc-plugin-markdown --readme none --githubPages false --sourceLinkTemplate https://github.com/serenity-is/sleekgrid/blob/master/{path}#L{line} --readme none --out /Sandbox/serenity-is/SerenityIs/SerenityIs.Web/Docs/api/js/sleekgrid --json ./out/typedoc.json src",
+    "doc": "typedoc --plugin typedoc-plugin-markdown --exclude **/lib/**/* --excludePrivate --readme none --githubPages false --sourceLinkTemplate https://github.com/serenity-is/sleekgrid/blob/master/{path}#L{line} --readme none --out /Sandbox/serenity-is/SerenityIs/SerenityIs.Web/Docs/api/js/sleekgrid --json ./out/typedoc.json src",
     "dts": "npx -yes dts-bundle-generator -o dist/index.d.ts src/index.ts --project=./tsconfig.json --no-banner",
     "jest": "jest",
     "prepublishOnly": "pnpm build && jest && pnpm dts",
