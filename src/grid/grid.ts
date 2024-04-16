@@ -757,8 +757,11 @@ export class Grid<TItem = any> implements EditorHost {
 
         this.setSortColumns(this._sortColumns);
         this.setupColumnResize();
-        if (this._options.enableColumnReorder)
+        if (this._options.enableColumnReorder) {
             this.setupColumnReorder();
+            // sortable js removes draggable attribute after disposing / recreating
+            this._layout.getHeaderCols().forEach(el => el.querySelectorAll<HTMLDivElement>(".slick-resizable-handle").forEach(x => x.draggable = true));
+        }
     }
 
     private setupColumnSort(): void {
