@@ -10,7 +10,6 @@
         "ES2015",
         "DOM"
       ],
-      "incremental": false,
       "newLine": "lf",
       "noEmit": true,
       "noEmitHelpers": false,
