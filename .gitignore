@@ -20,3 +20,5 @@ node_modules/
 *.tgz
 
 /out/typedoc.json
+
+*.tsbuildinfo

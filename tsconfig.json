@@ -2,6 +2,7 @@
     "compileOnSave": false,
     "compilerOptions": {
       "allowJs": false,
+      "composite": true,
       "experimentalDecorators": true,
       "declaration": true,
       "emitBOM": true,
@@ -9,6 +10,7 @@
         "ES2015",
         "DOM"
       ],
+      "incremental": false,
       "newLine": "lf",
       "noEmit": true,
       "noEmitHelpers": false,
