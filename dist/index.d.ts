@@ -248,21 +248,21 @@ export interface FormatterContext<TItem = any> {
 	/** when returning a formatter result, prefer ctx.escape() to avoid script injection attacks! */
 	value?: any;
 }
-export type FormatterResult = (string | Element | DocumentFragment);
-export type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => FormatterResult;
+export declare type FormatterResult = (string | Element | DocumentFragment);
+export declare type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => FormatterResult;
 export interface CompatFormatterResult {
 	addClasses?: string;
 	text?: FormatterResult;
 	toolTip?: string;
 }
-export type CompatFormatter<TItem = any> = (row: number, cell: number, value: any, column: Column<TItem>, item: TItem, grid?: any) => string | CompatFormatterResult;
+export declare type CompatFormatter<TItem = any> = (row: number, cell: number, value: any, column: Column<TItem>, item: TItem, grid?: any) => string | CompatFormatterResult;
 export interface FormatterFactory<TItem = any> {
 	getFormat?(column: Column<TItem>): ColumnFormat<TItem>;
 	getFormatter?(column: Column<TItem>): CompatFormatter<TItem>;
 }
-export type AsyncPostRender<TItem = any> = (cellNode: HTMLElement, row: number, item: TItem, column: Column<TItem>, reRender: boolean) => void;
-export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number, column?: Column<TItem>) => void;
-export type CellStylesHash = {
+export declare type AsyncPostRender<TItem = any> = (cellNode: HTMLElement, row: number, item: TItem, column: Column<TItem>, reRender: boolean) => void;
+export declare type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number, column?: Column<TItem>) => void;
+export declare type CellStylesHash = {
 	[row: number]: {
 		[columnId: string]: string;
 	};
@@ -1018,7 +1018,7 @@ export interface ArgsColumn extends ArgsGrid {
 export interface ArgsColumnNode extends ArgsColumn {
 	node: HTMLElement;
 }
-export type ArgsSortCol = {
+export declare type ArgsSortCol = {
 	sortCol: Column;
 	sortAsc: boolean;
 };
