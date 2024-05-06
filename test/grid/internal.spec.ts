@@ -151,14 +151,18 @@ describe('getMaxSupportedCssHeight', () => {
         const oldNavigator = window.navigator;
         Object.defineProperty(window, 'navigator', {
             value: {
-                userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0'
-            }
+                userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0',
+            },
+            configurable: true,
+            writable: true
         });
 
-        expect(getMaxSupportedCssHeight()).toBe(4000000);
+        expect(getMaxSupportedCssHeight(true)).toBe(4000000);
 
         Object.defineProperty(window, 'navigator', {
-            value: oldNavigator
+            value: oldNavigator,
+            configurable: true,
+            writable: true
         });
     });
 
@@ -175,13 +179,17 @@ describe('getMaxSupportedCssHeight', () => {
             Object.defineProperty(window, 'navigator', {
                 value: {
                     userAgent
-                }
+                },
+                configurable: true,
+                writable: true
             });
 
-            expect(userAgent + ": " + getMaxSupportedCssHeight()).toBe(userAgent + ": " + 4000000); // concat to make it easier to debug
+            expect(userAgent + ": " + getMaxSupportedCssHeight(true)).toBe(userAgent + ": " + 32000000); // concat to make it easier to debug
 
             Object.defineProperty(window, 'navigator', {
-                value: oldNavigator
+                value: oldNavigator,
+                configurable: true,
+                writable: true
             });
         });
     });

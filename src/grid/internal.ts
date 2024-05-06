@@ -118,8 +118,10 @@ export function autosizeColumns(cols: Column[], availWidth: number, absoluteColM
     return reRender;
 }
 
-export function getMaxSupportedCssHeight(): number {
-    return maxSupportedCssHeight ?? ((navigator.userAgent.toLowerCase().match(/gecko\//) ? 4000000 : 32000000));
+export function getMaxSupportedCssHeight(recalc?: boolean): number {
+    if (!recalc && maxSupportedCssHeight != null)
+        return maxSupportedCssHeight;
+    return (maxSupportedCssHeight = ((navigator.userAgent.toLowerCase().match(/gecko\//) ? 4000000 : 32000000)));
 }
 
 export function getScrollBarDimensions(recalc?: boolean): { width: number; height: number; } {
@@ -335,7 +337,7 @@ export function removeUiStateHover() {
 export function getVBoxDelta(el: HTMLElement): number {
     if (!el)
         return 0;
-        
+
     var style = getComputedStyle(el);
     if (style.boxSizing === 'border-box')
         return 0;
