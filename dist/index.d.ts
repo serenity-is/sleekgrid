@@ -248,21 +248,21 @@ export interface FormatterContext<TItem = any> {
 	/** when returning a formatter result, prefer ctx.escape() to avoid script injection attacks! */
 	value?: any;
 }
-export declare type FormatterResult = (string | Element | DocumentFragment);
-export declare type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => FormatterResult;
+export type FormatterResult = (string | Element | DocumentFragment);
+export type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => FormatterResult;
 export interface CompatFormatterResult {
 	addClasses?: string;
 	text?: FormatterResult;
 	toolTip?: string;
 }
-export declare type CompatFormatter<TItem = any> = (row: number, cell: number, value: any, column: Column<TItem>, item: TItem, grid?: any) => string | CompatFormatterResult;
+export type CompatFormatter<TItem = any> = (row: number, cell: number, value: any, column: Column<TItem>, item: TItem, grid?: any) => string | CompatFormatterResult;
 export interface FormatterFactory<TItem = any> {
 	getFormat?(column: Column<TItem>): ColumnFormat<TItem>;
 	getFormatter?(column: Column<TItem>): CompatFormatter<TItem>;
 }
-export declare type AsyncPostRender<TItem = any> = (cellNode: HTMLElement, row: number, item: TItem, column: Column<TItem>, reRender: boolean) => void;
-export declare type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number, column?: Column<TItem>) => void;
-export declare type CellStylesHash = {
+export type AsyncPostRender<TItem = any> = (cellNode: HTMLElement, row: number, item: TItem, column: Column<TItem>, reRender: boolean) => void;
+export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number, column?: Column<TItem>) => void;
+export type CellStylesHash = {
 	[row: number]: {
 		[columnId: string]: string;
 	};
@@ -1018,7 +1018,7 @@ export interface ArgsColumn extends ArgsGrid {
 export interface ArgsColumnNode extends ArgsColumn {
 	node: HTMLElement;
 }
-export declare type ArgsSortCol = {
+export type ArgsSortCol = {
 	sortCol: Column;
 	sortAsc: boolean;
 };
@@ -1083,7 +1083,7 @@ export declare namespace Formatters {
 	function Checkbox(_row: number, _cell: number, value: any): string;
 	function Checkmark(_row: number, _cell: number, value: any): "" | "<i class=\"slick-checkmark\"></i>";
 }
-declare abstract class BaseEditor {
+declare abstract class BaseCellEdit {
 	protected _input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 	protected _defaultValue: any;
 	protected _args: EditorOptions;
@@ -1099,15 +1099,15 @@ declare abstract class BaseEditor {
 	isValueChanged(): boolean;
 	validate(): ValidationResult;
 }
-export declare class TextEditor extends BaseEditor {
+export declare class TextCellEdit extends BaseCellEdit {
 	_input: HTMLInputElement;
 	init(): void;
 }
-export declare class IntegerEditor extends TextEditor {
+export declare class IntegerCellEdit extends TextCellEdit {
 	serializeValue(): number;
 	validate(): ValidationResult;
 }
-export declare class FloatEditor extends TextEditor {
+export declare class FloatCellEdit extends TextCellEdit {
 	static AllowEmptyValue: boolean;
 	static DefaultDecimalPlaces: number;
 	getDecimalPlaces(): number;
@@ -1115,7 +1115,7 @@ export declare class FloatEditor extends TextEditor {
 	serializeValue(): any;
 	validate(): ValidationResult;
 }
-export declare class DateEditor extends TextEditor {
+export declare class DateCellEdit extends TextCellEdit {
 	private _calendarOpen;
 	init(): void;
 	destroy(): void;
@@ -1123,7 +1123,7 @@ export declare class DateEditor extends TextEditor {
 	hide(): void;
 	position(position: Position): void;
 }
-export declare class YesNoSelectEditor extends BaseEditor {
+export declare class YesNoSelectCellEdit extends BaseCellEdit {
 	_input: HTMLSelectElement;
 	init(): void;
 	loadValue(item: any): void;
@@ -1134,7 +1134,7 @@ export declare class YesNoSelectEditor extends BaseEditor {
 		msg: string;
 	};
 }
-export declare class CheckboxEditor extends BaseEditor {
+export declare class CheckboxCellEdit extends BaseCellEdit {
 	_input: HTMLInputElement;
 	init(): void;
 	loadValue(item: any): void;
@@ -1147,12 +1147,12 @@ export declare class CheckboxEditor extends BaseEditor {
 		msg: string;
 	};
 }
-export declare class PercentCompleteEditor extends IntegerEditor {
+export declare class PercentCompleteCellEdit extends IntegerCellEdit {
 	protected _picker: HTMLDivElement;
 	init(): void;
 	destroy(): void;
 }
-export declare class LongTextEditor extends BaseEditor {
+export declare class LongTextCellEdit extends BaseCellEdit {
 	_input: HTMLTextAreaElement;
 	protected _container: HTMLElement;
 	protected _wrapper: HTMLDivElement;
@@ -1166,14 +1166,14 @@ export declare class LongTextEditor extends BaseEditor {
 	destroy(): void;
 }
 export declare namespace Editors {
-	const Text: typeof TextEditor;
-	const Integer: typeof IntegerEditor;
-	const Float: typeof FloatEditor;
-	const Date: typeof DateEditor;
-	const YesNoSelect: typeof YesNoSelectEditor;
-	const Checkbox: typeof CheckboxEditor;
-	const PercentComplete: typeof PercentCompleteEditor;
-	const LongText: typeof LongTextEditor;
+	const Text: typeof TextCellEdit;
+	const Integer: typeof IntegerCellEdit;
+	const Float: typeof FloatCellEdit;
+	const Date: typeof DateCellEdit;
+	const YesNoSelect: typeof YesNoSelectCellEdit;
+	const Checkbox: typeof CheckboxCellEdit;
+	const PercentComplete: typeof PercentCompleteCellEdit;
+	const LongText: typeof LongTextCellEdit;
 }
 export interface GroupItemMetadataProviderOptions {
 	enableExpandCollapse?: boolean;

@@ -1,6 +1,6 @@
 import { Editor, EditorOptions, H, parsePx, Position } from "../core";
 
-abstract class BaseEditor {
+abstract class BaseCellEdit {
     protected _input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
     protected _defaultValue: any;
     protected _args: EditorOptions;
@@ -64,7 +64,7 @@ abstract class BaseEditor {
     }
 }
 
-export class TextEditor extends BaseEditor {
+export class TextCellEdit extends BaseCellEdit {
 
     declare _input: HTMLInputElement;
 
@@ -78,7 +78,7 @@ export class TextEditor extends BaseEditor {
     }
 }
 
-export class IntegerEditor extends TextEditor {
+export class IntegerCellEdit extends TextCellEdit {
 
     serializeValue() {
         return parseInt(this._input.value, 10) || 0;
@@ -96,7 +96,7 @@ export class IntegerEditor extends TextEditor {
     }
 }
 
-export class FloatEditor extends TextEditor {
+export class FloatCellEdit extends TextCellEdit {
 
     static AllowEmptyValue = false;
     static DefaultDecimalPlaces: number = null;
@@ -105,7 +105,7 @@ export class FloatEditor extends TextEditor {
         // returns the number of fixed decimal places or null
         var rtn = this._args.column.editorFixedDecimalPlaces;
         if (typeof rtn === 'undefined') {
-            rtn = FloatEditor.DefaultDecimalPlaces;
+            rtn = FloatCellEdit.DefaultDecimalPlaces;
         }
         return (!rtn && rtn !== 0 ? null : rtn);
     }
@@ -127,7 +127,7 @@ export class FloatEditor extends TextEditor {
 
     serializeValue() {
         var rtn = parseFloat(this._input.value) as any;
-        if (FloatEditor.AllowEmptyValue) {
+        if (FloatCellEdit.AllowEmptyValue) {
             if (!rtn && rtn !== 0)
                 rtn = '';
         } else {
@@ -156,7 +156,7 @@ export class FloatEditor extends TextEditor {
     }
 }
 
-export class DateEditor extends TextEditor {
+export class DateCellEdit extends TextCellEdit {
     private _calendarOpen = false;
 
     init() {
@@ -214,7 +214,7 @@ export class DateEditor extends TextEditor {
     }
 }
 
-export class YesNoSelectEditor extends BaseEditor {
+export class YesNoSelectCellEdit extends BaseCellEdit {
 
     declare _input: HTMLSelectElement;
 
@@ -248,7 +248,7 @@ export class YesNoSelectEditor extends BaseEditor {
     }
 }
 
-export class CheckboxEditor extends BaseEditor {
+export class CheckboxCellEdit extends BaseCellEdit {
 
     declare _input: HTMLInputElement;
 
@@ -288,7 +288,7 @@ export class CheckboxEditor extends BaseEditor {
     }
 }
 
-export class PercentCompleteEditor extends IntegerEditor {
+export class PercentCompleteCellEdit extends IntegerCellEdit {
     protected _picker: HTMLDivElement;
 
     init() {
@@ -328,7 +328,7 @@ export class PercentCompleteEditor extends IntegerEditor {
         ($ as any)(this._picker).find(".slick-editor-percentcomplete-buttons button")
             .on("click", (e: any) => {
                 this._input.value = (e.target as HTMLButtonElement).dataset.val;
-                // @ts-ignore               
+                // @ts-ignore
                 (($ as any)(slider) as any).slider("value", (e.target as HTMLButtonElement).dataset.val);
             });
     }
@@ -344,7 +344,7 @@ export class PercentCompleteEditor extends IntegerEditor {
 * The UI is added onto document BODY and .position(), .show() and .hide() are implemented.
 * KeyDown events are also handled to provide handling for Tab, Shift-Tab, Esc and Ctrl-Enter.
 */
-export class LongTextEditor extends BaseEditor {
+export class LongTextCellEdit extends BaseCellEdit {
 
     declare _input: HTMLTextAreaElement;
     protected _container: HTMLElement;

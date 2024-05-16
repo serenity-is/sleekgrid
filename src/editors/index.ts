@@ -1,14 +1,14 @@
-import { CheckboxEditor, DateEditor, FloatEditor, IntegerEditor, LongTextEditor, PercentCompleteEditor, TextEditor, YesNoSelectEditor } from "./editors";
+import { CheckboxCellEdit, DateCellEdit, FloatCellEdit, IntegerCellEdit, LongTextCellEdit, PercentCompleteCellEdit, TextCellEdit, YesNoSelectCellEdit } from "./editors";
 
 export * from "./editors";
 
 export namespace Editors {
-    export const Text = TextEditor;
-    export const Integer = IntegerEditor;
-    export const Float = FloatEditor;
-    export const Date = DateEditor;
-    export const YesNoSelect = YesNoSelectEditor;
-    export const Checkbox = CheckboxEditor;
-    export const PercentComplete = PercentCompleteEditor;
-    export const LongText = LongTextEditor;
+    export const Text = TextCellEdit;
+    export const Integer = IntegerCellEdit;
+    export const Float = FloatCellEdit;
+    export const Date = DateCellEdit;
+    export const YesNoSelect = YesNoSelectCellEdit;
+    export const Checkbox = CheckboxCellEdit;
+    export const PercentComplete = PercentCompleteCellEdit;
+    export const LongText = LongTextCellEdit;
 }
