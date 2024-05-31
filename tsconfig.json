@@ -2,7 +2,6 @@
     "compileOnSave": false,
     "compilerOptions": {
       "allowJs": false,
-      "experimentalDecorators": true,
       "declaration": true,
       "emitBOM": true,
       "lib": [
