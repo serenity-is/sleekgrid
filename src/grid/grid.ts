@@ -1000,6 +1000,9 @@ export class Grid<TItem = any> implements EditorHost {
                 else {
                     dist = Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX;
                 }
+                if (isNaN(dist)) {
+                    return;
+                }
                 shrinkOrStretchColumn(cols, colIdx, dist, this._options.forceFitColumns, this._absoluteColMinWidth);
 
                 this._layout.afterHeaderColumnDrag();
