@@ -987,15 +987,20 @@ export class Grid<TItem = any> implements EditorHost {
             };
 
             const drag = (e: DragEvent) => {
+                var dist;
                 if (noJQueryDrag) {
                     var thisPageX = (!e.pageX && !e.pageY) ? lastDragOverPos?.pageX : e.pageX;
                     var thisPageY = (!e.pageX && !e.pageY) ? lastDragOverPos?.pageY : e.pageY;
                     if (!thisPageX && !e.clientX && !thisPageY && !e.clientY)
                         return;
+                    dist = Math.min(maxPageX, Math.max(minPageX, thisPageX)) - pageX;
                     e.dataTransfer.effectAllowed = 'none';
                     e.preventDefault();
                 }
-                shrinkOrStretchColumn(cols, colIdx, Math.min(maxPageX, Math.max(minPageX, thisPageX)) - pageX, this._options.forceFitColumns, this._absoluteColMinWidth);
+                else {
+                    dist = Math.min(maxPageX, Math.max(minPageX, e.pageX)) - pageX;
+                }
+                shrinkOrStretchColumn(cols, colIdx, dist, this._options.forceFitColumns, this._absoluteColMinWidth);
 
                 this._layout.afterHeaderColumnDrag();
 
