@@ -3036,13 +3036,35 @@ export class Grid<TItem = any> implements EditorHost {
         }
     }
 
+    private getTextSelection(){
+        var selection = null;
+
+        if (window.getSelection && window.getSelection().rangeCount > 0) {
+          selection = window.getSelection().getRangeAt(0);
+        }
+
+        return selection;
+    }
+  
+    private setTextSelection(selection: Range){
+        if (window.getSelection && selection) {
+            var target = window.getSelection();
+            target.removeAllRanges();
+            target.addRange(selection);
+        }
+    }
+
     private handleClick(e: MouseEvent): void {
         if (!this._currentEditor) {
             // if this click resulted in some cell child node getting focus,
             // don't steal it back - keyboard events will still bubble up
             // IE9+ seems to default DIVs to tabIndex=0 instead of -1, so check for cell clicks directly.
             if (e.target != document.activeElement || (e.target as HTMLElement)?.classList?.contains?.("slick-cell")) {
+                var selection = this.getTextSelection();
                 this.setFocus();
+                if (selection && this._options.enableTextSelectionOnCells) {
+                    this.setTextSelection(selection);
+                }
             }
         }
 
