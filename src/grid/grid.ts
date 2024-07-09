@@ -1,6 +1,7 @@
 import { CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, CellRange, RowCell, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
+import { Draggable } from "./draggable";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { GridOptions, gridDefaults } from "./gridoptions";
 import { CachedRow, PostProcessCleanupEntry, absBox, addUiStateHover, autosizeColumns, calcMinMaxPageXOnDragStart, getInnerWidth, getMaxSupportedCssHeight, getScrollBarDimensions, getVBoxDelta, removeUiStateHover, shrinkOrStretchColumn, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
@@ -28,6 +29,7 @@ export class Grid<TItem = any> implements EditorHost {
     private _columnCssRulesR: any;
     private _currentEditor: Editor = null;
     private _data: any;
+    private _draggableInstance: { destroy: () => void };
     private _editController: EditController;
     private _emptyNode: (node: Element) => void;
     private _headerColumnWidthDiff: number = 0;
@@ -363,6 +365,19 @@ export class Grid<TItem = any> implements EditorHost {
                 .on("dragstart", { distance: 3 }, this.handleDragStart.bind(this))
                 .on("drag", this.handleDrag.bind(this))
                 .on("dragend", this.handleDragEnd.bind(this))
+        }
+        else {
+            this._draggableInstance = Draggable({
+                containerElement: this._container,
+                //allowDragFrom: 'div.slick-cell',
+                // the slick cell parent must always contain `.dnd` and/or `.cell-reorder` class to be identified as draggable
+                //allowDragFromClosest: 'div.slick-cell.dnd, div.slick-cell.cell-reorder',
+                preventDragFromKeys: ['ctrlKey', 'metaKey'],
+                onDragInit: this.handleDragInit.bind(this),
+                onDragStart: this.handleDragStart.bind(this),
+                onDrag: this.handleDrag.bind(this),
+                onDragEnd: this.handleDragEnd.bind(this)
+            });
         }
 
         canvases.forEach(canvas => {
@@ -1190,6 +1205,11 @@ export class Grid<TItem = any> implements EditorHost {
         var i = this._plugins.length;
         while (i--) {
             this.unregisterPlugin(this._plugins[i]);
+        }
+
+        if (this._draggableInstance) {
+            this._draggableInstance.destroy();
+            this._draggableInstance = null;
         }
 
         if (this._options.enableColumnReorder && this._jQuery && (this._jQuery.fn as any).sortable) {
@@ -2916,6 +2936,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         var retval = this.trigger(this.onDragInit, dd, e);
         if ((e as IEventData).isImmediatePropagationStopped && (e as IEventData).isImmediatePropagationStopped()) {
+            e.preventDefault();
             return retval;
         }
 
