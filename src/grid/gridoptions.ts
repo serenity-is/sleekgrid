@@ -127,6 +127,6 @@ export const gridDefaults: GridOptions = {
     showTopPanel: false,
     suppressActiveCellChangeOnEdit: false,
     topPanelHeight: 30,
-    useLegacyUI: true,
+    useLegacyUI: false,
     useCssVars: false
 }
