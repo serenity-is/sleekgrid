@@ -632,6 +632,7 @@ export interface GridOptions<TItem = any> {
 	multiSelect?: boolean;
 	preHeaderPanelHeight?: number;
 	renderAllCells?: boolean;
+	renderAllRows?: boolean;
 	removeNode?: (node: Element) => void;
 	rowHeight?: number;
 	rtl?: boolean;
