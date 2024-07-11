@@ -2301,22 +2301,27 @@ export class Grid<TItem = any> implements EditorHost {
 
     getRenderedRange(viewportTop?: number, viewportLeft?: number): ViewRange {
         var range = this.getVisibleRange(viewportTop, viewportLeft);
-        var buffer = Math.round(this._viewportInfo.height / this._options.rowHeight);
-        var minBuffer = this._options.minBuffer || 3;
-
-        if (this._vScrollDir == -1) {
-            range.top -= buffer;
-            range.bottom += minBuffer;
-        } else if (this._vScrollDir == 1) {
-            range.top -= minBuffer;
-            range.bottom += buffer;
-        } else {
-            range.top -= minBuffer;
-            range.bottom += minBuffer;
+        if (this._options.renderAllRows) {
+            range.top = 0;
+            range.bottom = this.getDataLengthIncludingAddNew() - 1;
         }
+        else {
+            var buffer = Math.round(this._viewportInfo.height / this._options.rowHeight);
+            var minBuffer = this._options.minBuffer || 3;
+            if (this._vScrollDir == -1) {
+                range.top -= buffer;
+                range.bottom += minBuffer;
+            } else if (this._vScrollDir == 1) {
+                range.top -= minBuffer;
+                range.bottom += buffer;
+            } else {
+                range.top -= minBuffer;
+                range.bottom += minBuffer;
+            }
 
-        range.top = Math.max(0, range.top);
-        range.bottom = Math.min(this.getDataLengthIncludingAddNew() - 1, range.bottom);
+            range.top = Math.max(0, range.top);
+            range.bottom = Math.min(this.getDataLengthIncludingAddNew() - 1, range.bottom);
+        }
 
         if (this._options.renderAllCells) {
             range.leftPx = 0;
@@ -3074,7 +3079,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         return selection;
     }
-  
+
     private setTextSelection(selection: Range){
         if (window.getSelection && selection) {
             var target = window.getSelection();
