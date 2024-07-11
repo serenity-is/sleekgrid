@@ -928,6 +928,8 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private handleDrag;
 	private handleDragEnd;
 	private handleKeyDown;
+	private getTextSelection;
+	private setTextSelection;
 	private handleClick;
 	private handleContextMenu;
 	private handleDblClick;

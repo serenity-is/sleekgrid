@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
-    <Version>1.8.6</Version>
+    <Version>1.8.7</Version>
     <Description>NuGet version of @serenity-is/sleekgrid NPM package</Description>
   </PropertyGroup>
   <ItemGroup>
