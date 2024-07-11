@@ -83,7 +83,7 @@ export function Draggable(options: DraggableOption) {
     function init() {
         if (containerElement) {
             containerElement.addEventListener('mousedown', userPressed as EventListener);
-            containerElement.addEventListener('touchstart', userPressed as EventListener);
+            containerElement.addEventListener('touchstart', userPressed as EventListener, { passive: true });
         }
     }
 
@@ -131,10 +131,10 @@ export function Draggable(options: DraggableOption) {
 
                 if (result !== false) {
                     document.body.addEventListener('mousemove', userMoved);
-                    document.body.addEventListener('touchmove', userMoved);
+                    document.body.addEventListener('touchmove', userMoved, { passive: true });
                     document.body.addEventListener('mouseup', userReleased);
-                    document.body.addEventListener('touchend', userReleased);
-                    document.body.addEventListener('touchcancel', userReleased);
+                    document.body.addEventListener('touchend', userReleased, { passive: true });
+                    document.body.addEventListener('touchcancel', userReleased, { passive: true });
                 }
             }
         }
