@@ -19,9 +19,9 @@ interface ArgsMoveRows {
 }
 
 export class RowMoveManager implements IPlugin {
-    private grid: Grid;
-    private options: RowMoveManagerOptions;
-    private dragging: boolean;
+    declare private grid: Grid;
+    declare private options: RowMoveManagerOptions;
+    declare private dragging: boolean;
     private handler = new EventSubscriber();
     onBeforeMoveRows = new EventEmitter<ArgsMoveRows>();
     onMoveRows = new EventEmitter<ArgsMoveRows>();

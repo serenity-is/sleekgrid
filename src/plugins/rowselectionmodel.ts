@@ -27,11 +27,10 @@ function rangesToRows(ranges: CellRange[]) {
 }
 
 export class RowSelectionModel implements IPlugin, SelectionModel {
-    private grid: Grid;
+    declare private grid: Grid;
     private handler = new EventSubscriber();
-    private inHandler: boolean;
-    private options: RowSelectionModelOptions;
-    private ranges: CellRange[];
+    declare private options: RowSelectionModelOptions;
+    declare private ranges: CellRange[];
     onSelectedRangesChanged = new EventEmitter<CellRange[]>();
 
     constructor(options?: RowSelectionModelOptions) {

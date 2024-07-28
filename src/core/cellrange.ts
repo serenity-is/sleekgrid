@@ -7,10 +7,10 @@
  */
 export class CellRange {
 
-    public fromRow: number;
-    public fromCell: number;
-    public toRow: number;
-    public toCell: number;
+    declare public fromRow: number;
+    declare public fromCell: number;
+    declare public toRow: number;
+    declare public toCell: number;
 
     constructor(fromRow: number, fromCell: number, toRow?: number, toCell?: number) {
         if (toRow === undefined && toCell === undefined) {

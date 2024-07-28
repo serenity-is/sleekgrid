@@ -9,8 +9,8 @@ export interface AutoTooltipsOptions {
 
 export class AutoTooltips implements IPlugin {
 
-    private grid: Grid;
-    private options: AutoTooltipsOptions;
+    declare private grid: Grid;
+    declare private options: AutoTooltipsOptions;
 
     constructor(options?: AutoTooltipsOptions) {
         this.options = Object.assign({}, AutoTooltips.defaults, options);
@@ -34,10 +34,10 @@ export class AutoTooltips implements IPlugin {
     }
 
     destroy() {
-        if (this.options.enableForCells) 
+        if (this.options.enableForCells)
             this.grid.onMouseEnter.unsubscribe(this.handleMouseEnter);
 
-        if (this.options.enableForHeaderCells) 
+        if (this.options.enableForHeaderCells)
             this.grid.onHeaderMouseEnter.unsubscribe(this.handleHeaderMouseEnter);
     }
 
@@ -52,7 +52,7 @@ export class AutoTooltips implements IPlugin {
         if (!node.title || this.options.replaceExisting) {
             if (node.clientWidth < node.scrollWidth) {
                 text = node.textContent?.trim() ?? "";
-                if (this.options.maxToolTipLength && 
+                if (this.options.maxToolTipLength &&
                     text.length > this.options.maxToolTipLength) {
                     text = text.substring(0, this.options.maxToolTipLength - 3) + "...";
                 }

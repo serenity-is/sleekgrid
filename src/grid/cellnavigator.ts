@@ -11,7 +11,7 @@ export interface CellNavigatorHost {
 
 export class CellNavigator {
 
-    private host: CellNavigatorHost;
+    declare private host: CellNavigatorHost;
 
     constructor(h: CellNavigatorHost) {
         this.host = h;

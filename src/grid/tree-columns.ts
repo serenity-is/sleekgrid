@@ -106,7 +106,7 @@ function extractColumns(node: any): TreeColumn[] {
  */
 export class TreeColumns {
 
-    private treeColumns: TreeColumn[];
+    declare private treeColumns: TreeColumn[];
 
     constructor(treeColumns: TreeColumn[]) {
         this.treeColumns = treeColumns;

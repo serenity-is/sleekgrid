@@ -23,14 +23,14 @@ export interface GroupItemMetadataProviderOptions {
 }
 
 export class GroupItemMetadataProvider {
-    protected grid: Grid;
-    private options: GroupItemMetadataProviderOptions;
+    declare protected grid: Grid;
+    declare private options: GroupItemMetadataProviderOptions;
 
     constructor(opt?: GroupItemMetadataProviderOptions) {
         this.options = Object.assign({}, GroupItemMetadataProvider.defaults, opt);
-        this.options.groupFormat ??= opt?.groupFormatter ? convertCompatFormatter(opt.groupFormatter) : 
+        this.options.groupFormat ??= opt?.groupFormatter ? convertCompatFormatter(opt.groupFormatter) :
             ctx => GroupItemMetadataProvider.defaultGroupFormat(ctx, this.options);
-        this.options.totalsFormat ??= opt?.totalsFormatter ? convertCompatFormatter(opt.totalsFormatter) : 
+        this.options.totalsFormat ??= opt?.totalsFormatter ? convertCompatFormatter(opt.totalsFormatter) :
             ctx => GroupItemMetadataProvider.defaultTotalsFormat(ctx, this.grid);
     }
 
@@ -67,7 +67,7 @@ export class GroupItemMetadataProvider {
         return (ctx.column?.groupTotalsFormatter?.(item, ctx.column)) ??
             ((grid ?? ctx.grid)?.groupTotalsFormatter?.(item, ctx.column)) ?? "";
     }
-    
+
     init(grid: Grid) {
         this.grid = grid;
         grid.onClick.subscribe(this.handleGridClick);
@@ -96,12 +96,12 @@ export class GroupItemMetadataProvider {
         if (!grid)
             return;
         var item = grid.getDataItem(args.row);
-        if (!item || 
-            !(item instanceof Group) || 
+        if (!item ||
+            !(item instanceof Group) ||
             !this.options.toggleCssClass ||
             !(e.target as HTMLElement).classList.contains(this.options.toggleCssClass))
             return;
-            
+
         e.stopImmediatePropagation();
         e.preventDefault();
 
@@ -118,14 +118,14 @@ export class GroupItemMetadataProvider {
     }
 
     handleGridKeyDown = (e: KeyboardEvent, args: ArgsCell) => {
-        if (!this.options.enableExpandCollapse || 
+        if (!this.options.enableExpandCollapse ||
             (e.key !== " " && e.key !== "-" && e.key !== "+"))
             return;
 
         let grid = args?.grid ?? this.grid;
         if (!grid)
             return;
-            
+
         var activeCell = grid.getActiveCell();
         if (!activeCell)
             return;

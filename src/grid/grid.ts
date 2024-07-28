@@ -9,60 +9,60 @@ import { LayoutEngine } from "./layout";
 import { IPlugin, SelectionModel, ViewRange, ViewportInfo } from "./types";
 
 export class Grid<TItem = any> implements EditorHost {
-    private _absoluteColMinWidth: number;
-    private _activeCanvasNode: HTMLElement;
-    private _activeCell: number;
-    private _activeCellNode: HTMLElement = null;
-    private _activePosX: number;
-    private _activeRow: number;
-    private _activeViewportNode: HTMLElement;
+    declare private _absoluteColMinWidth: number;
+    declare private _activeCanvasNode: HTMLElement;
+    declare private _activeCell: number;
+    declare private _activeCellNode: HTMLElement;
+    declare private _activePosX: number;
+    declare private _activeRow: number;
+    declare private _activeViewportNode: HTMLElement;
     private _cellCssClasses: Record<string, CellStylesHash> = {};
     private _cellHeightDiff: number = 0;
     private _cellWidthDiff: number = 0;
-    private _cellNavigator: CellNavigator;
-    private _colById: { [key: string]: number };
-    private _colDefaults: Partial<Column>;
+    declare private _cellNavigator: CellNavigator;
+    declare private _colById: { [key: string]: number };
+    declare private _colDefaults: Partial<Column>;
     private _colLeft: number[] = [];
     private _colRight: number[] = [];
-    private _cols: Column<TItem>[];
-    private _columnCssRulesL: any;
-    private _columnCssRulesR: any;
-    private _currentEditor: Editor = null;
-    private _data: any;
-    private _draggableInstance: { destroy: () => void };
-    private _editController: EditController;
-    private _emptyNode: (node: Element) => void;
+    declare private _cols: Column<TItem>[];
+    declare private _columnCssRulesL: any;
+    declare private _columnCssRulesR: any;
+    declare private _currentEditor: Editor;
+    declare private _data: any;
+    declare private _draggableInstance: { destroy: () => void };
+    declare private _editController: EditController;
+    declare private _emptyNode: (node: Element) => void;
     private _headerColumnWidthDiff: number = 0;
-    private _hEditorLoader: number = null;
-    private _hPostRender: number = null;
-    private _hPostRenderCleanup: number = null;
-    private _hRender: number = null;
+    declare private _hEditorLoader: number;
+    declare private _hPostRender: number;
+    declare private _hPostRenderCleanup: number;
+    declare private _hRender: number;
     private _ignoreScrollUntil: number = 0;
-    private _initColById: { [key: string]: number };
-    private _initCols: Column<TItem>[];
-    private _initialized = false;
-    private _jQuery: any;
-    private _jumpinessCoefficient: number;
-    private _lastRenderTime: number;
-    private _layout: LayoutEngine;
-    private _numberOfPages: number;
-    private _options: GridOptions<TItem>;
+    declare private _initColById: { [key: string]: number };
+    declare private _initCols: Column<TItem>[];
+    declare private _initialized;
+    declare private _jQuery: any;
+    declare private _jumpinessCoefficient: number;
+    declare private _lastRenderTime: number;
+    declare private _layout: LayoutEngine;
+    declare private _numberOfPages: number;
+    declare private _options: GridOptions<TItem>;
     private _page: number = 0;
-    private _pageHeight: number;
+    declare private _pageHeight: number;
     private _pageOffset: number = 0;
     private _pagingActive: boolean = false;
     private _pagingIsLastPage: boolean = false;
     private _plugins: IPlugin[] = [];
-    private _postCleanupActive: boolean;
+    declare private _postCleanupActive: boolean;
     private _postProcessCleanupQueue: PostProcessCleanupEntry[] = [];
     private _postProcessedRows: { [row: number]: { [cell: number]: string } } = {};
-    private _postProcessFromRow: number = null;
+    declare private _postProcessFromRow: number;
     private _postProcessGroupId: number = 0;
-    private _postProcessToRow: number = null;
-    private _postRenderActive: boolean;
-    private _removeNode: (node: Element) => void;
+    declare private _postProcessToRow: number;
+    declare private _postRenderActive: boolean;
+    declare private _removeNode: (node: Element) => void;
     private _rowsCache: { [key: number]: CachedRow } = {};
-    private _scrollDims: { width: number, height: number };
+    declare private _scrollDims: { width: number, height: number };
     private _scrollLeft: number = 0;
     private _scrollLeftPrev: number = 0;
     private _scrollLeftRendered: number = 0;
@@ -70,21 +70,21 @@ export class Grid<TItem = any> implements EditorHost {
     private _scrollTopPrev: number = 0;
     private _scrollTopRendered: number = 0;
     private _selectedRows: number[] = [];
-    private _selectionModel: SelectionModel;
-    private _serializedEditorValue: any;
+    declare private _selectionModel: SelectionModel;
+    declare private _serializedEditorValue: any;
     private _sortColumns: ColumnSort[] = [];
-    private _styleNode: HTMLStyleElement;
-    private _stylesheet: any;
+    declare private _styleNode: HTMLStyleElement;
+    declare private _stylesheet: any;
     private _tabbingDirection: number = 1;
     private _uid: string = "sleekgrid_" + Math.round(1000000 * Math.random());
     private _viewportInfo: ViewportInfo = {} as any;
     private _vScrollDir: number = 1;
 
     private _boundAncestorScroll: HTMLElement[] = [];
-    private _container: HTMLElement;
-    private _focusSink1: HTMLElement;
-    private _focusSink2: HTMLElement;
-    private _groupingPanel: HTMLElement;
+    declare private _container: HTMLElement;
+    declare private _focusSink1: HTMLElement;
+    declare private _focusSink2: HTMLElement;
+    declare private _groupingPanel: HTMLElement;
 
     readonly onActiveCellChanged = new EventEmitter<ArgsCell>();
     readonly onActiveCellPositionChanged = new EventEmitter<ArgsGrid>();
@@ -862,7 +862,7 @@ export class Grid<TItem = any> implements EditorHost {
         };
     }
 
-    private sortableColInstances: any[];
+    declare private sortableColInstances: any[];
 
     private setupColumnReorder(): void {
 
@@ -3345,7 +3345,7 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private setActiveCellInternal(newCell: HTMLElement, opt_editMode?: boolean, preClickModeOn?: boolean, suppressActiveCellChangedEvent?: boolean, e?: any): void {
-        if (this._activeCellNode != null) {
+        if (this._activeCellNode) {
             this.makeActiveCellNormal();
             this._activeCellNode.classList.remove("active");
             var c = this._rowsCache[this._activeRow];
@@ -3357,7 +3357,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         this._activeCellNode = newCell;
 
-        if (this._activeCellNode != null) {
+        if (this._activeCellNode) {
             var bcl = this._activeCellNode.getBoundingClientRect();
 
             var rowOffset = Math.floor(this._activeCellNode.closest('.grid-canvas')?.getBoundingClientRect().top ?? 0 + document.body.scrollTop);

@@ -95,7 +95,7 @@ export interface EditController {
  * @constructor
  */
 export class EditorLock {
-    private activeEditController: EditController;
+    declare private activeEditController: EditController;
 
     /***
      * Returns true if a specified edit controller is active (has the edit lock).

@@ -1,9 +1,9 @@
 import { Editor, EditorOptions, H, parsePx, Position } from "../core";
 
 abstract class BaseCellEdit {
-    protected _input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
-    protected _defaultValue: any;
-    protected _args: EditorOptions;
+    declare protected _input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+    declare protected _defaultValue: any;
+    declare protected _args: EditorOptions;
 
     constructor(args: EditorOptions) {
         this._args = args;
@@ -289,7 +289,7 @@ export class CheckboxCellEdit extends BaseCellEdit {
 }
 
 export class PercentCompleteCellEdit extends IntegerCellEdit {
-    protected _picker: HTMLDivElement;
+    declare protected _picker: HTMLDivElement;
 
     init() {
         super.init();
@@ -347,8 +347,8 @@ export class PercentCompleteCellEdit extends IntegerCellEdit {
 export class LongTextCellEdit extends BaseCellEdit {
 
     declare _input: HTMLTextAreaElement;
-    protected _container: HTMLElement;
-    protected _wrapper: HTMLDivElement;
+    declare protected _container: HTMLElement;
+    declare protected _wrapper: HTMLDivElement;
 
     init() {
         const isComposite = this._args.compositeEditorOptions;
