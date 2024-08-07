@@ -1266,7 +1266,6 @@ export interface RowSelectionModelOptions {
 export declare class RowSelectionModel implements IPlugin, SelectionModel {
 	private grid;
 	private handler;
-	private inHandler;
 	private options;
 	private ranges;
 	onSelectedRangesChanged: EventEmitter<CellRange[], IEventData>;
