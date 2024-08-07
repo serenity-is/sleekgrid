@@ -1877,9 +1877,10 @@ export class Grid<TItem = any> implements EditorHost {
                 }
             }
 
+            const isFrozen = frozenCols && i < frozenCols;
             // Do not render cells outside of the viewport.
-            if (this._colRight[Math.min(ii - 1, i + colspan - 1)] > range.leftPx) {
-                if (this._colLeft[i] > range.rightPx) {
+            if (isFrozen || this._colRight[Math.min(ii - 1, i + colspan - 1)] > range.leftPx) {
+                if (!isFrozen && this._colLeft[i] > range.rightPx) {
                     // All columns to the right are outside the range.
                     break;
                 }
