@@ -9,6 +9,12 @@ export interface FormatterContext<TItem = any> {
     /** returns html escaped ctx.value if called without arguments. prefer this over ctx.value to avoid html injection attacks! */
     readonly escape: ((value?: any) => string);
     grid?: any;
+
+    /**
+     * True if the returned string should be considered HTML markup.
+     * Defaults to grid options enableHtmlRendering (which is true by default) */
+    isHtml?: boolean;
+
     item?: TItem;
     row?: number;
     tooltip?: string;
@@ -56,7 +62,7 @@ export function convertCompatFormatter(compatFormatter: CompatFormatter): Column
     }
 }
 
-export function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement) {
+export function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement, sanitizer?: (dirtyHtml: string) => string) {
     var oldFmtAtt = node.dataset.fmtatt as string;
     if (oldFmtAtt?.length > 0) {
         for (var k of oldFmtAtt.split(','))
@@ -83,8 +89,17 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: Form
     else if (html instanceof Node) {
         node.appendChild(html);
     }
-    else
-        node.innerHTML = "" + html;
+    else {
+        html = "" + html;
+        if (ctx.isHtml ?? true) {
+            if (sanitizer) {
+                html = sanitizer(html);
+            }
+            node.innerHTML = html;
+        }
+        else
+            node.textContent = html;
+    }
 
     if (ctx.addAttrs != null) {
         var keys = Object.keys(ctx.addAttrs);

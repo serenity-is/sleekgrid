@@ -39,7 +39,7 @@ const compatDefaults = {
     globalName: 'Slick._',
     color: true,
     logLevel: 'info',
-    sourcemap: true,    
+    sourcemap: true,
     footer: {
         js: '["Data", "Editors", "Formatters", "Plugins"].forEach(ns => Slick._[ns] && (Slick[ns] = Object.assign(Slick[ns] || {}, Slick._[ns])) && delete Slick._[ns]); Object.assign(Slick, Slick._); delete Slick._;'
     }
@@ -51,7 +51,7 @@ const compatCore = {
     outfile: './dist/compat/slick.core.js',
     footer: {
         js: compatDefaults.footer.js + " Slick.Event = Slick.EventEmitter; Slick.EventHandler = Slick.EventSubscriber; Slick.Range = Slick.CellRange; typeof Map !== 'undefined' && (Slick.Map = Map);"
-    }    
+    }
 }
 
 const compatGrid = {
@@ -59,7 +59,7 @@ const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["addClass", "applyFormatterResultToCellNode", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escapeHtml", "defaultColumnFormat", "disableSelection", "EventEmitter", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "CellRange", "removeClass", "RowCell", "spacerDiv", "titleize"]
+        Slick: ["addClass", "applyFormatterResultToCellNode", "basicRegexSanitizer", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escapeHtml", "defaultColumnFormat", "disableSelection", "EventEmitter", "EventData", "GlobalEditorLock", "initializeColumns", "H", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "CellRange", "removeClass", "RowCell", "spacerDiv", "titleize"]
     })]
 }
 

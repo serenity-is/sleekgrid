@@ -1,4 +1,4 @@
-import { CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, CellRange, RowCell, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { basicRegexSanitizer, CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { Draggable } from "./draggable";
@@ -131,6 +131,8 @@ export class Grid<TItem = any> implements EditorHost {
         this._options = options = Object.assign({}, gridDefaults, options);
         // @ts-ignore
         options.jQuery = this._jQuery = options.jQuery === void 0 ? (typeof jQuery !== "undefined" ? jQuery : void 0) : options.jQuery;
+        // @ts-ignore
+        options.sanitizer = options.sanitizer === void 0 ? (typeof DOMPurify !== "undefined" && typeof DOMPurify.sanitize == "function" ? DOMPurify.sanitize : basicRegexSanitizer) : options.sanitizer;
 
         if (this._jQuery && container instanceof (this._jQuery as any))
             this._container = (container as any)[0];
@@ -1802,6 +1804,7 @@ export class Grid<TItem = any> implements EditorHost {
             column,
             grid: this,
             escape: escapeHtml,
+            isHtml: !!this._options.treatFormatterOutputAsHtml ,
             item,
             row
         }
@@ -2106,7 +2109,7 @@ export class Grid<TItem = any> implements EditorHost {
         if (ctx.item)
             formatResult = this.getFormatter(row, ctx.column)(ctx);
         this._emptyNode(cellNode);
-        applyFormatterResultToCellNode(ctx, formatResult, cellNode);
+        applyFormatterResultToCellNode(ctx, formatResult, cellNode, this._options.sanitizer);
     }
 
     updateRow(row: number): void {

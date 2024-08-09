@@ -24,8 +24,15 @@ function escFunc(a: string) {
 }
 
 export function escapeHtml(s: any) {
-    if (!arguments.length)
-        s = this.value;
+    if (!arguments.length) {
+        if (typeof this !== "undefined") {
+            s = this.value;
+        }
+    }
+
+    if (typeof this !== "undefined") {
+        this.isHtml = true;
+    }
 
     if (s == null)
         return '';
@@ -34,6 +41,10 @@ export function escapeHtml(s: any) {
         s = "" + s;
 
     return s.replace(/[<>"'&]/g, escFunc)
+}
+
+export function basicRegexSanitizer(dirtyHtml: string) {
+    return (dirtyHtml ?? "").replace(/(\b)(on[a-z]+)(\s*)=|javascript:([^>]*)[^>]*|(<\s*)(\/*)script([<>]*).*(<\s*)(\/*)script(>*)|(&lt;)(\/*)(script|script defer)(.*)(&gt;|&gt;">)/gi, '');
 }
 
 export function disableSelection(target: HTMLElement) {
