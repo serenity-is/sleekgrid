@@ -89,16 +89,14 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: Form
     else if (html instanceof Node) {
         node.appendChild(html);
     }
-    else {
-        html = "" + html;
-        if (ctx.isHtml ?? true) {
-            if (sanitizer) {
-                html = sanitizer(html);
-            }
-            node.innerHTML = html;
+    else if (typeof html === "string" && (ctx.isHtml ?? true)) {
+        if (sanitizer) {
+            html = sanitizer(html);
         }
-        else
-            node.textContent = html;
+        node.innerHTML = html;
+    }
+    else {
+        node.textContent = "" + html;
     }
 
     if (ctx.addAttrs != null) {
