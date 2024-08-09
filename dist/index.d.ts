@@ -251,18 +251,19 @@ export interface FormatterContext<TItem = any> {
 	/**
 	 * Sets isHtml to true and returns the given markup as is.
 	 */
-	readonly asHtml: (markup: string) => string;
+	asHtml: (markup: string) => string;
 	/**
 	 * Sets isHtml to false and returns the given value as is.
 	 * If no value argument is provided, returns ctx.value.
 	 */
-	readonly asText: (value?: any) => any;
+	asText(): TItem;
+	asText<T>(value: T): T;
 	/**
 	 * Returns html escaped ctx.value if called without arguments.
 	 * prefer this over ctx.value to avoid html injection attacks!
 	 * Note that calling this function also sets isHtml to true
 	 */
-	readonly escape: ((value?: any) => string);
+	escape(value?: any): string;
 	/**
 	 * True if the returned string should be considered HTML markup.
 	 * Defaults to grid options treatFormatterOutputAsHtml
@@ -314,7 +315,7 @@ export type CellStylesHash = {
 		[columnId: string]: string;
 	};
 };
-export declare function defaultColumnFormat(ctx: FormatterContext): any;
+export declare function defaultColumnFormat(ctx: FormatterContext): string;
 export declare function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat;
 export declare function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement, sanitizer?: (dirtyHtml: string) => string): void;
 export declare function createFormatterContext(props: Partial<FormatterContext>): FormatterContext;
@@ -777,8 +778,19 @@ export interface GridOptions<TItem = any> {
 	 * Factory function for creating custom formatters. Default is `null`.
 	 */
 	formatterFactory?: FormatterFactory;
+	/**
+	 * Defaults to `false`. If `true`, places frozen rows at the bottom edge of the grid.
+	 */
 	frozenBottom?: boolean;
+	/**
+	 * Defaults to `undefined`. If specified, freezes the given number of columns on the left edge of the grid.
+	 * Prefer setting column.frozen = 'true' for individual columns as this is only for compatibility.
+	 */
 	frozenColumns?: number;
+	/**
+	 * Defaults to `undefined`. If specified, freezes the given number of rows at the top or bottom
+	 * edge of the grid based on `frozenBottom`.
+	 */
 	frozenRows?: number;
 	/**
 	 * Defaults to `false`. If `true`, makes rows take the full width of the grid.
@@ -827,6 +839,9 @@ export interface GridOptions<TItem = any> {
 	 * Defaults to `true`. If `true`, enables multiple cell selection.
 	 */
 	multiSelect?: boolean;
+	/**
+	 * Sets grouping panel height. Default is `undefined`, e.g. it is set via CSS.
+	 */
 	preHeaderPanelHeight?: number;
 	/**
 	 * Defaults to `false`. If `true`, renders all cells (row columns) in the viewport, at the cost of higher memory usage and reduced performance.
@@ -892,6 +907,9 @@ export interface GridOptions<TItem = any> {
 	 * Defaults to `false`. If `true`, suppresses the activation of cells when they contain an editor and are clicked.
 	 */
 	suppressActiveCellChangeOnEdit?: boolean;
+	/**
+	 * Defaults to `false`. If `true`, synchronizes column resizing with cell resizing.
+	 */
 	syncColumnCellResize?: boolean;
 	/**
 	 * Defaults to `30`. Height of the top panel in pixels.
@@ -916,13 +934,15 @@ export interface GridOptions<TItem = any> {
 	 *
 	 * It is recommended to set this to false, which will treat formatter output as plain text by default and encourage
 	 * the use of text or DOM elements (e.g., via jsx-dom, Fluent) in formatters. Even when this option is set to false,
-	 * formatters can still return HTML by explicitly setting FormatterContext.isHtml to true.
+	 * formatters can still return HTML by explicitly setting FormatterContext.isHtml to true or calling
+	 * FormatterContext.asHtml() to return a value.
 	 *
 	 * Additionally, if FormatterContext.escape() is called within a formatter, isHtml will automatically be set to true
 	 * regardless of this setting, to mitigate issues with existing formatters when treatFormatterOutputAsHtml is false.
 	 *
-	 * However, when treatFormatterOutputAsHtml is set to false, legacy formatters that return HTML without using ctx.escape()
-	 * or manually setting isHtml may break. It is important to update such formatters before disabling this option.
+	 * However, when treatFormatterOutputAsHtml is set to false, legacy formatters that return HTML without using ctx.escape(),
+	 * ctx.asHtml() or ctx.isHtml = true will not work as expected. It is important to update such formatters before
+	 * disabling this option.
 	 */
 	treatFormatterOutputAsHtml?: boolean;
 }
@@ -1353,13 +1373,13 @@ export declare function PercentCompleteFormatter(ctx: FormatterContext): string;
 export declare function PercentCompleteBarFormatter(ctx: FormatterContext): string;
 export declare function YesNoFormatter(ctx: FormatterContext): "Yes" | "No";
 export declare function CheckboxFormatter(ctx: FormatterContext): string;
-export declare function CheckmarkFormatter(ctx: FormatterContext): "" | "<i class=\"slick-checkmark\"></i>";
+export declare function CheckmarkFormatter(ctx: FormatterContext): string;
 export declare namespace Formatters {
 	function PercentComplete(_row: number, _cell: number, value: any): string;
 	function PercentCompleteBar(_row: number, _cell: number, value: any): string;
 	function YesNo(_row: number, _cell: number, value: any): "Yes" | "No";
 	function Checkbox(_row: number, _cell: number, value: any): string;
-	function Checkmark(_row: number, _cell: number, value: any): "" | "<i class=\"slick-checkmark\"></i>";
+	function Checkmark(_row: number, _cell: number, value: any): string;
 }
 declare abstract class BaseCellEdit {
 	protected _input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;

@@ -21,20 +21,21 @@ export interface FormatterContext<TItem = any> {
     /**
      * Sets isHtml to true and returns the given markup as is.
      */
-    readonly asHtml: (markup: string) => string;
+    asHtml: (markup: string) => string;
 
     /**
      * Sets isHtml to false and returns the given value as is.
      * If no value argument is provided, returns ctx.value.
      */
-    readonly asText: (value?: any) => any;
+    asText(): TItem;
+    asText<T>(value: T): T;
 
     /**
      * Returns html escaped ctx.value if called without arguments.
      * prefer this over ctx.value to avoid html injection attacks!
      * Note that calling this function also sets isHtml to true
      */
-    readonly escape: ((value?: any) => string);
+    escape(value?: any): string;
 
     /**
      * True if the returned string should be considered HTML markup.
@@ -97,8 +98,8 @@ export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number
 
 export type CellStylesHash = { [row: number]: { [columnId: string]: string } }
 
-export function defaultColumnFormat(ctx: FormatterContext) {
-    return ctx.asText();
+export function defaultColumnFormat(ctx: FormatterContext): string {
+    return ctx.escape();
 }
 
 export function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat {
@@ -185,7 +186,7 @@ function asText(value?: any): any {
 
 export function createFormatterContext(props: Partial<FormatterContext>): FormatterContext {
     return {
-        escape: escapeHtml,
+        escape: escapeHtml as any,
         asHtml: asHtml,
         asText: asText,
         ...props
