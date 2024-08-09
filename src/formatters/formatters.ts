@@ -1,12 +1,12 @@
-import { escapeHtml, FormatterContext } from "../core";
+import { FormatterContext } from "../core";
 
 export function PercentCompleteFormatter(ctx: FormatterContext) {
     if (ctx.value == null || ctx.value === "")
-        return "-";
+        return ctx.asText("-");
     if (ctx.value < 50)
-        return "<span style='color:red; font-weight:bold;'>" + ctx.escape() + "%</span>";
+        return ctx.asHtml("<span style='color:red; font-weight:bold;'>" + ctx.escape() + "%</span>");
 
-    return "<span style='color:green'>" + escapeHtml(ctx.value) + "%</span>";
+    return ctx.asHtml("<span style='color:green'>" + ctx.escape() + "%</span>");
 }
 
 export function PercentCompleteBarFormatter(ctx: FormatterContext) {
@@ -21,19 +21,19 @@ export function PercentCompleteBarFormatter(ctx: FormatterContext) {
     else
         color = "green";
 
-    return "<span class='percent-complete-bar slick-percentcomplete-bar' style='background:" + color + ";width:" + escapeHtml(ctx.value) + "%' title='" + escapeHtml(ctx.value) + "%'></span>";
+    return ctx.asHtml("<span class='percent-complete-bar slick-percentcomplete-bar' style='background:" + ctx.escape(color) + ";width:" + ctx.escape() + "%' title='" + ctx.escape() + "%'></span>");
 }
 
 export function YesNoFormatter(ctx: FormatterContext) {
-    return ctx.value ? 'Yes' : 'No';
+    return ctx.asText(ctx.value ? 'Yes' : 'No');
 }
 
 
 export function CheckboxFormatter(ctx: FormatterContext) {
-    return `<i class="slick-checkbox slick-edit-preclick${ctx.value ? " checked" : ""}"></i>`;
+    return ctx.asHtml(`<i class="slick-checkbox slick-edit-preclick${ctx.value ? " checked" : ""}"></i>`);
 }
 
 export function CheckmarkFormatter(ctx: FormatterContext) {
-    return ctx.value ? '<i class="slick-checkmark"></i>' : '';
+    return ctx.asHtml(ctx.value ? '<i class="slick-checkmark"></i>' : '');
 }
 

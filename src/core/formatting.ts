@@ -1,23 +1,77 @@
 import type { Column } from "./column";
 import { addClass, escapeHtml, removeClass } from "./util";
 
+/**
+ * Context object for column formatters. It provides access to the
+ * current cell value, row index, column index, etc.
+ * Use grid.getFormatterContext() to create a new instance.
+ */
 export interface FormatterContext<TItem = any> {
+
+    /**
+     * Additional attributes to be added to the cell node.
+     */
     addAttrs?: { [key: string]: string; };
+
+    /**
+     * Additional classes to be added to the cell node.
+     */
     addClass?: string;
-    cell?: number;
-    column?: Column<TItem>;
-    /** returns html escaped ctx.value if called without arguments. prefer this over ctx.value to avoid html injection attacks! */
+
+    /**
+     * Sets isHtml to true and returns the given markup as is.
+     */
+    readonly asHtml: (markup: string) => string;
+
+    /**
+     * Sets isHtml to false and returns the given value as is.
+     * If no value argument is provided, returns ctx.value.
+     */
+    readonly asText: (value?: any) => any;
+
+    /**
+     * Returns html escaped ctx.value if called without arguments.
+     * prefer this over ctx.value to avoid html injection attacks!
+     * Note that calling this function also sets isHtml to true
+     */
     readonly escape: ((value?: any) => string);
-    grid?: any;
 
     /**
      * True if the returned string should be considered HTML markup.
-     * Defaults to grid options enableHtmlRendering (which is true by default) */
+     * Defaults to grid options treatFormatterOutputAsHtml
+     */
     isHtml?: boolean;
 
-    item?: TItem;
+    /**
+     * The row index of the cell.
+     */
     row?: number;
+
+    /**
+     * The column index of the cell.
+     */
+    cell?: number;
+
+    /**
+     * The column definition of the cell.
+     */
+    column?: Column<TItem>;
+
+    /**
+     * The grid instance.
+     */
+    grid?: any;
+
+    /**
+     * The item of the row.
+     */
+    item?: TItem;
+
+    /**
+     * Tooltip text to be added to the cell node as title attribute.
+     */
     tooltip?: string;
+
     /** when returning a formatter result, prefer ctx.escape() to avoid script injection attacks! */
     value?: any;
 }
@@ -44,15 +98,16 @@ export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number
 export type CellStylesHash = { [row: number]: { [columnId: string]: string } }
 
 export function defaultColumnFormat(ctx: FormatterContext) {
-    return escapeHtml(ctx.value);
+    return ctx.asText();
 }
 
 export function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat {
     if (compatFormatter == null)
         return null;
 
-    return function(ctx: FormatterContext): FormatterResult {
+    return function (ctx: FormatterContext): FormatterResult {
         var fmtResult = compatFormatter(ctx.row, ctx.cell, ctx.value, ctx.column, ctx.item, ctx.grid);
+        ctx.isHtml = true;
         if (fmtResult != null && typeof fmtResult !== 'string' && Object.prototype.toString.call(fmtResult) === '[object Object]') {
             ctx.addClass = fmtResult.addClasses;
             ctx.tooltip = fmtResult.toolTip;
@@ -112,5 +167,27 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: Form
     if (ctx.addClass?.length) {
         addClass(node, ctx.addClass);
         node.dataset.fmtcls = ctx.addClass;
+    }
+}
+
+function asHtml(markup?: string): string {
+    this.isHtml = true;
+    return markup;
+}
+
+function asText(value?: any): any {
+    this.isHtml = false;
+    if (!arguments.length && this) {
+        return this.value;
+    }
+    return value;
+}
+
+export function createFormatterContext(props: Partial<FormatterContext>): FormatterContext {
+    return {
+        escape: escapeHtml,
+        asHtml: asHtml,
+        asText: asText,
+        ...props
     }
 }

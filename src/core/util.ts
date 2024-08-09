@@ -24,13 +24,11 @@ function escFunc(a: string) {
 }
 
 export function escapeHtml(s: any) {
-    if (!arguments.length) {
-        if (typeof this !== "undefined") {
-            s = this.value;
-        }
+    if (!arguments.length && this) {
+        s = this.value;
     }
 
-    if (typeof this !== "undefined") {
+    if (this) {
         this.isHtml = true;
     }
 

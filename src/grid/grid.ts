@@ -1,4 +1,4 @@
-import { basicRegexSanitizer, CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, basicRegexSanitizer, columnDefaults, convertCompatFormatter, createFormatterContext, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { Draggable } from "./draggable";
@@ -1799,17 +1799,17 @@ export class Grid<TItem = any> implements EditorHost {
     getFormatterContext(row: number, cell: number): FormatterContext {
         var column = this._cols[cell];
         var item = this.getDataItem(row);
-        const ctx: FormatterContext = {
+        const ctx = createFormatterContext({
             cell,
             column,
             grid: this,
-            escape: escapeHtml,
-            isHtml: !!this._options.treatFormatterOutputAsHtml ,
+            isHtml: !!this._options.treatFormatterOutputAsHtml,
             item,
             row
-        }
-        if (item)
+        });
+        if (item) {
             ctx.value = this.getDataItemValueForColumn(item, column);
+        }
         return ctx;
     }
 
@@ -1926,14 +1926,14 @@ export class Grid<TItem = any> implements EditorHost {
 
         // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
         var formatResult: FormatterResult;
-        const ctx: FormatterContext = {
+        const ctx = createFormatterContext({
             cell,
             column,
-            escape: escapeHtml,
             grid: this,
+            isHtml: !!this._options.treatFormatterOutputAsHtml,
             item,
             row
-        }
+        });
 
         if (item) {
             ctx.value = this.getDataItemValueForColumn(item, column);

@@ -192,8 +192,22 @@ export interface GridOptions<TItem = any> {
      * Factory function for creating custom formatters. Default is `null`.
      */
     formatterFactory?: FormatterFactory;
+
+    /**
+     * Defaults to `false`. If `true`, places frozen rows at the bottom edge of the grid.
+     */
     frozenBottom?: boolean;
+
+    /**
+     * Defaults to `undefined`. If specified, freezes the given number of columns on the left edge of the grid.
+     * Prefer setting column.frozen = 'true' for individual columns as this is only for compatibility.
+     */
     frozenColumns?: number;
+
+    /**
+     * Defaults to `undefined`. If specified, freezes the given number of rows at the top or bottom
+     * edge of the grid based on `frozenBottom`.
+     */
     frozenRows?: number;
 
     /**
@@ -250,6 +264,10 @@ export interface GridOptions<TItem = any> {
      * Defaults to `true`. If `true`, enables multiple cell selection.
      */
     multiSelect?: boolean;
+
+    /**
+     * Sets grouping panel height. Default is `undefined`, e.g. it is set via CSS.
+     */
     preHeaderPanelHeight?: number;
 
     /**
@@ -330,6 +348,10 @@ export interface GridOptions<TItem = any> {
      * Defaults to `false`. If `true`, suppresses the activation of cells when they contain an editor and are clicked.
      */
     suppressActiveCellChangeOnEdit?: boolean;
+
+    /**
+     * Defaults to `false`. If `true`, synchronizes column resizing with cell resizing.
+     */
     syncColumnCellResize?: boolean;
 
     /**
@@ -359,13 +381,15 @@ export interface GridOptions<TItem = any> {
      *
      * It is recommended to set this to false, which will treat formatter output as plain text by default and encourage
      * the use of text or DOM elements (e.g., via jsx-dom, Fluent) in formatters. Even when this option is set to false,
-     * formatters can still return HTML by explicitly setting FormatterContext.isHtml to true.
+     * formatters can still return HTML by explicitly setting FormatterContext.isHtml to true or calling
+     * FormatterContext.asHtml() to return a value.
      *
      * Additionally, if FormatterContext.escape() is called within a formatter, isHtml will automatically be set to true
      * regardless of this setting, to mitigate issues with existing formatters when treatFormatterOutputAsHtml is false.
      *
-     * However, when treatFormatterOutputAsHtml is set to false, legacy formatters that return HTML without using ctx.escape()
-     * or manually setting isHtml may break. It is important to update such formatters before disabling this option.
+     * However, when treatFormatterOutputAsHtml is set to false, legacy formatters that return HTML without using ctx.escape(),
+     * ctx.asHtml() or ctx.isHtml = true will not work as expected. It is important to update such formatters before
+     * disabling this option.
      */
     treatFormatterOutputAsHtml?: boolean;
 }
