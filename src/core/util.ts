@@ -28,10 +28,6 @@ export function escapeHtml(s: any) {
         s = this.value;
     }
 
-    if (this) {
-        this.isHtml = true;
-    }
-
     if (s == null)
         return '';
 
