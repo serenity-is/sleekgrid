@@ -1,5 +1,5 @@
 import type { Column, EditCommand, EditorFactory, EditorLock } from "../core";
-import { ColumnFormat, CompatFormatter, defaultColumnFormat, FormatterFactory, GlobalEditorLock, GroupTotals } from "../core";
+import { ColumnFormat, CompatFormatter, FormatterFactory, GlobalEditorLock, GroupTotals, defaultColumnFormat } from "../core";
 import { LayoutEngine } from "./layout";
 
 /**
@@ -374,24 +374,6 @@ export interface GridOptions<TItem = any> {
      */
     viewportClass?: string;
 
-    /**
-     * When set to true (the default for compatibility), strings returned from formatters are treated as HTML markup.
-     * This means FormatterContext.isHtml is also set to true by default. If a formatter returns HTML, the output
-     * will be sanitized using the specified sanitizer function.
-     *
-     * It is recommended to set this to false, which will treat formatter output as plain text by default and encourage
-     * the use of text or DOM elements (e.g., via jsx-dom, Fluent) in formatters. Even when this option is set to false,
-     * formatters can still return HTML by explicitly setting FormatterContext.isHtml to true or calling
-     * FormatterContext.asHtml() to return a value.
-     *
-     * Additionally, if FormatterContext.escape() is called within a formatter, isHtml will automatically be set to true
-     * regardless of this setting, to mitigate issues with existing formatters when treatFormatterOutputAsHtml is false.
-     *
-     * However, when treatFormatterOutputAsHtml is set to false, legacy formatters that return HTML without using ctx.escape(),
-     * ctx.asHtml() or ctx.isHtml = true will not work as expected. It is important to update such formatters before
-     * disabling this option.
-     */
-    treatFormatterOutputAsHtml?: boolean;
 }
 
 export const gridDefaults: GridOptions = {
@@ -416,7 +398,6 @@ export const gridDefaults: GridOptions = {
     enableAsyncPostRenderCleanup: false,
     enableCellNavigation: true,
     enableColumnReorder: true,
-    treatFormatterOutputAsHtml: true,
     enableTabKeyNavigation: true,
     enableTextSelectionOnCells: false,
     explicitInitialization: false,

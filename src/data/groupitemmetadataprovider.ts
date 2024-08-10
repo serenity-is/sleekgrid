@@ -56,8 +56,8 @@ export class GroupItemMetadataProvider {
         if (!opt.enableExpandCollapse)
             return item?.title;
         let indentation = item.level * opt.groupIndentation;
-        return ctx.asHtml(`<span class="${ctx.escape(opt.toggleCssClass + " " + (item.collapsed ? opt.toggleCollapsedCssClass : opt.toggleExpandedCssClass))}" style="margin-left: ${indentation}px">
-<span class="${ctx.escape(opt.groupTitleCssClass)}" level="${ctx.escape(item.level)}">${item.title}</span>`);
+        return `<span class="${ctx.escape(opt.toggleCssClass + " " + (item.collapsed ? opt.toggleCollapsedCssClass : opt.toggleExpandedCssClass))}" style="margin-left: ${indentation}px">
+<span class="${ctx.escape(opt.groupTitleCssClass)}" level="${ctx.escape(item.level)}">${item.title}</span>`;
     }
 
     public static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): string {

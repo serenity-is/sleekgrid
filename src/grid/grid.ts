@@ -1,4 +1,4 @@
-import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, basicRegexSanitizer, columnDefaults, convertCompatFormatter, createFormatterContext, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, basicRegexSanitizer, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { Draggable } from "./draggable";
@@ -1799,17 +1799,16 @@ export class Grid<TItem = any> implements EditorHost {
     getFormatterContext(row: number, cell: number): FormatterContext {
         var column = this._cols[cell];
         var item = this.getDataItem(row);
-        const ctx = createFormatterContext({
+        const ctx: FormatterContext = {
             cell,
             column,
             grid: this,
-            isHtml: !!this._options.treatFormatterOutputAsHtml,
+            escape: escapeHtml,
             item,
             row
-        });
-        if (item) {
-            ctx.value = this.getDataItemValueForColumn(item, column);
         }
+        if (item)
+            ctx.value = this.getDataItemValueForColumn(item, column);
         return ctx;
     }
 
@@ -1926,18 +1925,21 @@ export class Grid<TItem = any> implements EditorHost {
 
         // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
         var formatResult: FormatterResult;
-        const ctx = createFormatterContext({
+        const ctx: FormatterContext = {
             cell,
             column,
+            escape: escapeHtml,
             grid: this,
-            isHtml: !!this._options.treatFormatterOutputAsHtml,
             item,
             row
-        });
+        }
 
         if (item) {
             ctx.value = this.getDataItemValueForColumn(item, column);
             formatResult = this.getFormatter(row, column)(ctx);
+            if (typeof formatResult === "string" && formatResult.length) {
+                formatResult = this._options.sanitizer?.(formatResult);
+            }
         }
 
         klass = escapeHtml(klass);
@@ -1965,24 +1967,15 @@ export class Grid<TItem = any> implements EditorHost {
             if (toolTip != null && toolTip.length)
                 sb.push('tooltip="' + escapeHtml(toolTip) + '"');
 
-            if (formatResult != null && !(formatResult instanceof Node)) {
-                if (!(ctx.isHtml ?? true)) {
-                    formatResult = escapeHtml(formatResult);
-                }
+            if (formatResult != null)
                 sb.push('>' + formatResult + '</div>');
-            }
             else
                 sb.push('></div>');
         }
-        else if (formatResult != null &&  !(formatResult instanceof Node)) {
-            if (!(ctx.isHtml ?? true)) {
-                formatResult = escapeHtml(formatResult);
-            }
+        else if (formatResult != null &&  !(formatResult instanceof Node))
             sb.push('<div class="' + klass + '">' + formatResult + '</div>');
-        }
-        else {
+        else
             sb.push('<div class="' + klass + '"></div>');
-        }
 
         var cache = this._rowsCache[row];
         cache.cellRenderQueue.push(cell);
@@ -2115,10 +2108,14 @@ export class Grid<TItem = any> implements EditorHost {
     private updateCellWithFormatter(cellNode: HTMLElement, row: number, cell: number): void {
         var formatResult: string | Element | DocumentFragment;
         const ctx = this.getFormatterContext(row, cell);
-        if (ctx.item)
+        if (ctx.item) {
             formatResult = this.getFormatter(row, ctx.column)(ctx);
+            if (typeof formatResult === "string" && formatResult.length) {
+                formatResult = this._options.sanitizer?.(formatResult);
+            }
+        }
         this._emptyNode(cellNode);
-        applyFormatterResultToCellNode(ctx, formatResult, cellNode, this._options.sanitizer);
+        applyFormatterResultToCellNode(ctx, formatResult, cellNode);
     }
 
     updateRow(row: number): void {

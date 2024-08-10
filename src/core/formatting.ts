@@ -19,29 +19,10 @@ export interface FormatterContext<TItem = any> {
     addClass?: string;
 
     /**
-     * Sets isHtml to true and returns the given markup as is.
-     */
-    asHtml: (markup: string) => string;
-
-    /**
-     * Sets isHtml to false and returns the given value as is.
-     * If no value argument is provided, returns ctx.value.
-     */
-    asText(): TItem;
-    asText<T>(value: T): T;
-
-    /**
      * Returns html escaped ctx.value if called without arguments.
      * prefer this over ctx.value to avoid html injection attacks!
-     * Note that calling this function also sets isHtml to true
      */
     escape(value?: any): string;
-
-    /**
-     * True if the returned string should be considered HTML markup.
-     * Defaults to grid options treatFormatterOutputAsHtml
-     */
-    isHtml?: boolean;
 
     /**
      * The row index of the cell.
@@ -98,17 +79,16 @@ export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number
 
 export type CellStylesHash = { [row: number]: { [columnId: string]: string } }
 
-export function defaultColumnFormat(ctx: FormatterContext): string {
-    return ctx.escape();
+export function defaultColumnFormat(ctx: FormatterContext) {
+    return escapeHtml(ctx.value);
 }
 
 export function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat {
     if (compatFormatter == null)
         return null;
 
-    return function (ctx: FormatterContext): FormatterResult {
+    return function(ctx: FormatterContext): FormatterResult {
         var fmtResult = compatFormatter(ctx.row, ctx.cell, ctx.value, ctx.column, ctx.item, ctx.grid);
-        ctx.isHtml = true;
         if (fmtResult != null && typeof fmtResult !== 'string' && Object.prototype.toString.call(fmtResult) === '[object Object]') {
             ctx.addClass = fmtResult.addClasses;
             ctx.tooltip = fmtResult.toolTip;
@@ -118,7 +98,7 @@ export function convertCompatFormatter(compatFormatter: CompatFormatter): Column
     }
 }
 
-export function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement, sanitizer?: (dirtyHtml: string) => string) {
+export function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement) {
     var oldFmtAtt = node.dataset.fmtatt as string;
     if (oldFmtAtt?.length > 0) {
         for (var k of oldFmtAtt.split(','))
@@ -145,15 +125,8 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: Form
     else if (html instanceof Node) {
         node.appendChild(html);
     }
-    else if (typeof html === "string" && (ctx.isHtml ?? true)) {
-        if (sanitizer) {
-            html = sanitizer(html);
-        }
-        node.innerHTML = html;
-    }
-    else {
-        node.textContent = "" + html;
-    }
+    else
+        node.innerHTML = "" + html;
 
     if (ctx.addAttrs != null) {
         var keys = Object.keys(ctx.addAttrs);
@@ -168,27 +141,5 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: Form
     if (ctx.addClass?.length) {
         addClass(node, ctx.addClass);
         node.dataset.fmtcls = ctx.addClass;
-    }
-}
-
-function asHtml(markup?: string): string {
-    this.isHtml = true;
-    return markup;
-}
-
-function asText(value?: any): any {
-    this.isHtml = false;
-    if (!arguments.length && this) {
-        return this.value;
-    }
-    return value;
-}
-
-export function createFormatterContext(props: Partial<FormatterContext>): FormatterContext {
-    return {
-        escape: escapeHtml as any,
-        asHtml: asHtml,
-        asText: asText,
-        ...props
     }
 }
