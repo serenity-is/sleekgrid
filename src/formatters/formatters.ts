@@ -2,7 +2,7 @@ import { FormatterContext } from "../core";
 
 export function PercentCompleteFormatter(ctx: FormatterContext) {
     if (ctx.value == null || ctx.value === "")
-        return ctx.asText("-");
+        return ctx.escape("-");
     if (ctx.value < 50)
         return ctx.asHtml("<span style='color:red; font-weight:bold;'>" + ctx.escape() + "%</span>");
 
@@ -25,7 +25,7 @@ export function PercentCompleteBarFormatter(ctx: FormatterContext) {
 }
 
 export function YesNoFormatter(ctx: FormatterContext) {
-    return ctx.asText(ctx.value ? 'Yes' : 'No');
+    return ctx.escape(ctx.value ? 'Yes' : 'No');
 }
 
 

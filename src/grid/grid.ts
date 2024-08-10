@@ -1965,15 +1965,24 @@ export class Grid<TItem = any> implements EditorHost {
             if (toolTip != null && toolTip.length)
                 sb.push('tooltip="' + escapeHtml(toolTip) + '"');
 
-            if (formatResult != null)
+            if (formatResult != null && !(formatResult instanceof Node)) {
+                if (!(ctx.isHtml ?? true)) {
+                    formatResult = escapeHtml(formatResult);
+                }
                 sb.push('>' + formatResult + '</div>');
+            }
             else
                 sb.push('></div>');
         }
-        else if (formatResult != null &&  !(formatResult instanceof Node))
+        else if (formatResult != null &&  !(formatResult instanceof Node)) {
+            if (!(ctx.isHtml ?? true)) {
+                formatResult = escapeHtml(formatResult);
+            }
             sb.push('<div class="' + klass + '">' + formatResult + '</div>');
-        else
+        }
+        else {
             sb.push('<div class="' + klass + '"></div>');
+        }
 
         var cache = this._rowsCache[row];
         cache.cellRenderQueue.push(cell);
