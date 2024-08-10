@@ -6,7 +6,7 @@ export function PercentCompleteFormatter(ctx: FormatterContext) {
     if (ctx.value < 50)
         return "<span style='color:red; font-weight:bold;'>" + ctx.escape() + "%</span>";
 
-    return "<span style='color:green'>" + escapeHtml(ctx.value) + "%</span>";
+    return "<span style='color:green'>" + ctx.escape() + "%</span>";
 }
 
 export function PercentCompleteBarFormatter(ctx: FormatterContext) {
@@ -21,7 +21,7 @@ export function PercentCompleteBarFormatter(ctx: FormatterContext) {
     else
         color = "green";
 
-    return "<span class='percent-complete-bar slick-percentcomplete-bar' style='background:" + color + ";width:" + escapeHtml(ctx.value) + "%' title='" + escapeHtml(ctx.value) + "%'></span>";
+    return "<span class='percent-complete-bar slick-percentcomplete-bar' style='background:" + color + ";width:" + ctx.escape() + "%' title='" + ctx.escape() + "%'></span>";
 }
 
 export function YesNoFormatter(ctx: FormatterContext) {
