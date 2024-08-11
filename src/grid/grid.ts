@@ -2199,7 +2199,7 @@ export class Grid<TItem = any> implements EditorHost {
         this._pagingIsLastPage = (pagingInfo.pageNum == pagingInfo.totalPages - 1);
     }
 
-    private updateRowCount(): void {
+    updateRowCount(): void {
         if (!this._initialized) {
             return;
         }

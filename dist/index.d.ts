@@ -1151,7 +1151,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 		pageNum: number;
 		totalPages: number;
 	}): void;
-	private updateRowCount;
+	updateRowCount(): void;
 	/**
 	 * @param viewportTop optional viewport top
 	 * @param viewportLeft optional viewport left
