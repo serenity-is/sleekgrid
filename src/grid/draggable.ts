@@ -82,21 +82,21 @@ export function Draggable(options: DraggableOption) {
 
     function init() {
         if (containerElement) {
-            containerElement.addEventListener('mousedown', userPressed as EventListener);
-            containerElement.addEventListener('touchstart', userPressed as EventListener, { passive: true });
+            containerElement.addEventListener('mousedown', userPressed);
+            containerElement.addEventListener('touchstart', userPressed, { passive: true });
         }
     }
 
     function executeDragCallbackWhenDefined(callback?: (e: DragEvent, dd: DragItem) => boolean | void, evt?: MouseEvent | Touch | TouchEvent | KeyboardEvent, dd?: DragItem) {
         if (typeof callback === 'function') {
-            return callback(evt as DragEvent, dd as DragItem);
+            return callback(evt as DragEvent, dd);
         }
     }
 
     function destroy() {
         if (containerElement) {
-            containerElement.removeEventListener('mousedown', userPressed as EventListener);
-            containerElement.removeEventListener('touchstart', userPressed as EventListener);
+            containerElement.removeEventListener('mousedown', userPressed);
+            containerElement.removeEventListener('touchstart', userPressed);
         }
     }
 
