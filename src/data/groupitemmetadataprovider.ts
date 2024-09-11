@@ -1,5 +1,5 @@
 import { Column, ColumnFormat, CompatFormatter, convertCompatFormatter, FormatterContext, Group, GroupTotals, ItemMetadata } from "../core";
-import { ArgsCell, Grid } from "../grid";
+import { ArgsCell, Grid, IPlugin } from "../grid";
 
 export interface GroupItemMetadataProviderOptions {
     enableExpandCollapse?: boolean;
@@ -22,7 +22,7 @@ export interface GroupItemMetadataProviderOptions {
     totalsFormatter?: CompatFormatter<GroupTotals>;
 }
 
-export class GroupItemMetadataProvider {
+export class GroupItemMetadataProvider implements IPlugin {
     declare protected grid: Grid;
     declare private options: GroupItemMetadataProviderOptions;
 
