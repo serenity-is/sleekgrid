@@ -8,6 +8,8 @@
         "ES2015",
         "DOM"
       ],
+      "module": "ESNext",
+      "moduleResolution": "Bundler",
       "newLine": "lf",
       "noEmit": true,
       "noEmitHelpers": false,
@@ -16,7 +18,6 @@
       "sourceMap": false,
       "skipLibCheck": false,
       "outDir": "./dist",
-      "moduleResolution": "Node",
       "target": "ESNext",
       "useDefineForClassFields": false
     },
