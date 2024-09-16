@@ -1024,7 +1024,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	readonly onSort: EventEmitter<ArgsSort, IEventData>;
 	readonly onValidationError: EventEmitter<ArgsValidationError, IEventData>;
 	readonly onViewportChanged: EventEmitter<ArgsGrid, IEventData>;
-	constructor(container: HTMLElement | ArrayLike<HTMLElement>, data: any, columns: Column<TItem>[], options: GridOptions<TItem>);
+	constructor(container: string | HTMLElement | ArrayLike<HTMLElement>, data: any, columns: Column<TItem>[], options: GridOptions<TItem>);
 	private createGroupingPanel;
 	private bindAncestorScroll;
 	init(): void;
@@ -1458,7 +1458,7 @@ export interface GroupItemMetadataProviderOptions {
 	totalsFormat?: ColumnFormat<GroupTotals>;
 	totalsFormatter?: CompatFormatter<GroupTotals>;
 }
-export declare class GroupItemMetadataProvider {
+export declare class GroupItemMetadataProvider implements IPlugin {
 	protected grid: Grid;
 	private options;
 	constructor(opt?: GroupItemMetadataProviderOptions);

@@ -123,7 +123,7 @@ export class Grid<TItem = any> implements EditorHost {
     readonly onValidationError = new EventEmitter<ArgsValidationError>();
     readonly onViewportChanged = new EventEmitter<ArgsGrid>();
 
-    constructor(container: HTMLElement | ArrayLike<HTMLElement>, data: any, columns: Column<TItem>[], options: GridOptions<TItem>) {
+    constructor(container: string | HTMLElement | ArrayLike<HTMLElement>, data: any, columns: Column<TItem>[], options: GridOptions<TItem>) {
 
         this._data = data;
         this._colDefaults = Object.assign({}, columnDefaults);
