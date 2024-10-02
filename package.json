@@ -26,13 +26,14 @@
   ],
   "scripts": {
     "build": "node build/build",
+    "build:full": "node build/build --full",
     "doc": "typedoc --plugin typedoc-plugin-markdown --exclude **/lib/**/* --excludePrivate --readme none --githubPages false --sourceLinkTemplate https://github.com/serenity-is/sleekgrid/blob/master/{path}#L{line} --readme none --out /Sandbox/serenity-is/SerenityIs/SerenityIs.Web/Docs/api/js/sleekgrid --json ./out/typedoc.json src",
     "dts": "npx -yes dts-bundle-generator -o dist/index.d.ts src/index.ts --project=./tsconfig.json --no-banner",
     "jest": "jest",
-    "prepublishOnly": "pnpm build && jest && pnpm dts",
+    "prepublishOnly": "pnpm build:full && jest && pnpm dts",
     "tsc": "tsc",
     "test": "pnpm build && jest --coverage",
-    "www": "pnpm build && cd docs && jekyll serve --livereload --config _config.yml,_config_local.yml"
+    "www": "pnpm build:full && cd docs && jekyll serve --livereload --config _config.yml,_config_local.yml"
   },
   "keywords": [
     "grid",

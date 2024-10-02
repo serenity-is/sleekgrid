@@ -3,6 +3,7 @@ import esbuild from "esbuild";
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join, resolve } from "path";
 import { fileURLToPath } from 'url';
+import process from 'process';
 
 export function globalExternals(filter, externals) {
     return {
@@ -153,19 +154,29 @@ const sleekGlobal = {
     outfile: './wwwroot/index.global.js'
 }
 
-for (var esmOpt of [
-    compatCore,
-    compatGrid,
-    compatFormatters,
-    compatEditors,
-    compatLayoutsFrozen,
-    compatDataGroupItemMetadataProvider,
-    compatPluginsAutoTooltips,
-    compatPluginsRowMoveManager,
-    compatPluginsRowSelectionModel,
+var buildList = [];
+
+if (process.argv.includes('--compat') ||
+    process.argv.includes('--full')) {
+    buildList.push(
+        compatCore,
+        compatGrid,
+        compatFormatters,
+        compatEditors,
+        compatLayoutsFrozen,
+        compatDataGroupItemMetadataProvider,
+        compatPluginsAutoTooltips,
+        compatPluginsRowMoveManager,
+        compatPluginsRowSelectionModel
+    );
+}
+
+buildList.push(
     sleekIndex,
     sleekGlobal
-]) {
+)
+
+for (var esmOpt of buildList) {
     await esbuild.build({
         ...esmOpt,
     }).catch(() => process.exit());
