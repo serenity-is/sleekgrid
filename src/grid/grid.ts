@@ -1754,22 +1754,22 @@ export class Grid<TItem = any> implements EditorHost {
                     if (columnMetadata) {
                         if (columnMetadata.format)
                             return columnMetadata.format;
-                        if (columnMetadata.formatter)
-                            return convertCompatFormatter(columnMetadata.formatter);
+                        if ((columnMetadata as any).formatter)
+                            return convertCompatFormatter((columnMetadata as any).formatter);
                     }
                 }
                 if (itemMetadata.format)
                     return itemMetadata.format;
-                if (itemMetadata.formatter)
-                    return convertCompatFormatter(itemMetadata.formatter);
+                if ((itemMetadata as any).formatter)
+                    return convertCompatFormatter((itemMetadata as any).formatter);
             }
         }
 
         if (column.format)
             return column.format;
 
-        if (column.formatter)
-            return convertCompatFormatter(column.formatter);
+        if ((column as any).formatter)
+            return convertCompatFormatter((column as any).formatter);
 
         var opt = this._options;
 
@@ -2989,7 +2989,7 @@ export class Grid<TItem = any> implements EditorHost {
         if (!handled) {
             if (!e.shiftKey && !e.altKey) {
                 if (this._options.editable && this._currentEditor && this._currentEditor.keyCaptureList) {
-                    if (this._currentEditor.keyCaptureList.indexOf(e.which) >= 0) {
+                    if (this._currentEditor.keyCaptureList.indexOf((e as any).which) >= 0) {
                         return;
                     }
                 }
@@ -3017,7 +3017,7 @@ export class Grid<TItem = any> implements EditorHost {
             if (!e.shiftKey && !e.altKey && !e.ctrlKey) {
 
                 if (this._options.editable && this._currentEditor && this._currentEditor.keyCaptureList) {
-                    if (this._currentEditor.keyCaptureList.indexOf(e.which) >= 0) {
+                    if (this._currentEditor.keyCaptureList.indexOf((e as any).which) >= 0) {
                         return;
                     }
                 }

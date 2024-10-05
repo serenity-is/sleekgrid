@@ -100,7 +100,7 @@ export class RowSelectionModel implements IPlugin, SelectionModel {
 
     private handleKeyDown(e: KeyboardEvent) {
         let activeRow = this.grid.getActiveCell();
-        if (!(activeRow && e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey && (e.which == 38 || e.which == 40)))
+        if (!(activeRow && e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey && ((e as any).which == 38 || (e as any).which == 40)))
             return;
 
         let selectedRows = this.getSelectedRows();
@@ -116,7 +116,7 @@ export class RowSelectionModel implements IPlugin, SelectionModel {
         let bottom = selectedRows[selectedRows.length - 1];
         let active;
 
-        if (e.which == 40) {
+        if ((e as any).which == 40) {
             active = activeRow.row < bottom || top == bottom ? ++bottom : ++top;
         } else {
             active = activeRow.row < bottom ? --bottom : --top;
