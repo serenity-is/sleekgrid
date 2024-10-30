@@ -149,8 +149,8 @@ export class Grid<TItem = any> implements EditorHost {
 
         this._container.classList.add('slick-container');
 
-        this._emptyNode = options.emptyNode ?? (this._jQuery ? (function(node: Element) { this(node).empty(); }).bind(this._jQuery) : (function(node: Element) { node.innerHTML = ""; }));
-        this._removeNode = options.removeNode ?? (this._jQuery ? (function(node: Element) { this(node).remove(); }).bind(this._jQuery) : (function(node: Element) { node.remove(); }));
+        this._emptyNode = options.emptyNode ?? (this._jQuery ? (function (node: Element) { this(node).empty(); }).bind(this._jQuery) : (function (node: Element) { node.innerHTML = ""; }));
+        this._removeNode = options.removeNode ?? (this._jQuery ? (function (node: Element) { this(node).remove(); }).bind(this._jQuery) : (function (node: Element) { node.remove(); }));
 
         if (options?.createPreHeaderPanel) {
             // for compat, as draggable grouping plugin expects preHeaderPanel for grouping
@@ -389,11 +389,8 @@ export class Grid<TItem = any> implements EditorHost {
                     .on('mouseleave', '.slick-cell', this.handleMouseLeave.bind(this));
             }
             else {
-                // need to reimplement this similar to jquery events
-                (canvas as HTMLElement).addEventListener("mouseenter", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") &&
-                    this.handleMouseEnter(e), { capture: true});
-                (canvas as HTMLElement).addEventListener("mouseleave", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") &&
-                    this.handleMouseLeave(e), { capture: true });
+                canvas.addEventListener("mouseenter", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") && this.handleMouseEnter.bind(this), { capture: true });
+                canvas.addEventListener("mouseleave", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") && this.handleMouseLeave.bind(this), { capture: true });
             }
         });
 
@@ -1972,7 +1969,7 @@ export class Grid<TItem = any> implements EditorHost {
             else
                 sb.push('></div>');
         }
-        else if (formatResult != null &&  !(formatResult instanceof Node))
+        else if (formatResult != null && !(formatResult instanceof Node))
             sb.push('<div class="' + klass + '">' + formatResult + '</div>');
         else
             sb.push('<div class="' + klass + '"></div>');
@@ -3080,17 +3077,17 @@ export class Grid<TItem = any> implements EditorHost {
         }
     }
 
-    private getTextSelection(){
+    private getTextSelection() {
         var selection = null;
 
         if (window.getSelection && window.getSelection().rangeCount > 0) {
-          selection = window.getSelection().getRangeAt(0);
+            selection = window.getSelection().getRangeAt(0);
         }
 
         return selection;
     }
 
-    private setTextSelection(selection: Range){
+    private setTextSelection(selection: Range) {
         if (window.getSelection && selection) {
             var target = window.getSelection();
             target.removeAllRanges();
