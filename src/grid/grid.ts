@@ -390,10 +390,10 @@ export class Grid<TItem = any> implements EditorHost {
             }
             else {
                 // need to reimplement this similar to jquery events
-                (canvas as HTMLElement).addEventListener("mouseenter", e => (e.target as HTMLElement).closest(".slick-cell") &&
-                    this.handleMouseEnter(e));
-                (canvas as HTMLElement).addEventListener("mouseleave", e => (e.target as HTMLElement).closest(".slick-cell") &&
-                    this.handleMouseLeave(e));
+                (canvas as HTMLElement).addEventListener("mouseenter", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") &&
+                    this.handleMouseEnter(e), { capture: true});
+                (canvas as HTMLElement).addEventListener("mouseleave", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") &&
+                    this.handleMouseLeave(e), { capture: true });
             }
         });
 
