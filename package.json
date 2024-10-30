@@ -1,6 +1,6 @@
 {
   "name": "@serenity-is/sleekgrid",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "description": "A modern Data Grid / Spreadsheet component",
   "type": "module",
   "types": "dist/index.d.ts",

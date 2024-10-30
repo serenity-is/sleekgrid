@@ -389,8 +389,8 @@ export class Grid<TItem = any> implements EditorHost {
                     .on('mouseleave', '.slick-cell', this.handleMouseLeave.bind(this));
             }
             else {
-                canvas.addEventListener("mouseenter", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") && this.handleMouseEnter.bind(this), { capture: true });
-                canvas.addEventListener("mouseleave", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") && this.handleMouseLeave.bind(this), { capture: true });
+                canvas.addEventListener("mouseenter", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") && this.handleMouseEnter(e), { capture: true });
+                canvas.addEventListener("mouseleave", e => (e.target as HTMLElement)?.classList?.contains("slick-cell") && this.handleMouseLeave(e), { capture: true });
             }
         });
 
