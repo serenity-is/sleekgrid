@@ -1964,7 +1964,7 @@ export class Grid<TItem = any> implements EditorHost {
             if (toolTip != null && toolTip.length)
                 sb.push('tooltip="' + escapeHtml(toolTip) + '"');
 
-            if (formatResult != null)
+            if (formatResult != null && !(formatResult instanceof Node))
                 sb.push('>' + formatResult + '</div>');
             else
                 sb.push('></div>');
