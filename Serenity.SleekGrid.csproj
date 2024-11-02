@@ -3,6 +3,9 @@
     <Version>1.9.4</Version>
     <Description>NuGet version of @serenity-is/sleekgrid NPM package</Description>
   </PropertyGroup>
+  <ItemGroup>
+      <Content Update="$(MSBuildProjectDirectory)\docs\**\*" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Pack="false" />
+  </ItemGroup>
   <Target Name="TSBuild" Condition="'$(SkipNodeScripts)' != 'true'" AfterTargets="AfterBuild" DependsOnTargets="NpmInstall">
     <Exec Command="pnpm build" />
   </Target>
