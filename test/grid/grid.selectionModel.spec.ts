@@ -1,6 +1,6 @@
 import { Grid } from "@/grid/grid";
 import { SelectionModel } from "@/grid";
-import { EventEmitter, Range } from "@/core";
+import { EventEmitter, CellRange } from "@/core";
 
 it('should selectionModel init with grid', () => {
     const grid = new Grid(document.createElement('div'), [], [], {});
@@ -10,11 +10,11 @@ it('should selectionModel init with grid', () => {
         init: (grid: Grid) => {
             selectionModelInitGrid = grid;
         },
-        setSelectedRanges: (_ranges: Range[]) => {
+        setSelectedRanges: (_ranges: CellRange[]) => {
         },
         refreshSelections: () => {
         },
-        onSelectedRangesChanged: new EventEmitter<Range[]>()
+        onSelectedRangesChanged: new EventEmitter<CellRange[]>()
     };
 
     grid.setSelectionModel(selectionModel);
@@ -27,14 +27,14 @@ it('should subscribe to selectionModel.onSelectedRangesChanged', () => {
 
     let selectionModelOnSelectedRangesSubscribed = false;
 
-    const eventEmitter = new EventEmitter<Range[]>();
+    const eventEmitter = new EventEmitter<CellRange[]>();
     eventEmitter.subscribe = () => {
         selectionModelOnSelectedRangesSubscribed = true;
     };
 
     const selectionModel: SelectionModel = {
         init: (_grid: Grid) => {},
-        setSelectedRanges: (_ranges: Range[]) => {
+        setSelectedRanges: (_ranges: CellRange[]) => {
         },
         refreshSelections: () => {
         },
@@ -50,14 +50,14 @@ it('should unsubscribe from selectionModel.onSelectedRangesChanged on destroy', 
 
     let selectionModelOnSelectedRangesUnsubscribed = false;
 
-    const eventEmitter = new EventEmitter<Range[]>();
+    const eventEmitter = new EventEmitter<CellRange[]>();
     eventEmitter.unsubscribe = () => {
         selectionModelOnSelectedRangesUnsubscribed = true;
     };
 
     const selectionModel: SelectionModel = {
         init: (_grid: Grid) => {},
-        setSelectedRanges: (_ranges: Range[]) => {
+        setSelectedRanges: (_ranges: CellRange[]) => {
         },
         refreshSelections: () => {
         },
@@ -74,14 +74,14 @@ it('should unsubscribe from selectionModel.onSelectedRangesChanged when setting 
 
     let selectionModelOnSelectedRangesUnsubscribed = false;
 
-    const eventEmitter = new EventEmitter<Range[]>();
+    const eventEmitter = new EventEmitter<CellRange[]>();
     eventEmitter.unsubscribe = () => {
         selectionModelOnSelectedRangesUnsubscribed = true;
     };
 
     const selectionModel: SelectionModel = {
         init: (_grid: Grid) => {},
-        setSelectedRanges: (_ranges: Range[]) => {
+        setSelectedRanges: (_ranges: CellRange[]) => {
         },
         refreshSelections: () => {
         },
@@ -91,11 +91,11 @@ it('should unsubscribe from selectionModel.onSelectedRangesChanged when setting 
     grid.setSelectionModel(selectionModel);
     grid.setSelectionModel({
         init: (_grid: Grid) => {},
-        setSelectedRanges: (_ranges: Range[]) => {
+        setSelectedRanges: (_ranges: CellRange[]) => {
         },
         refreshSelections: () => {
         },
-        onSelectedRangesChanged: new EventEmitter<Range[]>()
+        onSelectedRangesChanged: new EventEmitter<CellRange[]>()
     });
     expect(selectionModelOnSelectedRangesUnsubscribed).toBe(true);
 });
@@ -105,11 +105,11 @@ it('should return current selectionModel on getSelectionModel', () => {
 
     const selectionModel: SelectionModel = {
         init: (_grid: Grid) => {},
-        setSelectedRanges: (_ranges: Range[]) => {
+        setSelectedRanges: (_ranges: CellRange[]) => {
         },
         refreshSelections: () => {
         },
-        onSelectedRangesChanged: new EventEmitter<Range[]>()
+        onSelectedRangesChanged: new EventEmitter<CellRange[]>()
     };
 
     grid.setSelectionModel(selectionModel);

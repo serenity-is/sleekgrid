@@ -1,4 +1,5 @@
-﻿import { EventEmitter, EventData, EventSubscriber, IEventData, patchEvent, keyCode } from "@/core/event";
+import { EventEmitter, EventData, EventSubscriber, IEventData, patchEvent } from "@/core/event";
+import * as deprecatedWorkaround from "@/core/event";
 
 describe('EventData', () => {
     it('stopPropagation stops event propagation', () => {
@@ -511,5 +512,5 @@ describe('patchEvent', () => {
 });
 
 describe('keyCode', () => {
-    expect(keyCode.BACKSPACE).toBe(8);
+    expect((deprecatedWorkaround as any).keyCode.BACKSPACE).toBe(8);
 });
