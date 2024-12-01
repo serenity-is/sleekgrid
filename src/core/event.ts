@@ -22,7 +22,6 @@ export class EventData implements IEventData {
 
     /***
      * Stops event from propagating up the DOM tree.
-     * @method stopPropagation
      */
     stopPropagation() {
         this._isPropagationStopped = true;
@@ -61,7 +60,6 @@ export class EventEmitter<TArgs = any, TEventData extends IEventData = IEventDat
      * Adds an event handler to be called when the event is fired.
      * <p>Event handler will receive two arguments - an <code>EventData</code> and the <code>data</code>
      * object the event was fired with.<p>
-     * @method subscribe
      * @param fn {Function} Event handler.
      */
     subscribe(fn: ((e: TEventData, args: TArgs) => void)) {
@@ -70,7 +68,6 @@ export class EventEmitter<TArgs = any, TEventData extends IEventData = IEventDat
 
     /***
      * Removes an event handler added with <code>subscribe(fn)</code>.
-     * @method unsubscribe
      * @param fn {Function} Event handler to be removed.
      */
     unsubscribe(fn: ((e: TEventData, args: TArgs) => void)) {

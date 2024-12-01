@@ -73,7 +73,6 @@ export class Group<TEntity = any> extends NonDataRow {
 
   /***
    * Compares two Group instances.
-   * @method equals
    * @return {Boolean}
    * @param group {Group} Group instance to compare to.
    */
@@ -92,7 +91,6 @@ export class Group<TEntity = any> extends NonDataRow {
  * formatters during the display.
  * @class GroupTotals
  * @extends NonDataRow
- * @constructor
  */
  export class GroupTotals<TEntity = any> extends NonDataRow {
 
