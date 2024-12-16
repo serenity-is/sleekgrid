@@ -6,6 +6,10 @@
   <ItemGroup>
       <Content Update="$(MSBuildProjectDirectory)\docs\**\*" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Pack="false" />
   </ItemGroup>
+  <Target Name="CreateNodeModules" AfterTargets="NpmInstall">
+    <MakeDir Directories="$(MSBuildProjectDirectory)\node_modules" />
+    <Touch AlwaysCreate="true" Files="$(MSBuildProjectDirectory)\node_modules\.keep" />
+  </Target>
   <Target Name="TSBuild" Condition="'$(SkipNodeScripts)' != 'true'" AfterTargets="AfterBuild" DependsOnTargets="NpmInstall">
     <Exec Command="pnpm build" />
   </Target>
