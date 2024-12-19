@@ -1,5 +1,5 @@
-import { EventEmitter, EventData, EventSubscriber, IEventData, patchEvent } from "@/core/event";
-import * as deprecatedWorkaround from "@/core/event";
+import { EventEmitter, EventData, EventSubscriber, IEventData, patchEvent } from "../../src/core/event";
+import * as deprecatedWorkaround from "../../src/core/event";
 
 describe('EventData', () => {
     it('stopPropagation stops event propagation', () => {
@@ -512,5 +512,7 @@ describe('patchEvent', () => {
 });
 
 describe('keyCode', () => {
-    expect((deprecatedWorkaround as any).keyCode.BACKSPACE).toBe(8);
+    it("has correct codes", () => {
+        expect((deprecatedWorkaround as any).keyCode.BACKSPACE).toBe(8);
+    });
 });

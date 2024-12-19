@@ -1,4 +1,4 @@
-import { addClass, escapeHtml as escape, removeClass, disableSelection, H, spacerDiv } from "@/core/util";
+import { addClass, escapeHtml as escape, removeClass, disableSelection, H, spacerDiv } from "../../src/core/util";
 
 describe('addClass', () => {
     it('should not do anything if classes to add is null or undefined', () => {
@@ -176,7 +176,7 @@ describe('H', () => {
     it('should call ref method with the element reference', () => {
         var divRef: HTMLSpanElement;
         var spanRef: HTMLSpanElement;
-        var element = H('div', { ref: el => divRef = el }, 
+        var element = H('div', { ref: el => divRef = el },
             H('span', { ref: el => spanRef = el }));
         expect(divRef).toBeDefined();
         expect(divRef === element).toBe(true);

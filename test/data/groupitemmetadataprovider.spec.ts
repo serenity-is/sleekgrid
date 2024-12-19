@@ -1,5 +1,5 @@
-import { ColumnFormat, CompatFormatter, escapeHtml as escape, Group } from "@/core";
-import { GroupItemMetadataProvider } from "@/data/groupitemmetadataprovider"
+import { ColumnFormat, CompatFormatter, escapeHtml as escape, Group } from "../../src/core";
+import { GroupItemMetadataProvider } from "../../src/data/groupitemmetadataprovider"
 
 describe("GroupItemMetadataProvider.defaults", () => {
     it("has expected default values", () => {
@@ -44,7 +44,7 @@ describe("GroupItemMetadataProvider constructor", () => {
             expect(GroupItemMetadataProvider.defaults.totalsCssClass).toBe("slick-group-totals");
         }
         finally {
-            GroupItemMetadataProvider.defaults.groupLevelPrefix = old;            
+            GroupItemMetadataProvider.defaults.groupLevelPrefix = old;
         }
     });
 
@@ -85,7 +85,7 @@ describe("GroupItemMetadataProvider constructor", () => {
         finally {
             GroupItemMetadataProvider.defaultGroupFormat = old;
         }
-    });    
+    });
 
     it("uses totalsFormat if passed", () => {
         var totalsFormat: ColumnFormat = () => "ok";
@@ -123,7 +123,7 @@ describe("GroupItemMetadataProvider constructor", () => {
         finally {
             GroupItemMetadataProvider.defaultTotalsFormat = old;
         }
-    });    
+    });
 
 });
 
@@ -174,10 +174,10 @@ function mockGrid() {
         onClickList: <any[]>[],
         onClick: {
             subscribe: function(f: any) { grid.onClickList.push(f); },
-            unsubscribe: function(f: any) { 
+            unsubscribe: function(f: any) {
                 var idx = grid.onClickList.indexOf(f);
                 expect(idx >= 0).toBe(true);
-                grid.onClickList.splice(idx, 1); 
+                grid.onClickList.splice(idx, 1);
             }
         } as any,
         onKeyDownList: <any[]>[],
@@ -239,7 +239,7 @@ function mockGrid() {
 }
 
 describe("GroupItemMetadataProvider.init", () => {
-    
+
     it("attaches to onClick", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();
@@ -261,7 +261,7 @@ describe("GroupItemMetadataProvider.init", () => {
 });
 
 describe("GroupItemMetadataProvider.handleGridClick", () => {
-    
+
     it("ignores when args does not include grid", () => {
         var plugin = new GroupItemMetadataProvider();
         var grid = mockGrid();

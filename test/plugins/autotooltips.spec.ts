@@ -1,4 +1,4 @@
-import { AutoTooltips } from "@/plugins/autotooltips"
+import { AutoTooltips } from "../../src/plugins/autotooltips"
 
 describe("AutoTooltips.defaults", () => {
     it("enableForCells true", () => {
@@ -29,10 +29,10 @@ function mockGrid() {
         onMouseEnterList: <any[]>[],
         onMouseEnter: {
             subscribe: function(f: any) { grid.onMouseEnterList.push(f); },
-            unsubscribe: function(f: any) { 
+            unsubscribe: function(f: any) {
                 var idx = grid.onMouseEnterList.indexOf(f);
                 expect(idx >= 0).toBe(true);
-                grid.onMouseEnterList.splice(idx, 1); 
+                grid.onMouseEnterList.splice(idx, 1);
             }
         },
         onHeaderMouseEnterList: <any[]>[],
@@ -44,13 +44,13 @@ function mockGrid() {
                 grid.onHeaderMouseEnterList.splice(idx, 1);
             }
         },
-        getCellFromEvent: function(e: any) { 
-            grid.getCellFromEventCalls++; 
-            return e.cell === undefined ? { row: 7, cell: 3 } : e.cell; 
+        getCellFromEvent: function(e: any) {
+            grid.getCellFromEventCalls++;
+            return e.cell === undefined ? { row: 7, cell: 3 } : e.cell;
         },
         getCellFromEventCalls: 0,
-        getCellNode: function(row: number, cell: number) { 
-            grid.getCellNodeCalls++; 
+        getCellNode: function(row: number, cell: number) {
+            grid.getCellNodeCalls++;
             return row == 7 && cell == 3 ? grid.node : null
         },
         getCellNodeCalls: 0
@@ -59,7 +59,7 @@ function mockGrid() {
 }
 
 describe("AutoTooltips.enableForCells", () => {
-    
+
     it("attaches to onMouseEnter when enableForCells not specified", () => {
         var plugin = new AutoTooltips();
         var grid = mockGrid();
@@ -90,7 +90,7 @@ describe("AutoTooltips.enableForCells", () => {
 });
 
 describe("AutoTooltips.enableForHeaderCells", () => {
-    
+
     it("attaches to onHeaderMouseEnter when enableForCells is true", () => {
         var plugin = new AutoTooltips({ enableForHeaderCells: true });
         var grid = mockGrid();

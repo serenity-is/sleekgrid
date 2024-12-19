@@ -6,7 +6,7 @@ import {
     getVBoxDelta,
     removeUiStateHover,
     simpleArrayEquals
-} from '@/grid/internal';
+} from '../../src/grid/internal';
 
 describe('addUiStateHover', () => {
     it('should add ui-state-hover class to the element', () => {

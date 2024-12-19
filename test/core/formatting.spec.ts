@@ -3,8 +3,8 @@ import {
     applyFormatterResultToCellNode,
     convertCompatFormatter,
     CompatFormatter, FormatterContext
-} from "@/core/formatting";
-import { escapeHtml as escape } from "@/core/util";
+} from "../../src/core/formatting";
+import { escapeHtml as escape } from "../../src/core/util";
 
 describe('defaultFormatter', () => {
     it('should encode & as &amp;', () => {

@@ -1,5 +1,5 @@
-import { Grid } from "@/grid/grid";
-import { BasicLayout, GridOptions, ViewportInfo } from "@/grid";
+import { Grid } from "../../src/grid/grid";
+import { BasicLayout, GridOptions, ViewportInfo } from "../../src/grid/";
 
 describe('canvas', () => {
     it('should return canvas node for cell or column index using layout', () => {

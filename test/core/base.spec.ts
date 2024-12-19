@@ -1,4 +1,4 @@
-import { NonDataRow, preClickClassName } from "@/core/base";
+import { NonDataRow, preClickClassName } from "../../src/core/base";
 
 describe('NonDataRow', () => {
     it('should set __nonDataRow to true', () => {

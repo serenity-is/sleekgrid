@@ -4,12 +4,9 @@
     "baseUrl": ".",
     "noImplicitAny": false,
     "declaration": false,
-    "paths": {
-        "@/*": ["../src/*"]
-    },
     "sourceMap": true,
     "types": [
-      "jest"
+      "vitest/globals"
     ]
   },
   "include": [

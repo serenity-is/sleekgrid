@@ -1,6 +1,6 @@
-﻿import { Column, columnDefaults } from "@/core/column";
-import { Grid } from "@/grid/grid";
-import { BasicLayout, gridDefaults, GridOptions, LayoutHost } from "@/grid";
+﻿import { Column, columnDefaults } from "../../src/core/column";
+import { Grid } from "../../src/grid/grid";
+import { BasicLayout, gridDefaults, GridOptions, LayoutHost } from "../../src/grid/";
 
 function threeCols(): Column[] {
     return [{

@@ -1,4 +1,4 @@
-﻿import { Column, initializeColumns, titleize } from "@/core/column";
+﻿import { Column, initializeColumns, titleize } from "../../src/core/column";
 
 it('should set defaults of the columns', () => {
     const column: Column = {};
@@ -148,5 +148,5 @@ it('titleize should work with empty values', () => {
     expect(titleize(null)).toBe(null);
     expect(titleize(undefined)).toBe(undefined);
     expect(titleize("")).toBe("");
-    expect(titleize(0 as any)).toBe(0);    
+    expect(titleize(0 as any)).toBe(0);
 })

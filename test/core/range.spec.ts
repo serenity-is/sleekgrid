@@ -1,4 +1,4 @@
-﻿import { CellRange } from "@/core/cellrange";
+﻿import { CellRange } from "../../src/core/cellrange";
 
 describe('Range', () => {
     it('sets toRow to fromRow if toRow is undefined', () => {
