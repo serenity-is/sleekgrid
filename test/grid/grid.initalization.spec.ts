@@ -221,7 +221,7 @@ describe('layout', () => {
         const container = document.createElement("div");
         new Grid(container, [], [], {});
 
-        expect(container.style.outline).toBe("0");
+        expect(container.style.outline).toBe(globalThis.jsdom ? "0" : "0px");
     });
 
     it('should add uid as a class to the container', () => {
