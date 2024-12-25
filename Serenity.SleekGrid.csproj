@@ -2,15 +2,16 @@
   <PropertyGroup>
     <Version>1.9.4</Version>
     <Description>NuGet version of @serenity-is/sleekgrid NPM package</Description>
+    <PrepareForBuildDependsOn>TSBuild;$(PrepareForBuildDependsOn)</PrepareForBuildDependsOn>
   </PropertyGroup>
   <ItemGroup>
       <Content Update="$(MSBuildProjectDirectory)\docs\**\*" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Pack="false" />
   </ItemGroup>
   <Target Name="CreateNodeModules" AfterTargets="NpmInstall">
     <MakeDir Directories="$(MSBuildProjectDirectory)\node_modules" />
-    <Touch AlwaysCreate="true" Files="$(MSBuildProjectDirectory)\node_modules\.keep" />
+    <Touch AlwaysCreate="true" Files="$(MSBuildProjectDirectory)\node_modules\.keep" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules\.keep')" />
   </Target>
-  <Target Name="TSBuild" Condition="'$(SkipNodeScripts)' != 'true'" AfterTargets="AfterBuild" DependsOnTargets="NpmInstall">
+  <Target Name="TSBuild" Condition="'$(SkipNodeScripts)' != 'true'" DependsOnTargets="NpmInstall">
     <Exec Command="pnpm build" />
   </Target>
 </Project>

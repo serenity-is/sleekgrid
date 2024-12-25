@@ -1,9 +1,9 @@
 
 import esbuild from "esbuild";
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { join, resolve } from "path";
-import { fileURLToPath } from 'url';
+import { dirname, join, resolve } from "path";
 import process from 'process';
+import { fileURLToPath } from 'url';
 
 export function globalExternals(filter, externals) {
     return {
@@ -30,6 +30,27 @@ export function globalExternals(filter, externals) {
                 }
             );
         },
+    };
+}
+
+export function writeIfChanged() {
+    return {
+        name: "write-if-changed",
+        setup(build) {
+            const write = build.initialOptions.write;
+            build.initialOptions.write = false;
+            build.onEnd(result => {
+                if (write === undefined || write) {
+                    result.outputFiles?.forEach(file => {
+                        if (!existsSync(file.path) ||
+                            readFileSync(file.path, 'utf8') !== file.text) {
+                            mkdirSync(dirname(file.path), { recursive: true });
+                            writeFileSync(file.path, file.text);
+                        }
+                    });
+                }
+            });
+        }
     };
 }
 
@@ -151,7 +172,10 @@ const sleekGlobal = {
     globalName: compatCore.globalName,
     format: 'iife',
     footer: compatCore.footer,
-    outfile: './wwwroot/index.global.js'
+    outfile: './wwwroot/index.global.js',
+    plugins: [
+        writeIfChanged()
+    ]
 }
 
 var buildList = [];
