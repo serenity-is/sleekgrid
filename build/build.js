@@ -33,12 +33,15 @@ export function globalExternals(filter, externals) {
     };
 }
 
-
-export function writeIfChanged() {
+function writeIfChanged() {
     return {
         name: "write-if-changed",
         setup(build) {
+            const write = build.initialOptions.write;
+            build.initialOptions.write = false;
             build.onEnd(result => {
+                if (!(write === undefined || write))
+                    return;
                 result.outputFiles?.forEach(file => {
                     if (existsSync(file.path)) {
                         const old = readFileSync(file.path);

@@ -8,7 +8,7 @@
       <Content Update="$(MSBuildProjectDirectory)\docs\**\*" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Pack="false" />
   </ItemGroup>
   <Target Name="CreateNodeModules" AfterTargets="NpmInstall">
-    <MakeDir Directories="$(MSBuildProjectDirectory)\node_modules" />
+    <MakeDir Directories="$(MSBuildProjectDirectory)\node_modules" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules')" />
     <Touch AlwaysCreate="true" Files="$(MSBuildProjectDirectory)\node_modules\.keep" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules\.keep')" />
   </Target>
   <Target Name="TSBuild" Condition="'$(SkipNodeScripts)' != 'true'" DependsOnTargets="NpmInstall">
