@@ -321,8 +321,12 @@ export class Grid<TItem = any> implements EditorHost {
             });
         });
 
-        if (this._jQuery && (this._jQuery.fn as any).mousewheel && (this.hasFrozenColumns() || this.hasFrozenRows())) {
-            this._jQuery(viewports).on("mousewheel", this.handleMouseWheel.bind(this));
+        if (this.hasFrozenColumns() || this.hasFrozenRows()) {
+            const handleMouseWheel = this.handleMouseWheel.bind(this);
+            viewports.forEach(vp => {
+                onEvent(vp, "wheel", handleMouseWheel);
+                onEvent(vp, "mousewheel" as any, handleMouseWheel);
+            });
         }
 
         this._layout.getHeaderCols().forEach(hs => {
@@ -396,9 +400,12 @@ export class Grid<TItem = any> implements EditorHost {
 
         // Work around http://crbug.com/312427.
         if (navigator.userAgent.toLowerCase().match(/webkit/) &&
-            navigator.userAgent.toLowerCase().match(/macintosh/) &&
-            this._jQuery) {
-            this._jQuery(canvases).on("mousewheel", this.handleMouseWheel.bind(this));
+            navigator.userAgent.toLowerCase().match(/macintosh/)) {
+            const handleMouseWheel = this.handleMouseWheel.bind(this);
+            canvases.forEach(c => {
+                onEvent(c, "wheel", handleMouseWheel);
+                onEvent(c, "mousewheel" as any, handleMouseWheel);
+            });
         }
     }
 
@@ -2704,17 +2711,47 @@ export class Grid<TItem = any> implements EditorHost {
         }
     }
 
-    private handleMouseWheel(e: MouseEvent, delta: number, deltaX: number, deltaY: number): void {
-        deltaX = (typeof deltaX == "undefined" ? (e as any).originalEvent?.deltaX : deltaX) || 0;
-        deltaY = (typeof deltaY == "undefined" ? (e as any).originalEvent?.deltaY : deltaY) || 0;
+    private handleMouseWheel(e: MouseEvent & { axis: number; wheelDelta: number; wheelDeltaX: number; wheelDeltaY: number; HORIZONTAL_AXIS: number; }): void {
+        e = (e as any).originalEvent || e;
+        let delta = 0;
+        let deltaX = 0;
+        let deltaY = 0;
+
+        if (e.wheelDelta) {
+            delta = e.wheelDelta / 120;
+        }
+        if (e.detail) {
+            delta = -e.detail / 3;
+        }
+
+        deltaY = delta;
+
+        if (e.axis !== undefined && e.axis === e.HORIZONTAL_AXIS) {
+            deltaY = 0;
+            deltaX = -1 * delta;
+        }
+
+        if (e.wheelDeltaY !== undefined) {
+            deltaY = e.wheelDeltaY / 120;
+        }
+        if (e.wheelDeltaX !== undefined) {
+            deltaX = -1 * e.wheelDeltaX / 120;
+        }
+
         this._scrollTop = Math.max(0, this._layout.getScrollContainerY().scrollTop - (deltaY * this._options.rowHeight));
         this._scrollLeft = this._layout.getScrollContainerX().scrollLeft + (deltaX * 10);
-        this.handleScroll(true);
+        if (this._handleScroll(true)) {
+            e.preventDefault();
+        }
     }
 
-    private handleScroll(isMouseWheel?: boolean) {
+    private handleScroll() {
         this._scrollTop = this._layout.getScrollContainerY().scrollTop;
         this._scrollLeft = this._layout.getScrollContainerX().scrollLeft;
+        this._handleScroll();
+    }
+
+    private _handleScroll(isMouseWheel?: boolean) {
 
         var vScrollDist = Math.abs(this._scrollTop - this._scrollTopPrev);
         var hScrollDist = Math.abs(this._scrollLeft - this._scrollLeftPrev);
