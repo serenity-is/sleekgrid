@@ -40,7 +40,7 @@ export class Grid<TItem = any> implements EditorHost {
     private _ignoreScrollUntil: number = 0;
     declare private _initColById: { [key: string]: number };
     declare private _initCols: Column<TItem>[];
-    declare private _initialized;
+    declare private _initialized: any;
     declare private _jQuery: any;
     declare private _jumpinessCoefficient: number;
     declare private _lastRenderTime: number;
