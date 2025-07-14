@@ -1,4 +1,4 @@
-// Adapted from https://github.com/6pac/SlickGrid/blob/master/src/slick.interactions.ts to replace jquery.event.drag.js
+// Adapted from https://github.com/6pac/SlickGrid/blob/master/src/slick.interactions.ts to replace jquery.event.drag
 
 export interface DragItem {
     dragSource: HTMLElement | Document | null;

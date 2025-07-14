@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="{{ site.packageurl.jqueryui }}/themes/base/datepicker.css" type="text/css" />
     <script src="{{ site.packageurl.jquery }}/dist/jquery.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <script src="{{ site.packageurl.sleekgrid }}/lib/jquery.event.drag-2.3.0.js" crossorigin="anonymous"></script>
     <script src="{{ site.packageurl.jqueryui }}/dist/jquery-ui.min.js" crossorigin="anonymous"></script>
     <script src="{{ site.packageurl.sleekgrid }}/dist/compat/slick.core.js{%if site.local %}?v={% assign vf_ = site.static_files | where: "path", "/assets/local/dist/compat/slick.core.js" | first %}{{ vf_.modified_time | replace: "-", "" | replace: " ", "" | replace: ":", "" | replace: "+", "" }}{% endif %}"></script>
     <script src="{{ site.packageurl.sleekgrid }}/dist/compat/slick.grid.js{%if site.local %}?v={% assign vf_ = site.static_files | where: "path", "/assets/local/dist/compat/slick.grid.js" | first %}{{ vf_.modified_time | replace: "-", "" | replace: " ", "" | replace: ":", "" | replace: "+", "" }}{% endif %}"></script>
