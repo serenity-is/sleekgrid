@@ -4,12 +4,6 @@ export default defineConfig({
     test: {
         name: "sleekgrid",
         environment: "jsdom",
-        browser: {
-            provider: 'playwright',
-            instances: [{
-                browser: "chromium",
-            }]
-        },
         globals: true
     }
 })
