@@ -1461,7 +1461,7 @@ export declare class GroupItemMetadataProvider implements IPlugin {
 	handleGridKeyDown: (e: KeyboardEvent, args: ArgsCell) => void;
 	groupCellPosition: () => {
 		cell: number;
-		colspan: "*" | number;
+		colspan: number | "*";
 	};
 	getGroupRowMetadata: ((item: Group) => ItemMetadata);
 	getTotalsRowMetadata: ((item: GroupTotals) => ItemMetadata);

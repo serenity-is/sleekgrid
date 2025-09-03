@@ -157,7 +157,7 @@ export class GroupItemMetadataProvider implements IPlugin {
 
         const result = {
             cell: 0,
-            colspan: <"*" | number>"*"
+            colspan: <number | "*">"*"
         }
 
         if (!this.options.groupRowTotals ||
