@@ -1,4 +1,4 @@
-import { escapeHtml, FormatterContext } from "../core";
+import { FormatterContext } from "../core";
 
 export function PercentCompleteFormatter(ctx: FormatterContext) {
     if (ctx.value == null || ctx.value === "")
