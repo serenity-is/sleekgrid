@@ -2,7 +2,6 @@
   <PropertyGroup>
     <Version>1.9.7</Version>
     <Description>NuGet version of @serenity-is/sleekgrid NPM package</Description>
-    <GenerateComputedBuildStaticWebAssetsDependsOn>RunTSBuild;$(GenerateComputedBuildStaticWebAssetsDependsOn)</GenerateComputedBuildStaticWebAssetsDependsOn>
   </PropertyGroup>
   <ItemGroup>
       <Content Update="$(MSBuildProjectDirectory)\docs\**\*" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Pack="false" />
@@ -11,7 +10,7 @@
     <MakeDir Directories="$(MSBuildProjectDirectory)\node_modules" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules')" />
     <Touch AlwaysCreate="true" Files="$(MSBuildProjectDirectory)\node_modules\.keep" Condition="!Exists('$(MSBuildProjectDirectory)\node_modules\.keep')" />
   </Target>
-  <Target Name="RunTSBuild" Condition="'$(SkipNodeScripts)' != 'true'" DependsOnTargets="NpmInstall">
+  <Target Name="RunTSBuild" Condition="'$(SkipNodeScripts)' != 'true'" BeforeTargets="ResolveProjectStaticWebAssets"  DependsOnTargets="NpmInstall">
     <Exec Command="pnpm build" />
   </Target>
 </Project>
