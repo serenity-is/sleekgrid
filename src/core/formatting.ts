@@ -50,6 +50,11 @@ export interface FormatterContext<TItem = any> {
     item?: TItem;
 
     /**
+     * Purpose of the call, e.g. "autowidth", "excelexport", "groupheader", "headerfilter", "pdfexport", "print".
+     */
+    purpose?: "autowidth" | "excelexport" | "groupheader" | "grouptotal" | "headerfilter" | "pdfexport" | "print";
+
+    /**
      * Tooltip text to be added to the cell node as title attribute.
      */
     tooltip?: string;
