@@ -387,19 +387,19 @@ export declare class GroupTotals<TEntity = any> extends NonDataRow {
 	/**
 	 * Contains sum
 	 */
-	sum?: number;
+	sum?: Record<string, any>;
 	/**
 	 * Contains avg
 	 */
-	avg?: number;
+	avg?: Record<string, any>;
 	/**
 	 * Contains min
 	 */
-	min?: any;
+	min?: Record<string, any>;
 	/**
 	 * Contains max
 	 */
-	max?: any;
+	max?: Record<string, any>;
 }
 export interface Column<TItem = any> {
 	asyncPostRender?: AsyncPostRender<TItem>;
