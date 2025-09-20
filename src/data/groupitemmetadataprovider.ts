@@ -1,4 +1,4 @@
-import { Column, ColumnFormat, CompatFormatter, convertCompatFormatter, FormatterContext, Group, GroupTotals, ItemMetadata } from "../core";
+import { Column, ColumnFormat, CompatFormatter, convertCompatFormatter, FormatterContext, Group, IGroupTotals, ItemMetadata } from "../core";
 import { ArgsCell, Grid, IPlugin } from "../grid";
 
 export interface GroupItemMetadataProviderOptions {
@@ -18,8 +18,8 @@ export interface GroupItemMetadataProviderOptions {
     toggleCollapsedCssClass?: string;
     totalsCssClass?: string;
     totalsFocusable?: boolean;
-    totalsFormat?: ColumnFormat<GroupTotals>;
-    totalsFormatter?: CompatFormatter<GroupTotals>;
+    totalsFormat?: ColumnFormat<IGroupTotals>;
+    totalsFormatter?: CompatFormatter<IGroupTotals>;
 }
 
 export class GroupItemMetadataProvider implements IPlugin {
@@ -61,10 +61,10 @@ export class GroupItemMetadataProvider implements IPlugin {
     }
 
     public static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): string {
-        var item = ctx.item as GroupTotals;
+        var item = ctx.item as IGroupTotals;
         if (!item.__groupTotals && (item as any).totals)
             item = (item as any).totals;
-        return (ctx.column?.groupTotalsFormatter?.(item, ctx.column)) ??
+        return (ctx.column?.groupTotalsFormatter?.(item as IGroupTotals, ctx.column)) ??
             ((grid ?? ctx.grid)?.groupTotalsFormatter?.(item, ctx.column)) ?? "";
     }
 
@@ -214,7 +214,7 @@ export class GroupItemMetadataProvider implements IPlugin {
         return result;
     }
 
-    getTotalsRowMetadata: ((item: GroupTotals) => ItemMetadata) = (item) => {
+    getTotalsRowMetadata: ((item: IGroupTotals) => ItemMetadata) = (item) => {
         const opt = this.options;
         return {
           selectable: false,

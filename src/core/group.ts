@@ -84,6 +84,17 @@ export class Group<TEntity = any> extends NonDataRow {
     }
 }
 
+export interface IGroupTotals<TEntity = any> {
+    __nonDataRow?: boolean;
+    __groupTotals?: boolean;
+    group?: Group<TEntity>;
+    initialized?: boolean;
+    sum?: Record<string, any>;
+    avg?: Record<string, any>;
+    min?: Record<string, any>;
+    max?: Record<string, any>;
+}
+
 /***
  * Information about group totals.
  * An instance of GroupTotals will be created for each totals row and passed to the aggregators
@@ -92,7 +103,7 @@ export class Group<TEntity = any> extends NonDataRow {
  * @class GroupTotals
  * @extends NonDataRow
  */
- export class GroupTotals<TEntity = any> extends NonDataRow {
+ export class GroupTotals<TEntity = any> extends NonDataRow implements IGroupTotals<TEntity> {
 
     readonly __groupTotals = true;
 

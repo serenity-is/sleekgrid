@@ -1,6 +1,6 @@
 import { EditorClass, ValidationResult } from "./editing";
 import type { AsyncPostCleanup, AsyncPostRender, ColumnFormat, CompatFormatter } from "./formatting";
-import { GroupTotals } from "./group";
+import { IGroupTotals } from "./group";
 
 export interface Column<TItem = any> {
     asyncPostRender?: AsyncPostRender<TItem>;
@@ -18,7 +18,7 @@ export interface Column<TItem = any> {
     format?: ColumnFormat<TItem>;
     /** @deprecated */
     formatter?: CompatFormatter<TItem>;
-    groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: unknown) => string;
+    groupTotalsFormatter?: (p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: unknown) => string;
     headerCssClass?: string;
     id?: string;
     maxWidth?: any;

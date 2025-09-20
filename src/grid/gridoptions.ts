@@ -1,4 +1,4 @@
-import type { Column, EditCommand, EditorFactory, EditorLock } from "../core";
+import type { Column, EditCommand, EditorFactory, EditorLock, IGroupTotals } from "../core";
 import { ColumnFormat, CompatFormatter, FormatterFactory, GlobalEditorLock, GroupTotals, defaultColumnFormat } from "../core";
 import { LayoutEngine } from "./layout";
 
@@ -228,7 +228,7 @@ export interface GridOptions<TItem = any> {
     /**
      * Function to format group totals for display in the grouping panel.
      */
-    groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
+    groupTotalsFormatter?: (p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
 
     /**
      * Defaults to `30`. Height of the header row in pixels.

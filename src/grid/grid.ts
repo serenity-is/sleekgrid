@@ -1,4 +1,4 @@
-import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, GroupTotals, H, IEventData, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, basicRegexSanitizer, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, H, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, basicRegexSanitizer, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { Draggable } from "./draggable";
@@ -2659,7 +2659,7 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     // for usage as fallback by the groupmetadataitemprovider
-    groupTotalsFormatter(p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: any): string {
+    groupTotalsFormatter(p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: any): string {
         return this._options.groupTotalsFormatter ? this._options.groupTotalsFormatter(p1, p2, grid ?? this) : "";
     }
 
