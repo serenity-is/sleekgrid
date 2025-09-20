@@ -361,6 +361,16 @@ export declare class Group<TEntity = any> extends NonDataRow {
 	 */
 	equals(group: Group): boolean;
 }
+export interface IGroupTotals<TEntity = any> {
+	__nonDataRow?: boolean;
+	__groupTotals?: boolean;
+	group?: Group<TEntity>;
+	initialized?: boolean;
+	sum?: Record<string, any>;
+	avg?: Record<string, any>;
+	min?: Record<string, any>;
+	max?: Record<string, any>;
+}
 /***
  * Information about group totals.
  * An instance of GroupTotals will be created for each totals row and passed to the aggregators
@@ -369,7 +379,7 @@ export declare class Group<TEntity = any> extends NonDataRow {
  * @class GroupTotals
  * @extends NonDataRow
  */
-export declare class GroupTotals<TEntity = any> extends NonDataRow {
+export declare class GroupTotals<TEntity = any> extends NonDataRow implements IGroupTotals<TEntity> {
 	readonly __groupTotals = true;
 	/***
 	 * Parent Group.
@@ -417,7 +427,7 @@ export interface Column<TItem = any> {
 	format?: ColumnFormat<TItem>;
 	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
-	groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: unknown) => string;
+	groupTotalsFormatter?: (p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: unknown) => string;
 	headerCssClass?: string;
 	id?: string;
 	maxWidth?: any;
@@ -780,7 +790,7 @@ export interface GridOptions<TItem = any> {
 	/**
 	 * Function to format group totals for display in the grouping panel.
 	 */
-	groupTotalsFormatter?: (p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
+	groupTotalsFormatter?: (p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
 	/**
 	 * Defaults to `30`. Height of the header row in pixels.
 	 */
@@ -1159,7 +1169,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private invalidatePostProcessingResults;
 	private updateRowPositions;
 	private updateGrandTotals;
-	groupTotalsFormatter(p1?: GroupTotals<TItem>, p2?: Column<TItem>, grid?: any): string;
+	groupTotalsFormatter(p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: any): string;
 	render: () => void;
 	private handleHeaderRowScroll;
 	private handleFooterRowScroll;
@@ -1446,8 +1456,8 @@ export interface GroupItemMetadataProviderOptions {
 	toggleCollapsedCssClass?: string;
 	totalsCssClass?: string;
 	totalsFocusable?: boolean;
-	totalsFormat?: ColumnFormat<GroupTotals>;
-	totalsFormatter?: CompatFormatter<GroupTotals>;
+	totalsFormat?: ColumnFormat<IGroupTotals>;
+	totalsFormatter?: CompatFormatter<IGroupTotals>;
 }
 export declare class GroupItemMetadataProvider implements IPlugin {
 	protected grid: Grid;
@@ -1468,7 +1478,7 @@ export declare class GroupItemMetadataProvider implements IPlugin {
 		colspan: number | "*";
 	};
 	getGroupRowMetadata: ((item: Group) => ItemMetadata);
-	getTotalsRowMetadata: ((item: GroupTotals) => ItemMetadata);
+	getTotalsRowMetadata: ((item: IGroupTotals) => ItemMetadata);
 }
 export interface AutoTooltipsOptions {
 	enableForCells?: boolean;
