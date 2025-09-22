@@ -1,4 +1,5 @@
 import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, H, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, basicRegexSanitizer, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { IDataView } from "../core/idataview";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { Draggable } from "./draggable";
@@ -28,7 +29,7 @@ export class Grid<TItem = any> implements EditorHost {
     declare private _columnCssRulesL: any;
     declare private _columnCssRulesR: any;
     declare private _currentEditor: Editor;
-    declare private _data: any;
+    declare private _data: IDataView<TItem> | TItem[];
     declare private _draggableInstance: { destroy: () => void };
     declare private _editController: EditController;
     declare private _emptyNode: (node: Element) => void;
@@ -1563,18 +1564,20 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private bindToData(): void {
-        if (this._data) {
-            this._data.onRowCountChanged && this._data.onRowCountChanged.subscribe(this.viewOnRowCountChanged);
-            this._data.onRowsChanged && this._data.onRowsChanged.subscribe(this.viewOnRowsChanged);
-            this._data.onDataChanged && this._data.onDataChanged.subscribe(this.viewOnDataChanged);
+        const view = this._data as IDataView;
+        if (view) {
+            view.onRowCountChanged && view.onRowCountChanged.subscribe(this.viewOnRowCountChanged);
+            view.onRowsChanged && view.onRowsChanged.subscribe(this.viewOnRowsChanged);
+            view.onDataChanged && view.onDataChanged.subscribe(this.viewOnDataChanged);
         }
     }
 
     private unbindFromData(): void {
-        if (this._data) {
-            this._data.onRowCountChanged && this._data.onRowCountChanged.unsubscribe(this.viewOnRowCountChanged);
-            this._data.onRowsChanged && this._data.onRowsChanged.unsubscribe(this.viewOnRowsChanged);
-            this._data.onDataChanged && this._data.onDataChanged.unsubscribe(this.viewOnDataChanged);
+        const view = this._data as IDataView;
+        if (view) {
+            view.onRowCountChanged && view.onRowCountChanged.unsubscribe(this.viewOnRowCountChanged);
+            view.onRowsChanged && view.onRowsChanged.unsubscribe(this.viewOnRowsChanged);
+            view.onDataChanged && view.onDataChanged.unsubscribe(this.viewOnDataChanged);
         }
     }
 
@@ -1594,10 +1597,10 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     getDataLength(): number {
-        if (this._data.getLength) {
-            return this._data.getLength();
+        if ((this._data as IDataView).getLength) {
+            return (this._data as IDataView).getLength();
         } else {
-            return this._data.length;
+            return (this._data as TItem[]).length;
         }
     }
 
@@ -1606,11 +1609,11 @@ export class Grid<TItem = any> implements EditorHost {
             (!this._pagingActive || this._pagingIsLastPage ? 1 : 0));
     }
 
-    getDataItem(i: number): TItem {
-        if (this._data.getItem) {
-            return this._data.getItem(i);
+    getDataItem(row: number): TItem {
+        if ((this._data as IDataView).getItem) {
+            return (this._data as IDataView).getItem(row);
         } else {
-            return this._data[i];
+            return (this._data as TItem[])[row];
         }
     }
 
@@ -1747,10 +1750,9 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     getFormatter(row: number, column: Column<TItem>): ColumnFormat<TItem> {
-        var data = this._data;
-
-        if (data.getItemMetadata) {
-            const itemMetadata = data.getItemMetadata(row) as ItemMetadata;
+        const view = this._data as IDataView;
+        if (view.getItemMetadata) {
+            const itemMetadata = view.getItemMetadata(row) as ItemMetadata;
             if (itemMetadata) {
                 const colsMetadata = itemMetadata.columns;
                 if (colsMetadata) {
@@ -1818,7 +1820,7 @@ export class Grid<TItem = any> implements EditorHost {
 
     private getEditor(row: number, cell: number): EditorClass {
         var column = this._cols[cell];
-        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row) as ItemMetadata;
+        var itemMetadata = (this._data as IDataView).getItemMetadata?.(row) as ItemMetadata;
         var colsMetadata = itemMetadata && itemMetadata.columns;
 
         if (colsMetadata && colsMetadata[column.id] && colsMetadata[column.id].editor !== undefined) {
@@ -1850,7 +1852,7 @@ export class Grid<TItem = any> implements EditorHost {
             rowCss += " " + this._options.addNewRowCssClass;
         }
 
-        var itemMetadata = this._data.getItemMetadata?.(row) as ItemMetadata;
+        var itemMetadata = (this._data as IDataView).getItemMetadata?.(row);
 
         if (itemMetadata && itemMetadata.cssClasses) {
             rowCss += " " + itemMetadata.cssClasses;
@@ -2441,7 +2443,7 @@ export class Grid<TItem = any> implements EditorHost {
             // Render missing cells.
             cellsAdded = 0;
 
-            var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row) as ItemMetadata;
+            var itemMetadata = (this._data as IDataView).getItemMetadata?.(row);
             var colsMetadata = itemMetadata && itemMetadata.columns;
 
             var d = this.getDataItem(row);
@@ -2641,9 +2643,9 @@ export class Grid<TItem = any> implements EditorHost {
         if (!this._options.showFooterRow || !this._initialized)
             return;
 
-        var totals;
-        if (this._data && this._data.getGrandTotals)
-            totals = this._data.getGrandTotals();
+        var totals: IGroupTotals;
+        if (this._data && (this._data as IDataView).getGrandTotals)
+            totals = (this._data as IDataView).getGrandTotals();
         totals = totals ?? {};
 
         var cols = this._cols;
@@ -3544,7 +3546,7 @@ export class Grid<TItem = any> implements EditorHost {
             this._activeCellNode.innerHTML = "";
         }
 
-        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(this._activeRow) as ItemMetadata;
+        var itemMetadata = (this._data as IDataView).getItemMetadata?.(this._activeRow) as ItemMetadata;
         var colsMetadata = itemMetadata && itemMetadata.columns;
         var columnMetadata = colsMetadata && (colsMetadata[columnDef.id] || colsMetadata[this._activeCell]);
 
@@ -3761,7 +3763,7 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     getColspan(row: number, cell: number): number {
-        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row) as ItemMetadata;
+        var itemMetadata = (this._data as IDataView).getItemMetadata?.(row) as ItemMetadata;
         if (!itemMetadata || !itemMetadata.columns) {
             return 1;
         }
@@ -3903,7 +3905,7 @@ export class Grid<TItem = any> implements EditorHost {
             return false;
         }
 
-        var rowMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
+        var rowMetadata = (this._data as IDataView).getItemMetadata?.(row);
         if (rowMetadata && typeof rowMetadata.focusable === "boolean") {
             return rowMetadata.focusable;
         }
@@ -3925,7 +3927,7 @@ export class Grid<TItem = any> implements EditorHost {
             return false;
         }
 
-        var itemMetadata = this._data.getItemMetadata && this._data.getItemMetadata(row);
+        var itemMetadata = (this._data as IDataView).getItemMetadata?.(row);
         if (itemMetadata && typeof itemMetadata.selectable === "boolean") {
             return itemMetadata.selectable;
         }

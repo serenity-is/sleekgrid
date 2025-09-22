@@ -52,10 +52,12 @@ export const columnDefaults: Partial<Column> = {
 export interface ColumnMetadata<TItem = any> {
     colspan: number | '*';
     cssClasses?: string;
+    focusable?: boolean;
     editor?: EditorClass;
     format?: ColumnFormat<TItem>;
     /** @deprecated */
     formatter?: CompatFormatter<TItem>;
+    selectable?: boolean;
 }
 
 export interface ColumnSort {

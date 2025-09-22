@@ -450,10 +450,12 @@ export declare const columnDefaults: Partial<Column>;
 export interface ColumnMetadata<TItem = any> {
 	colspan: number | "*";
 	cssClasses?: string;
+	focusable?: boolean;
 	editor?: EditorClass;
 	format?: ColumnFormat<TItem>;
 	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
+	selectable?: boolean;
 }
 export interface ColumnSort {
 	columnId: string;
@@ -472,6 +474,15 @@ export interface ItemMetadata<TItem = any> {
 }
 export declare function initializeColumns(columns: Column[], defaults: Partial<Column<any>>): void;
 export declare function titleize(str: string): string;
+export interface IDataView<TItem = any> {
+	getGrandTotals(): IGroupTotals;
+	getLength(): number;
+	getItem(row: number): (TItem | Group<TItem> | IGroupTotals);
+	getItemMetadata?(row: number): ItemMetadata<TItem>;
+	onDataChanged?: EventEmitter;
+	onRowCountChanged?: EventEmitter;
+	onRowsChanged?: EventEmitter;
+}
 export declare class CellRange {
 	fromRow: number;
 	fromCell: number;
@@ -1114,7 +1125,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	getData(): any;
 	getDataLength(): number;
 	private getDataLengthIncludingAddNew;
-	getDataItem(i: number): TItem;
+	getDataItem(row: number): TItem;
 	getTopPanel(): HTMLElement;
 	setTopPanelVisibility(visible: boolean): void;
 	setColumnHeaderVisibility(visible: boolean, animate?: boolean): void;
@@ -1265,7 +1276,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	setActiveCell(row: number, cell: number): void;
 	setActiveRow(row: number, cell: number, suppressScrollIntoView?: boolean): void;
 	canCellBeActive(row: number, cell: number): boolean;
-	canCellBeSelected(row: number, cell: number): any;
+	canCellBeSelected(row: number, cell: number): boolean;
 	gotoCell(row: number, cell: number, forceEdit?: boolean): void;
 	commitCurrentEdit(): boolean;
 	private cancelCurrentEdit;
