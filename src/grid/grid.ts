@@ -1365,7 +1365,9 @@ export class Grid<TItem = any> implements EditorHost {
                 }
                 for (var k = ranges[i].fromCell; k <= ranges[i].toCell; k++) {
                     if (this.canCellBeSelected(j, k)) {
-                        hash[j][cols[k].id] = this._options.selectedCellCssClass;
+                        const cid = cols[k].id;
+                        if (isPollutingKey(cid)) continue;
+                        hash[j][cid] = this._options.selectedCellCssClass;
                     }
                 }
             }
@@ -1397,7 +1399,9 @@ export class Grid<TItem = any> implements EditorHost {
                 }
                 for (var k = ranges[i].fromCell; k <= ranges[i].toCell; k++) {
                     if (this.canCellBeSelected(j, k)) {
-                        hash[j][cols[k].id] = this._options.selectedCellCssClass;
+                        const cid = cols[k].id;
+                        if (isPollutingKey(cid)) continue;
+                        hash[j][cid] = this._options.selectedCellCssClass;
                     }
                 }
             }
@@ -2615,6 +2619,7 @@ export class Grid<TItem = any> implements EditorHost {
             if (postProcessed) {
                 // change status of columns to be re-rendered
                 for (var columnIdx in postProcessed) {
+                    if (isPollutingKey(columnIdx)) continue;
                     postProcessed[columnIdx] = 'C';
                 }
             }
@@ -4072,3 +4077,6 @@ export class Grid<TItem = any> implements EditorHost {
     }
 }
 
+function isPollutingKey(key: string | null | undefined): boolean {
+    return key === '__proto__' || key === 'constructor' || key === 'prototype';
+}
