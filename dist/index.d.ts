@@ -515,7 +515,7 @@ export declare class CellRange {
 }
 export declare function addClass(el: Element, cls: string): void;
 export declare function escapeHtml(s: any): any;
-export declare function basicRegexSanitizer(dirtyHtml: string): string;
+export declare function basicDOMSanitizer(dirtyHtml: string): string;
 export declare function disableSelection(target: HTMLElement): void;
 export declare function removeClass(el: Element, cls: string): void;
 export declare function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: {
@@ -869,7 +869,7 @@ export interface GridOptions<TItem = any> {
 	rtl?: boolean;
 	/**
 	 * Optional function for sanitizing HTML strings to avoid XSS attacks.
-	 * Default is `DOMPurify.sanitize` if available globally, otherwise falls back to `basicRegexSanitizer`.
+	 * Default is `DOMPurify.sanitize` if available globally, otherwise falls back to `basicDOMSanitizer`.
 	 */
 	sanitizer?: (dirtyHtml: string) => string;
 	/**

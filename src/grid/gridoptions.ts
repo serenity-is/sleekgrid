@@ -300,7 +300,7 @@ export interface GridOptions<TItem = any> {
 
     /**
      * Optional function for sanitizing HTML strings to avoid XSS attacks.
-     * Default is `DOMPurify.sanitize` if available globally, otherwise falls back to `basicRegexSanitizer`.
+     * Default is `DOMPurify.sanitize` if available globally, otherwise falls back to `basicDOMSanitizer`.
      */
     sanitizer?: (dirtyHtml: string) => string;
 

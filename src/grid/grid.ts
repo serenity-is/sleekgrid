@@ -1,4 +1,4 @@
-import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, H, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, basicRegexSanitizer, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, H, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, basicDOMSanitizer, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { IDataView } from "../core/idataview";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
@@ -133,7 +133,7 @@ export class Grid<TItem = any> implements EditorHost {
         // @ts-ignore
         options.jQuery = this._jQuery = options.jQuery === void 0 ? (typeof jQuery !== "undefined" ? jQuery : void 0) : options.jQuery;
         // @ts-ignore
-        options.sanitizer = options.sanitizer === void 0 ? (typeof DOMPurify !== "undefined" && typeof DOMPurify.sanitize == "function" ? DOMPurify.sanitize : basicRegexSanitizer) : options.sanitizer;
+        options.sanitizer = options.sanitizer === void 0 ? (typeof DOMPurify !== "undefined" && typeof DOMPurify.sanitize == "function" ? DOMPurify.sanitize : basicDOMSanitizer) : options.sanitizer;
 
         if (this._jQuery && container instanceof (this._jQuery as any))
             this._container = (container as any)[0];

@@ -1,4 +1,4 @@
-import { addClass, escapeHtml as escape, removeClass, disableSelection, H, spacerDiv } from "../../src/core/util";
+import { addClass, basicDOMSanitizer, disableSelection, escapeHtml as escape, H, removeClass, spacerDiv } from "../../src/core/util";
 
 describe('addClass', () => {
     it('should not do anything if classes to add is null or undefined', () => {
@@ -284,3 +284,189 @@ describe('escape', () => {
         expect(escape.apply({ value: "&><" }, [])).toBe("&amp;&gt;&lt;");
     });
 });
+
+describe("basicDOMSanitizer", () => {
+    it("should return empty string for null/undefined input", () => {
+        expect(basicDOMSanitizer(null)).toBe('');
+        expect(basicDOMSanitizer(undefined)).toBe('');
+        expect(basicDOMSanitizer('')).toBe('');
+    });
+
+    it("should preserve safe HTML content", () => {
+        const safe = '<div class="container"><p>Hello <strong>world</strong>!</p></div>';
+        expect(basicDOMSanitizer(safe)).toBe(safe);
+    });
+
+    it("should remove script tags completely", () => {
+        const dirty = '<div>Safe</div><script>alert("XSS")</script><p>Content</p>';
+        const expected = '<div>Safe</div><p>Content</p>';
+        expect(basicDOMSanitizer(dirty)).toBe(expected);
+    });
+
+    it("should remove iframe elements", () => {
+        const dirty = '<p>Before</p><iframe src="malicious.com"></iframe><p>After</p>';
+        const expected = '<p>Before</p><p>After</p>';
+        expect(basicDOMSanitizer(dirty)).toBe(expected);
+    });
+
+    it("should remove dangerous elements", () => {
+        const dangerousElements = ['object', 'embed', 'form', 'input', 'button', 'textarea', 'select', 'style', 'link'];
+        dangerousElements.forEach(tag => {
+            const dirty = `<p>Safe</p><${tag}>dangerous</${tag}><p>Content</p>`;
+            const result = basicDOMSanitizer(dirty);
+            expect(result).not.toContain(`<${tag}>`);
+            expect(result).not.toContain(`</${tag}>`);
+            expect(result).toContain('<p>Safe</p>');
+            expect(result).toContain('<p>Content</p>');
+        });
+    });
+
+    it("should remove event handler attributes", () => {
+        const dirty = '<div onclick="alert(1)" onload="evil()" onmouseover="bad()">Content</div>';
+        const expected = '<div>Content</div>';
+        expect(basicDOMSanitizer(dirty)).toBe(expected);
+    });
+
+    it("should remove href attributes with javascript URLs", () => {
+        const dirty = '<a href="javascript:alert(1)">Bad Link</a>';
+        const expected = '<a>Bad Link</a>';
+        expect(basicDOMSanitizer(dirty)).toBe(expected);
+    });
+
+    it("should remove src attributes with javascript URLs", () => {
+        const dirty = '<img src="javascript:alert(1)">';
+        const expected = '<img>';
+        expect(basicDOMSanitizer(dirty)).toBe(expected);
+    });
+
+    it("should remove data URL attributes", () => {
+        const dirty = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==">';
+        const expected = '<img>';
+        expect(basicDOMSanitizer(dirty)).toBe(expected);
+    });
+
+    it("should preserve safe href attributes", () => {
+        const safe = '<a href="https://example.com">Safe Link</a>';
+        expect(basicDOMSanitizer(safe)).toBe(safe);
+    });
+
+    it("should preserve safe src attributes", () => {
+        const safe = '<img src="https://example.com/image.jpg" alt="Safe Image">';
+        expect(basicDOMSanitizer(safe)).toBe(safe);
+    });
+
+    it("should remove attributes containing javascript anywhere", () => {
+        const dirty = '<div data-js="javascript:void(0)" custom="some-javascript-code">Content</div>';
+        const expected = '<div>Content</div>';
+        expect(basicDOMSanitizer(dirty)).toBe(expected);
+    });
+
+    it("should handle complex nested dangerous content", () => {
+        const dirty = `
+            <div class="safe">
+                <p>Safe paragraph</p>
+                <script>alert('XSS1');</script>
+                <a href="javascript:alert('XSS2')">Bad Link</a>
+                <iframe src="evil.com">
+                    <form action="hack.php">
+                        <input type="hidden" name="csrf" value="stolen">
+                        <button onclick="stealData()">Submit</button>
+                    </form>
+                </iframe>
+                <img src="data:text/html,<script>alert('XSS3')</script>">
+                <span>More safe content</span>
+            </div>
+        `;
+        const result = basicDOMSanitizer(dirty);
+
+        // Check that dangerous elements are removed
+        expect(result).not.toContain('<script>');
+        expect(result).not.toContain('<iframe>');
+        expect(result).not.toContain('<form>');
+        expect(result).not.toContain('<input>');
+        expect(result).not.toContain('<button>');
+        expect(result).not.toContain('javascript:');
+        expect(result).not.toContain('data:');
+
+        // Check that safe content is preserved
+        expect(result).toContain('<div class="safe">');
+        expect(result).toContain('<p>Safe paragraph</p>');
+        expect(result).toContain('<span>More safe content</span>');
+        expect(result).toContain('Bad Link'); // Text should remain even if href is removed
+    });
+
+    it("should handle malformed HTML gracefully", () => {
+        const malformed = '<div><script>evil</script><p>Unclosed<div><a href="javascript:bad">Bad</a>';
+        // Should not crash and should sanitize what's parseable
+        const result = basicDOMSanitizer(malformed);
+        expect(result).not.toContain('<script>');
+        expect(result).not.toContain('javascript:');
+        expect(result).toContain('Unclosed');
+    });
+
+    it("should handle HTML entities correctly", () => {
+        const withEntities = '<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>';
+        expect(basicDOMSanitizer(withEntities)).toBe(withEntities);
+    });
+
+    it("should handle mixed case tags and attributes", () => {
+        const mixedCase = '<DIV><SCRIPT>alert(1)</SCRIPT><A HREF="javascript:bad()">Link</A></DIV>';
+        const expected = '<div><a>Link</a></div>';
+        expect(basicDOMSanitizer(mixedCase)).toBe(expected);
+    });
+
+    it("should handle xlink:href attributes", () => {
+        const dirty = '<svg><a xlink:href="javascript:alert(1)">Bad SVG Link</a></svg>';
+        const expected = '<svg><a>Bad SVG Link</a></svg>';
+        expect(basicDOMSanitizer(dirty)).toBe(expected);
+    });
+
+    it("should preserve safe xlink:href attributes", () => {
+        const safe = '<svg><a xlink:href="#anchor">Safe SVG Link</a></svg>';
+        expect(basicDOMSanitizer(safe)).toBe(safe);
+    });
+
+    it("should validate URLs with improved pattern", () => {
+        // Should allow safe protocols
+        expect(basicDOMSanitizer('<a href="https://example.com">HTTPS</a>')).toBe('<a href="https://example.com">HTTPS</a>');
+        expect(basicDOMSanitizer('<a href="http://example.com">HTTP</a>')).toBe('<a href="http://example.com">HTTP</a>');
+        expect(basicDOMSanitizer('<a href="mailto:test@example.com">Email</a>')).toBe('<a href="mailto:test@example.com">Email</a>');
+        expect(basicDOMSanitizer('<a href="tel:+1234567890">Phone</a>')).toBe('<a href="tel:+1234567890">Phone</a>');
+
+        // Should allow relative URLs
+        expect(basicDOMSanitizer('<a href="/path">Relative Path</a>')).toBe('<a href="/path">Relative Path</a>');
+        expect(basicDOMSanitizer('<a href="?query=value">Query</a>')).toBe('<a href="?query=value">Query</a>');
+        expect(basicDOMSanitizer('<a href="#anchor">Anchor</a>')).toBe('<a href="#anchor">Anchor</a>');
+
+        // Should block dangerous protocols
+        expect(basicDOMSanitizer('<a href="javascript:alert(1)">JS</a>')).toBe('<a>JS</a>');
+        expect(basicDOMSanitizer('<a href="data:text/html,<script>alert(1)</script>">Data</a>')).toBe('<a>Data</a>');
+        expect(basicDOMSanitizer('<a href="vbscript:msgbox(1)">VBScript</a>')).toBe('<a>VBScript</a>');
+    });
+
+    it("should preserve whitespace between elements", () => {
+        // Test whitespace preservation between safe elements
+        const withSpace = '<i class="fa fa-something"></i> Sometext';
+        expect(basicDOMSanitizer(withSpace)).toBe(withSpace);
+
+        // Test multiple spaces
+        const multipleSpaces = '<span>Before</span>   <span>After</span>';
+        expect(basicDOMSanitizer(multipleSpaces)).toBe(multipleSpaces);
+
+        // Test newlines
+        const withNewlines = '<div>Line 1</div>\n<div>Line 2</div>';
+        expect(basicDOMSanitizer(withNewlines)).toBe(withNewlines);
+
+        // Test whitespace around dangerous elements (should preserve whitespace when elements are removed)
+        const dangerousWithSpace = '<i class="fa fa-something"></i> <script>evil()</script> Sometext';
+        const expectedDangerous = '<i class="fa fa-something"></i>  Sometext';
+        expect(basicDOMSanitizer(dangerousWithSpace)).toBe(expectedDangerous);
+
+        // Note: DOMParser normalizes invalid self-closing tags for non-void elements
+        // This is expected HTML parsing behavior, not a bug in the sanitizer
+        // Example: '<i class="fa fa-something" /> Sometext' becomes '<i class="fa fa-something"> Sometext</i>'
+        // because <i> is not a void element in HTML5
+    });
+
+});
+
