@@ -1,5 +1,5 @@
-import { Grid } from "../../src/grid/grid";
 import { IPlugin } from "../../src/grid/";
+import { Grid } from "../../src/grid/grid";
 
 it('should call plugin init with grid instance', () => {
     const grid = new Grid(document.createElement('div'), [], [], {});

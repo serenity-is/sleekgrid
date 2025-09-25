@@ -1,5 +1,5 @@
-import { BasicLayout, Grid } from "../../src/grid";
 import { Column } from "../../src/core";
+import { BasicLayout, Grid } from "../../src/grid";
 
 const getTestColumns = (): Column[] => ([{
     id: 'test_id',

@@ -157,7 +157,7 @@ export function simpleArrayEquals(arr1: number[], arr2: number[]) {
  * A, B, C, D, E, F, G, H and desired order is G, D, F (assuming A, B, C, E
  * were invisible) the result is A, B, G, H, D, E, F.
  */
- export function sortToDesiredOrderAndKeepRest(columns: Column[], idOrder: string[]): Column[] {
+export function sortToDesiredOrderAndKeepRest(columns: Column[], idOrder: string[]): Column[] {
     if (idOrder.length == 0)
         return columns;
 

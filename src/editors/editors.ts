@@ -356,7 +356,7 @@ export class LongTextCellEdit extends BaseCellEdit {
 
         this._wrapper = this._container.appendChild(H("div", {
             class: "large-editor-text slick-large-editor-text",
-            style: `z-index:10000; background:white; padding:5px; border:3px solid gray; border-radius:10px;${isComposite ? "position: relative; padding: 0; border: 0" : "position: absolute" }`
+            style: `z-index:10000; background:white; padding:5px; border:3px solid gray; border-radius:10px;${isComposite ? "position: relative; padding: 0; border: 0" : "position: absolute"}`
         },
             H("textarea", { hidefocus: true, rows: "5", style: "background:white; width:250px; height:80px; border:0; outline:0", ref: el => this._input = el })));
 
@@ -364,8 +364,8 @@ export class LongTextCellEdit extends BaseCellEdit {
             addCompositeChangeListener(this, this._args, this._input)
         else {
             this._wrapper.appendChild(H("div", { style: "text-align: right" },
-                H("button", { ref: el => el.addEventListener('click', this.save.bind(this))}, "Save" ),
-                H("button", { ref: el => el.addEventListener('click', this.cancel.bind(this))}, "Cancel")));
+                H("button", { ref: el => el.addEventListener('click', this.save.bind(this)) }, "Save"),
+                H("button", { ref: el => el.addEventListener('click', this.cancel.bind(this)) }, "Cancel")));
 
             this._input.addEventListener('keydown', this.handleKeyDown.bind(this));
             this.position(this._args.position);

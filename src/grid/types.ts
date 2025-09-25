@@ -1,4 +1,4 @@
-import type { EventEmitter, CellRange } from "../core";
+import type { CellRange, EventEmitter } from "../core";
 import type { Grid } from "./grid";
 
 export interface IPlugin {

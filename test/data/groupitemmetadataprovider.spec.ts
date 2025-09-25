@@ -1,5 +1,5 @@
 import { ColumnFormat, CompatFormatter, escapeHtml as escape, Group } from "../../src/core";
-import { GroupItemMetadataProvider } from "../../src/data/groupitemmetadataprovider"
+import { GroupItemMetadataProvider } from "../../src/data/groupitemmetadataprovider";
 
 describe("GroupItemMetadataProvider.defaults", () => {
     it("has expected default values", () => {

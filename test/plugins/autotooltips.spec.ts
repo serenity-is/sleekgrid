@@ -1,4 +1,4 @@
-import { AutoTooltips } from "../../src/plugins/autotooltips"
+import { AutoTooltips } from "../../src/plugins/autotooltips";
 
 describe("AutoTooltips.defaults", () => {
     it("enableForCells true", () => {

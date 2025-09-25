@@ -1,15 +1,15 @@
 ﻿{
-  "extends": "../tsconfig.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "noImplicitAny": false,
-    "declaration": false,
-    "sourceMap": true,
-    "types": [
-      "vitest/globals"
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "noImplicitAny": false,
+        "declaration": false,
+        "sourceMap": true,
+        "types": [
+            "vitest/globals"
+        ]
+    },
+    "include": [
+        "**/*.spec.ts"
     ]
-  },
-  "include": [
-    "**/*.spec.ts"
-  ]
 }

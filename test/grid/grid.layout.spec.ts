@@ -1,5 +1,5 @@
-import { Grid } from "../../src/grid/grid";
 import { BasicLayout, GridOptions, ViewportInfo } from "../../src/grid/";
+import { Grid } from "../../src/grid/grid";
 
 describe('canvas', () => {
     it('should return canvas node for cell or column index using layout', () => {
@@ -303,7 +303,7 @@ describe('viewport', () => {
         new Grid(document.createElement('div'), [], [], {layoutEngine});
 
         if (!asserted)
-            fail('assertion not made');
+            throw "assertion not made";
     });
 
     it('should return viewportInfo.width - scrollbar width on getAvailableWidth if there viewportInfo hasVScroll is truthy', () => {
@@ -326,7 +326,7 @@ describe('viewport', () => {
         new Grid(document.createElement('div'), [], [], {layoutEngine});
 
         if (!asserted)
-            fail('assertion not made');
+            throw "assertion not made";
     });
 });
 
@@ -353,7 +353,7 @@ describe('scroll', () => {
         new Grid(document.createElement('div'), [], [], {layoutEngine});
 
         if (!asserted)
-            fail('assertion not made');
+            throw "assertion not made";
     });
 
     it('should unbind from onScroll event of the element with grid destroy', () => {

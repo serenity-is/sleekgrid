@@ -1,8 +1,9 @@
 import {
-    defaultColumnFormat,
     applyFormatterResultToCellNode,
+    CompatFormatter,
     convertCompatFormatter,
-    CompatFormatter, FormatterContext
+    defaultColumnFormat,
+    FormatterContext
 } from "../../src/core/formatting";
 import { escapeHtml as escape } from "../../src/core/util";
 

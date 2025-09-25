@@ -92,7 +92,7 @@ export function convertCompatFormatter(compatFormatter: CompatFormatter): Column
     if (compatFormatter == null)
         return null;
 
-    return function(ctx: FormatterContext): FormatterResult {
+    return function (ctx: FormatterContext): FormatterResult {
         var fmtResult = compatFormatter(ctx.row, ctx.cell, ctx.value, ctx.column, ctx.item, ctx.grid);
         if (fmtResult != null && typeof fmtResult !== 'string' && Object.prototype.toString.call(fmtResult) === '[object Object]') {
             ctx.addClass = fmtResult.addClasses;

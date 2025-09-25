@@ -217,12 +217,12 @@ export class GroupItemMetadataProvider implements IPlugin {
     getTotalsRowMetadata: ((item: IGroupTotals) => ItemMetadata) = (item) => {
         const opt = this.options;
         return {
-          selectable: false,
-          focusable: opt.totalsFocusable,
-          cssClasses: opt.totalsCssClass + " " + opt.groupLevelPrefix + item?.group?.level,
-          format: opt.totalsFormat,
-          editor: null
+            selectable: false,
+            focusable: opt.totalsFocusable,
+            cssClasses: opt.totalsCssClass + " " + opt.groupLevelPrefix + item?.group?.level,
+            format: opt.totalsFormat,
+            editor: null
         };
-      }
+    }
 
 }

@@ -11,7 +11,7 @@ export interface TreeColumnsGrid {
 
 function filter(node: TreeColumn[], condition: (col: TreeColumn) => boolean) {
 
-    return node.filter(function(column: TreeColumn) {
+    return node.filter(function (column: TreeColumn) {
         var valid = condition(column);
 
         if (valid && column.columns)
@@ -24,14 +24,14 @@ function filter(node: TreeColumn[], condition: (col: TreeColumn) => boolean) {
 function sort(columns: TreeColumn[], grid: TreeColumnsGrid) {
     columns.sort((a, b) => {
         var indexA = getOrDefault(grid.getColumnIndex(a.id)),
-        indexB = getOrDefault(grid.getColumnIndex(b.id));
+            indexB = getOrDefault(grid.getColumnIndex(b.id));
 
         return indexA - indexB;
     })
-    .forEach(function(column) {
-        if (column.columns)
-            sort(column.columns, grid);
-    });
+        .forEach(function (column) {
+            if (column.columns)
+                sort(column.columns, grid);
+        });
 }
 
 function getOrDefault(value: any) {
@@ -57,9 +57,9 @@ function getColumnsInDepth(node: any, depth: number, current?: number) {
     if (depth == current) {
 
         if (node.length) {
-            node.forEach(function(n: any) {
+            node.forEach(function (n: any) {
                 if (n.columns) {
-                    n.extractColumns = function() {
+                    n.extractColumns = function () {
                         return extractColumns(n);
                     };
                 }
@@ -149,7 +149,7 @@ export class TreeColumns {
     };
 
     extractColumns() {
-        return this.hasDepth() ? extractColumns(this.treeColumns): this.treeColumns;
+        return this.hasDepth() ? extractColumns(this.treeColumns) : this.treeColumns;
     };
 
     getDepth() {
@@ -172,7 +172,7 @@ export class TreeColumns {
         return filter(this.cloneTreeColumns(), condition);
     };
 
-    reOrder(grid: TreeColumnsGrid ) {
+    reOrder(grid: TreeColumnsGrid) {
         return sort(this.treeColumns, grid);
     };
 

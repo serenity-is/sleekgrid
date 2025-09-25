@@ -1,6 +1,6 @@
-import { Grid } from "../../src/grid/grid";
+import { CellRange, EventEmitter } from "../../src/core";
 import { SelectionModel } from "../../src/grid/";
-import { EventEmitter, CellRange } from "../../src/core";
+import { Grid } from "../../src/grid/grid";
 
 it('should selectionModel init with grid', () => {
     const grid = new Grid(document.createElement('div'), [], [], {});

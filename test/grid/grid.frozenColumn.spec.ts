@@ -88,7 +88,7 @@ describe('options.frozenColumns', () => {
     it('sets the first visible column to frozen when 1', () => {
         var cols = threeCols();
         cols[0].visible = false;
-        const grid = new Grid(container(), [], cols , {
+        const grid = new Grid(container(), [], cols, {
             enableColumnReorder: false,
             frozenColumns: 1,
             layoutEngine: new FrozenLayout()
@@ -117,7 +117,7 @@ describe('options.frozenColumns', () => {
     it('sets the first two visible column to frozen when 2', () => {
         var cols = threeCols();
         cols[0].visible = false;
-        const grid = new Grid(container(), [], cols , {
+        const grid = new Grid(container(), [], cols, {
             enableColumnReorder: false,
             frozenColumns: 2,
             layoutEngine: new FrozenLayout()

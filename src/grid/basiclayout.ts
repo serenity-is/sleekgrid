@@ -1,7 +1,7 @@
 import { Column, H, parsePx, spacerDiv } from "../core";
 import { LayoutEngine, LayoutHost } from "./layout";
 
-export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
+export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     var host: LayoutHost;
     var canvasWidth: number;
     var headersWidth: number;
@@ -56,12 +56,12 @@ export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
                 var prop = "--l" + i;
                 var oldVal = styles.getPropertyValue(prop);
                 var newVal = x + "px";
-                if (oldVal !== newVal) 
+                if (oldVal !== newVal)
                     styles.setProperty(prop, newVal);
                 prop = "--r" + i;
                 oldVal = styles.getPropertyValue(prop);
                 newVal = (canvasWidth - x - w) + "px"
-                if (oldVal !== newVal) 
+                if (oldVal !== newVal)
                     styles.setProperty(prop, newVal);
                 x += w;
             }
@@ -104,7 +104,7 @@ export const BasicLayout: { new(): LayoutEngine } = function(): LayoutEngine {
         var scrollWidth = host.getScrollDims().width;
         var cols = host.getColumns();
         for (var i = 0, ii = cols.length; i < ii; i++) {
-            headersWidth +=  cols[i].width;
+            headersWidth += cols[i].width;
         }
 
         headersWidth += scrollWidth;

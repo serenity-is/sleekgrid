@@ -1,4 +1,4 @@
-import {Group, GroupTotals} from "../../src/core/group";
+import { Group, GroupTotals } from "../../src/core/group";
 
 describe('Group', () => {
     it('should set readonly __group to true', () => {

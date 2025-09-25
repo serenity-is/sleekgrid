@@ -112,7 +112,7 @@ interface EventSubscriberEntry<TArgs = any, TEventData extends IEventData = IEve
     handler: ((e: TEventData, args: TArgs) => void);
 }
 
-export class EventSubscriber<TArgs = any, TEventData extends IEventData = IEventData>  {
+export class EventSubscriber<TArgs = any, TEventData extends IEventData = IEventData> {
     private _handlers: EventSubscriberEntry<TArgs, TEventData>[] = [];
 
     subscribe(event: EventEmitter<TArgs, TEventData>, handler: ((e: TEventData, args: TArgs) => void)): this {
@@ -169,11 +169,11 @@ export const keyCode = {
 }
 
 function returnTrue() {
-	return true;
+    return true;
 }
 
 function returnFalse() {
-	return false;
+    return false;
 }
 
 // patches event so that it has methods jQuery event objects provides, for backward compatibility when jQuery is not loaded
@@ -182,17 +182,17 @@ export function patchEvent(e: IEventData) {
         return e;
 
     if (!e.isDefaultPrevented && e.preventDefault)
-        e.isDefaultPrevented = function() { return this.defaultPrevented; }
+        e.isDefaultPrevented = function () { return this.defaultPrevented; }
 
     var org1: () => void, org2: () => void;
     if (!e.isImmediatePropagationStopped && (org1 = e.stopImmediatePropagation)) {
         e.isImmediatePropagationStopped = returnFalse;
-        e.stopImmediatePropagation = function() { this.isImmediatePropagationStopped = returnTrue; org1.call(this); }
+        e.stopImmediatePropagation = function () { this.isImmediatePropagationStopped = returnTrue; org1.call(this); }
     }
 
     if (!e.isPropagationStopped && (org2 = e.stopPropagation)) {
         e.isPropagationStopped = returnFalse;
-        e.stopPropagation = function() { this.isPropagationStopped = returnTrue; org2.call(this); }
+        e.stopPropagation = function () { this.isPropagationStopped = returnTrue; org2.call(this); }
     }
 
     return e;

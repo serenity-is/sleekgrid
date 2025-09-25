@@ -1,5 +1,5 @@
-import { EventEmitter, EventData, EventSubscriber, IEventData, patchEvent } from "../../src/core/event";
 import * as deprecatedWorkaround from "../../src/core/event";
+import { EventData, EventEmitter, EventSubscriber, IEventData, patchEvent } from "../../src/core/event";
 
 describe('EventData', () => {
     it('stopPropagation stops event propagation', () => {

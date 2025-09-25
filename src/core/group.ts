@@ -71,11 +71,11 @@ export class Group<TEntity = any> extends NonDataRow {
     groupingKey: string;
 
 
-  /***
-   * Compares two Group instances.
-   * @return {Boolean}
-   * @param group {Group} Group instance to compare to.
-   */
+    /***
+     * Compares two Group instances.
+     * @return {Boolean}
+     * @param group {Group} Group instance to compare to.
+     */
     equals(group: Group): boolean {
         return this.value === group.value &&
             this.count === group.count &&
@@ -103,7 +103,7 @@ export interface IGroupTotals<TEntity = any> {
  * @class GroupTotals
  * @extends NonDataRow
  */
- export class GroupTotals<TEntity = any> extends NonDataRow implements IGroupTotals<TEntity> {
+export class GroupTotals<TEntity = any> extends NonDataRow implements IGroupTotals<TEntity> {
 
     readonly __groupTotals = true;
 

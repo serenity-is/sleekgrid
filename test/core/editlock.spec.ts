@@ -1,4 +1,4 @@
-import {EditController, EditorLock, GlobalEditorLock} from "../../src/core/editing";
+import { EditController, EditorLock, GlobalEditorLock } from "../../src/core/editing";
 
 describe('EditLock', () => {
     it('should throw an exception when deactivating not active editor', () => {

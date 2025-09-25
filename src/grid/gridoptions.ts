@@ -1,5 +1,5 @@
 import type { Column, EditCommand, EditorFactory, EditorLock, IGroupTotals } from "../core";
-import { ColumnFormat, CompatFormatter, FormatterFactory, GlobalEditorLock, GroupTotals, defaultColumnFormat } from "../core";
+import { ColumnFormat, CompatFormatter, FormatterFactory, GlobalEditorLock, defaultColumnFormat } from "../core";
 import { LayoutEngine } from "./layout";
 
 /**

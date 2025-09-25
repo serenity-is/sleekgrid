@@ -1,7 +1,7 @@
 import { Column, disableSelection, H, parsePx, spacerDiv } from "../core";
 import { GridOptions, LayoutEngine, LayoutHost, ViewRange } from "../grid";
 
-export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
+export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     var canvasWidth: number;
     var canvasWidthL: number;
     var canvasWidthR: number;
@@ -451,7 +451,7 @@ export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
     const afterHeaderColumnDrag = () => {
         const oldCanvasWidthL = canvasWidthL;
         canvasWidth = calcCanvasWidth();
-        if (frozenCols &&  canvasWidthL != oldCanvasWidthL) {
+        if (frozenCols && canvasWidthL != oldCanvasWidthL) {
             headerColsL.style.width = canvasWidthL + 1000 + 'px';
             paneHeaderR.style[host.getOptions().rtl ? 'right' : 'left'] = canvasWidthL + 'px';
         }
@@ -471,12 +471,12 @@ export const FrozenLayout: { new(): LayoutEngine } = function(): LayoutEngine {
                 var prop = "--l" + i;
                 var oldVal = styles.getPropertyValue(prop);
                 var newVal = x + "px";
-                if (oldVal !== newVal) 
+                if (oldVal !== newVal)
                     styles.setProperty(prop, newVal);
                 prop = "--r" + i;
                 oldVal = styles.getPropertyValue(prop);
                 newVal = (((frozenCols > 0 && i >= frozenCols) ? canvasWidthR : canvasWidthL) - x - w) + "px"
-                if (oldVal !== newVal) 
+                if (oldVal !== newVal)
                     styles.setProperty(prop, newVal);
                 x += w;
             }

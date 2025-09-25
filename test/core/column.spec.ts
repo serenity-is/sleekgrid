@@ -103,7 +103,7 @@ it('should be able to constrain the maxWidth of the column', () => {
 it('should not override already existing properties', () => {
     const columns: Column[] = [
         { id: 'c1', name: 'c1', width: 100 },
-        { id: 'c2', name: 'c2', minWidth: 50},
+        { id: 'c2', name: 'c2', minWidth: 50 },
         { id: 'c3', name: 'c3', maxWidth: 200 },
     ];
 
