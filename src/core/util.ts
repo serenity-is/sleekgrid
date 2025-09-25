@@ -42,6 +42,12 @@ export function basicDOMSanitizer(dirtyHtml: string): string {
         return dirtyHtml ?? '';
     }
 
+    // Fast path: if the input contains no HTML tags or entities, it's safe to return as-is
+    // This avoids the expensive DOMParser overhead for simple text content
+    if (!/<|>|&|"|'/.test(dirtyHtml)) {
+        return dirtyHtml;
+    }
+
     // Check if DOMParser is available (should be in all modern browsers)
     if (typeof DOMParser === 'undefined') {
         // Fallback to basic escaping if DOMParser is not available

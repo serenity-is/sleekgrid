@@ -292,6 +292,15 @@ describe("basicDOMSanitizer", () => {
         expect(basicDOMSanitizer('')).toBe('');
     });
 
+    it("should use fast path for plain text without HTML characters", () => {
+        // These should go through the fast path and return as-is
+        expect(basicDOMSanitizer('Hello World')).toBe('Hello World');
+        expect(basicDOMSanitizer('123456')).toBe('123456');
+        expect(basicDOMSanitizer('a-z A-Z 0-9')).toBe('a-z A-Z 0-9');
+        expect(basicDOMSanitizer('Special chars: @#$%^*()')).toBe('Special chars: @#$%^*()');
+        expect(basicDOMSanitizer('Unicode: 你好 🌟')).toBe('Unicode: 你好 🌟');
+    });
+
     it("should preserve safe HTML content", () => {
         const safe = '<div class="container"><p>Hello <strong>world</strong>!</p></div>';
         expect(basicDOMSanitizer(safe)).toBe(safe);
