@@ -115,10 +115,48 @@ export function titleize(str: string) {
     if (!str)
         return str;
 
-    str = ("" + str).replace(/([A-Z]+)([A-Z][a-z])/, "$1_$2")
-        .replace(/([a-z\d])([A-Z])/, "$1_$2")
-        .replace(/[-\s]/, "_").toLowerCase();
+    str = "" + str;
 
-    return str.replace(/\s/, '_').split('_').filter(x => x.length)
+    // Simple character-by-character approach to avoid ReDoS vulnerabilities
+    let result = "";
+    for (let i = 0; i < str.length; i++) {
+        const char = str[i];
+        const prevChar = i > 0 ? str[i - 1] : null;
+        const nextChar = i < str.length - 1 ? str[i + 1] : null;
+
+        // Insert underscore before uppercase letters in these cases:
+        // 1. lowercase/digit followed by uppercase (camelCase -> camel_Case)
+        // 2. uppercase followed by uppercase+lowercase, but not at the start of consecutive caps
+        if (char >= 'A' && char <= 'Z' && prevChar) {
+            if (prevChar >= 'a' && prevChar <= 'z' || prevChar >= '0' && prevChar <= '9') {
+                // Case 1: lowercase/digit -> uppercase
+                result += '_';
+            } else if (prevChar >= 'A' && prevChar <= 'Z' && nextChar && nextChar >= 'a' && nextChar <= 'z') {
+                // Case 2: we're in a sequence of uppercase letters followed by lowercase
+                // Find the start of this uppercase sequence
+                let seqStart = i - 1;
+                while (seqStart > 0 && str[seqStart - 1] >= 'A' && str[seqStart - 1] <= 'Z') {
+                    seqStart--;
+                }
+                // Insert underscore before the last uppercase before the lowercase
+                if (i > seqStart) {
+                    result += '_';
+                }
+            }
+        }
+
+        // Replace hyphens and whitespace with underscores
+        if (char === '-' || /\s/.test(char)) {
+            result += '_';
+        } else {
+            result += char;
+        }
+    }
+
+    // Convert to lowercase and clean up
+    result = result.toLowerCase().replace(/_+/g, '_');
+
+    // Split into words, filter out empty strings, and title case each word
+    return result.split('_').filter(x => x.length)
         .map(x => x.charAt(0).toUpperCase() + x.substring(1).toLowerCase()).join(' ');
 }
