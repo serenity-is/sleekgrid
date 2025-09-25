@@ -1,6 +1,6 @@
-import type { Column, EditCommand, EditorFactory, EditorLock, IGroupTotals } from "../core";
-import { ColumnFormat, CompatFormatter, FormatterFactory, GlobalEditorLock, defaultColumnFormat } from "../core";
-import { LayoutEngine } from "./layout";
+import type { Column, EditCommand, EditorFactory, EditorLock, IGroupTotals } from ".";
+import { ColumnFormat, CompatFormatter, FormatterFactory, GlobalEditorLock, defaultColumnFormat } from ".";
+import type { LayoutEngine } from "../grid/layout";
 
 /**
  * Configuration options for the SleekGrid component.

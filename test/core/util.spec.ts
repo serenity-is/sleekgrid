@@ -1,4 +1,4 @@
-import { addClass, basicDOMSanitizer, disableSelection, escapeHtml as escape, H, removeClass, spacerDiv } from "../../src/core/util";
+import { addClass, basicDOMSanitizer, disableSelection, escapeHtml, H, removeClass, spacerDiv } from "../../src/core/util";
 
 describe('addClass', () => {
     it('should not do anything if classes to add is null or undefined', () => {
@@ -234,54 +234,54 @@ describe('disableSelection', () => {
 
 describe('escape', () => {
     it('should encode & as &amp;', () => {
-        expect(escape('&')).toBe('&amp;');
+        expect(escapeHtml('&')).toBe('&amp;');
     });
 
     it('should encode < as &lt;', () => {
-        expect(escape('<')).toBe('&lt;');
+        expect(escapeHtml('<')).toBe('&lt;');
     });
 
     it('should encode > as &gt;', () => {
-        expect(escape('>')).toBe('&gt;');
+        expect(escapeHtml('>')).toBe('&gt;');
     });
 
     it('should encode " as &quot;', () => {
-        expect(escape('"')).toBe('&quot;');
+        expect(escapeHtml('"')).toBe('&quot;');
     });
 
     it('should encode multiple & as &amp;', () => {
-        expect(escape('&&')).toBe('&amp;&amp;');
+        expect(escapeHtml('&&')).toBe('&amp;&amp;');
     });
 
     it('should encode multiple < as &lt;', () => {
-        expect(escape('<<')).toBe('&lt;&lt;');
+        expect(escapeHtml('<<')).toBe('&lt;&lt;');
     });
 
     it('should encode multiple > as &gt;', () => {
-        expect(escape('>>')).toBe('&gt;&gt;');
+        expect(escapeHtml('>>')).toBe('&gt;&gt;');
     });
 
     it('should encode multiple " as &quot;', () => {
-        expect(escape('""')).toBe('&quot;&quot;');
+        expect(escapeHtml('""')).toBe('&quot;&quot;');
     });
 
     it('should encode all characters', () => {
-        expect(escape('&<>"')).toBe('&amp;&lt;&gt;&quot;');
+        expect(escapeHtml('&<>"')).toBe('&amp;&lt;&gt;&quot;');
     });
 
     it('should return empty string if parameter is null or undefined', () => {
-        expect(escape(null)).toBe('');
-        expect(escape(undefined)).toBe('');
+        expect(escapeHtml(null)).toBe('');
+        expect(escapeHtml(undefined)).toBe('');
     });
 
     it('should convert any type to a string', () => {
-        expect(escape(1)).toBe('1');
-        expect(escape(true)).toBe('true');
-        expect(escape({})).toBe('[object Object]');
+        expect(escapeHtml(1)).toBe('1');
+        expect(escapeHtml(true)).toBe('true');
+        expect(escapeHtml({})).toBe('[object Object]');
     });
 
     it('uses this.value if no argument passed', () => {
-        expect(escape.apply({ value: "&><" }, [])).toBe("&amp;&gt;&lt;");
+        expect(escapeHtml.apply({ value: "&><" }, [])).toBe("&amp;&gt;&lt;");
     });
 });
 

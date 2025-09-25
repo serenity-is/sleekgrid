@@ -1,5 +1,6 @@
 import type { Column } from "./column";
-import { addClass, escapeHtml, removeClass } from "./util";
+import { gridDefaults } from "./gridoptions";
+import { addClass, basicDOMSanitizer, escapeHtml, removeClass } from "./util";
 
 /**
  * Context object for column formatters. It provides access to the
@@ -53,6 +54,11 @@ export interface FormatterContext<TItem = any> {
      * Purpose of the call, e.g. "autowidth", "excelexport", "groupheader", "headerfilter", "pdfexport", "print".
      */
     purpose?: "autowidth" | "excelexport" | "groupheader" | "grouptotal" | "headerfilter" | "pdfexport" | "print";
+
+    /**
+     * Sanitizer function to clean up dirty HTML.
+     */
+    sanitizer: (dirtyHtml: string) => string;
 
     /**
      * Tooltip text to be added to the cell node as title attribute.
@@ -131,7 +137,7 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: Form
         node.appendChild(html);
     }
     else
-        node.innerHTML = "" + html;
+        node.innerHTML = ctx.sanitizer?.("" + html) ?? ("" + html);
 
     if (ctx.addAttrs != null) {
         var keys = Object.keys(ctx.addAttrs);
@@ -147,4 +153,16 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: Form
         addClass(node, ctx.addClass);
         node.dataset.fmtcls = ctx.addClass;
     }
+}
+
+export function formatterContext<TItem = any>(opt?: Partial<Exclude<FormatterContext<TItem>, "addAttrs" | "addClass" | "tooltip">>): FormatterContext<TItem> {
+    return {
+        ...opt,
+        escape: opt?.escape ?? escapeHtml,
+        sanitizer: opt?.sanitizer ?? gridDefaults.sanitizer ??
+            // @ts-ignore
+            ((typeof DOMPurify !== "undefined" && typeof DOMPurify.sanitize == "function") ? DOMPurify.sanitize
+                : basicDOMSanitizer),
+        value: opt?.value
+    };
 }

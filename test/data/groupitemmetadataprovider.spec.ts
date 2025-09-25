@@ -1,4 +1,4 @@
-import { ColumnFormat, CompatFormatter, escapeHtml as escape, Group } from "../../src/core";
+import { ColumnFormat, CompatFormatter, formatterContext as ctx, Group } from "../../src/core";
 import { GroupItemMetadataProvider } from "../../src/data/groupitemmetadataprovider";
 
 describe("GroupItemMetadataProvider.defaults", () => {
@@ -67,7 +67,7 @@ describe("GroupItemMetadataProvider constructor", () => {
         expect(provider.getOptions().groupFormatter === groupFormatter).toBe(true);
         expect(provider.getOptions().groupFormat as any !== groupFormatter).toBe(true);
         expect(provider.getOptions().groupFormat).toBeDefined();
-        expect(provider.getOptions().groupFormat({ escape })).toBe("compat");
+        expect(provider.getOptions().groupFormat(ctx())).toBe("compat");
     });
 
 
@@ -79,7 +79,7 @@ describe("GroupItemMetadataProvider constructor", () => {
             var provider = new GroupItemMetadataProvider();
             var format = provider.getOptions().groupFormat;
             expect(format).toBeDefined();
-            format({ escape });
+            format(ctx());
             expect(opt === provider.getOptions()).toBe(true);
         }
         finally {
@@ -106,7 +106,7 @@ describe("GroupItemMetadataProvider constructor", () => {
         expect(provider.getOptions().totalsFormatter === totalsFormatter).toBe(true);
         expect(provider.getOptions().totalsFormat as any !== totalsFormatter).toBe(true);
         expect(provider.getOptions().totalsFormat).toBeDefined();
-        expect(provider.getOptions().totalsFormat({ escape })).toBe("compat");
+        expect(provider.getOptions().totalsFormat(ctx())).toBe("compat");
     });
 
     it("uses defaultTotalsFormat if none passed", () => {
@@ -117,7 +117,7 @@ describe("GroupItemMetadataProvider constructor", () => {
             var provider = new GroupItemMetadataProvider();
             var format = provider.getOptions().totalsFormat;
             expect(format).toBeDefined();
-            format({ escape });
+            format(ctx());
             expect(called).toBe(true);
         }
         finally {

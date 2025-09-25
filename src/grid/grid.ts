@@ -1,10 +1,10 @@
-import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, H, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, basicDOMSanitizer, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, H, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, formatterContext, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { IDataView } from "../core/idataview";
 import { BasicLayout } from "./basiclayout";
 import { CellNavigator } from "./cellnavigator";
 import { Draggable } from "./draggable";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
-import { GridOptions, gridDefaults } from "./gridoptions";
+import { GridOptions, gridDefaults } from "../core/gridoptions";
 import { CachedRow, PostProcessCleanupEntry, absBox, addUiStateHover, autosizeColumns, calcMinMaxPageXOnDragStart, getInnerWidth, getMaxSupportedCssHeight, getScrollBarDimensions, getVBoxDelta, removeUiStateHover, shrinkOrStretchColumn, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
 import { LayoutEngine } from "./layout";
 import { IPlugin, SelectionModel, ViewRange, ViewportInfo } from "./types";
@@ -133,7 +133,7 @@ export class Grid<TItem = any> implements EditorHost {
         // @ts-ignore
         options.jQuery = this._jQuery = options.jQuery === void 0 ? (typeof jQuery !== "undefined" ? jQuery : void 0) : options.jQuery;
         // @ts-ignore
-        options.sanitizer = options.sanitizer === void 0 ? (typeof DOMPurify !== "undefined" && typeof DOMPurify.sanitize == "function" ? DOMPurify.sanitize : basicDOMSanitizer) : options.sanitizer;
+        options.sanitizer = options.sanitizer === void 0 ? formatterContext().sanitizer : options.sanitizer;
 
         if (this._jQuery && container instanceof (this._jQuery as any))
             this._container = (container as any)[0];
@@ -1803,19 +1803,17 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     getFormatterContext(row: number, cell: number): FormatterContext {
-        var column = this._cols[cell];
-        var item = this.getDataItem(row);
-        const ctx: FormatterContext = {
+        const column = this._cols[cell];
+        const item = this.getDataItem(row);
+        return formatterContext<TItem>({
             cell,
             column,
             grid: this,
-            escape: escapeHtml,
             item,
-            row
-        }
-        if (item)
-            ctx.value = this.getDataItemValueForColumn(item, column);
-        return ctx;
+            row,
+            sanitizer: this._options.sanitizer,
+            value: item ? this.getDataItemValueForColumn(item, column) : void 0
+        });
     }
 
     private getEditor(row: number, cell: number): EditorClass {
@@ -1931,14 +1929,14 @@ export class Grid<TItem = any> implements EditorHost {
 
         // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
         var formatResult: FormatterResult;
-        const ctx: FormatterContext = {
+        const ctx = formatterContext<TItem>({
             cell,
             column,
-            escape: escapeHtml,
+            sanitizer: this._options.sanitizer,
             grid: this,
             item,
             row
-        }
+        });
 
         if (item) {
             ctx.value = this.getDataItemValueForColumn(item, column);

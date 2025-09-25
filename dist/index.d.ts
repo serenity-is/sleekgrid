@@ -266,6 +266,10 @@ export interface FormatterContext<TItem = any> {
 	 */
 	purpose?: "autowidth" | "excelexport" | "groupheader" | "grouptotal" | "headerfilter" | "pdfexport" | "print";
 	/**
+	 * Sanitizer function to clean up dirty HTML.
+	 */
+	sanitizer: (dirtyHtml: string) => string;
+	/**
 	 * Tooltip text to be added to the cell node as title attribute.
 	 */
 	tooltip?: string;
@@ -294,6 +298,7 @@ export type CellStylesHash = {
 export declare function defaultColumnFormat(ctx: FormatterContext): any;
 export declare function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat;
 export declare function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement): void;
+export declare function formatterContext<TItem = any>(opt?: Partial<Exclude<FormatterContext<TItem>, "addAttrs" | "addClass" | "tooltip">>): FormatterContext<TItem>;
 /***
  * Information about a group of rows.
  */

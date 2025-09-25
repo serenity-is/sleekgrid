@@ -1,6 +1,6 @@
 import { RowCell } from "../core";
 import { Column } from "../core/column";
-import { GridOptions } from "./gridoptions";
+import { GridOptions } from "../core/gridoptions";
 import { ViewportInfo, ViewRange } from "./types";
 
 export interface LayoutHost {

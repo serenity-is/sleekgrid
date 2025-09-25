@@ -1,27 +1,27 @@
-import { escapeHtml } from "../core";
+import { formatterContext } from "../core";
 import { CheckboxFormatter, CheckmarkFormatter, PercentCompleteBarFormatter, PercentCompleteFormatter, YesNoFormatter } from "./formatters";
 
 export * from "./formatters";
 
 export namespace Formatters {
     export function PercentComplete(_row: number, _cell: number, value: any) {
-        return PercentCompleteFormatter({ escape: escapeHtml, value });
+        return PercentCompleteFormatter(formatterContext({ value }));
     }
 
     export function PercentCompleteBar(_row: number, _cell: number, value: any) {
-        return PercentCompleteBarFormatter({ escape: escapeHtml, value });
+        return PercentCompleteBarFormatter(formatterContext({ value }));
     }
 
     export function YesNo(_row: number, _cell: number, value: any) {
-        return YesNoFormatter({ escape: escapeHtml, value });
+        return YesNoFormatter(formatterContext({ value }));
     }
 
     export function Checkbox(_row: number, _cell: number, value: any) {
-        return CheckboxFormatter({ escape: escapeHtml, value });
+        return CheckboxFormatter(formatterContext({ value }));
     }
 
     export function Checkmark(_row: number, _cell: number, value: any) {
-        return CheckmarkFormatter({ escape: escapeHtml, value });
+        return CheckmarkFormatter(formatterContext({ value }));
     }
 }
 

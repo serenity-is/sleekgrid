@@ -1,5 +1,5 @@
 import { CellRange, EventEmitter } from "../../src/core";
-import { SelectionModel } from "../../src/grid/";
+import { SelectionModel } from "../../src/grid";
 import { Grid } from "../../src/grid/grid";
 
 it('should selectionModel init with grid', () => {
