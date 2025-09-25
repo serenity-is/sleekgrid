@@ -223,7 +223,7 @@ export declare const GlobalEditorLock: EditorLock;
 /**
  * Context object for column formatters. It provides access to the
  * current cell value, row index, column index, etc.
- * Use grid.getFormatterContext() to create a new instance.
+ * Use grid.getFormatterContext() or the @see formatterContext helper to create a new instance.
  */
 export interface FormatterContext<TItem = any> {
 	/**
