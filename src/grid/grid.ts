@@ -1361,13 +1361,14 @@ export class Grid<TItem = any> implements EditorHost {
             for (var j = ranges[i].fromRow; j <= ranges[i].toRow; j++) {
                 if (!hash[j]) {  // prevent duplicates
                     this._selectedRows.push(j);
-                    hash[j] = {};
+                    hash[j] = Object.create(null);
                 }
                 for (var k = ranges[i].fromCell; k <= ranges[i].toCell; k++) {
                     if (this.canCellBeSelected(j, k)) {
                         const cid = cols[k].id;
-                        if (isPollutingKey(cid)) continue;
-                        hash[j][cid] = this._options.selectedCellCssClass;
+                        if (!isPollutingKey(cid)) {
+                            hash[j][cid] = this._options.selectedCellCssClass;
+                        }
                     }
                 }
             }
@@ -1395,14 +1396,14 @@ export class Grid<TItem = any> implements EditorHost {
             for (var j = ranges[i].fromRow; j <= ranges[i].toRow; j++) {
                 if (!hash[j]) {  // prevent duplicates
                     this._selectedRows.push(j);
-                    hash[j] = {};
+                    hash[j] = Object.create(null);
                 }
                 for (var k = ranges[i].fromCell; k <= ranges[i].toCell; k++) {
                     if (this.canCellBeSelected(j, k)) {
                         const cid = cols[k].id;
-                        if (isPollutingKey(cid))
-                            return;
-                        hash[j][cid] = this._options.selectedCellCssClass;
+                        if (!isPollutingKey(cid)) {
+                            hash[j][cid] = this._options.selectedCellCssClass;
+                        }
                     }
                 }
             }
