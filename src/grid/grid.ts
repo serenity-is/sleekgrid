@@ -1400,7 +1400,8 @@ export class Grid<TItem = any> implements EditorHost {
                 for (var k = ranges[i].fromCell; k <= ranges[i].toCell; k++) {
                     if (this.canCellBeSelected(j, k)) {
                         const cid = cols[k].id;
-                        if (isPollutingKey(cid)) continue;
+                        if (isPollutingKey(cid))
+                            return;
                         hash[j][cid] = this._options.selectedCellCssClass;
                     }
                 }
