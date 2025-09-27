@@ -605,10 +605,12 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         }
 
         var frozenColumns = viewCols.filter(x => x.frozen);
+        const scrollChange = (frozenCols > 0) !== (frozenColumns.length > 0);
         frozenCols = frozenColumns.length;
         if (frozenCols)
             return frozenColumns.concat(viewCols.filter(x => !x.frozen));
-
+        if (scrollChange)
+            setScroller();
         return viewCols;
     }
 
