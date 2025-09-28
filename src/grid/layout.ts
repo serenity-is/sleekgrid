@@ -10,6 +10,7 @@ export interface LayoutHost {
     getCellFromPoint(x: number, y: number): RowCell;
     getColumnCssRules(idx: number): { right: any; left: any; }
     getColumns(): Column[];
+    getInitialColumns(): Column[];
     getContainerNode(): HTMLElement;
     getDataLength(): number;
     getOptions(): GridOptions;

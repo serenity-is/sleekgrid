@@ -199,7 +199,7 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     }
 
     function reorderViewColumns(viewCols: Column[]): Column[] {
-        return viewCols;
+        return null;
     }
 
     function returnFalse() {

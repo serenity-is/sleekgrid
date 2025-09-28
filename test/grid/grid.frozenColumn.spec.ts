@@ -149,7 +149,7 @@ describe('options.frozenColumns', () => {
             layoutEngine: new FrozenLayout()
         });
 
-        const paneTopLeft = div.querySelector(`.${slickPaneTop}.${slickPaneRight}`) as HTMLDivElement;
+        const paneTopLeft = div.querySelector(`.${slickPaneTop}.${slickPaneLeft}`) as HTMLDivElement;
         expect(paneTopLeft).toBeDefined();
         expect(paneTopLeft.style.display).toBe('');
 
@@ -166,5 +166,80 @@ describe('options.frozenColumns', () => {
         expect(paneBottomRight.style.display).toBe('none');
     });
 
+    it("switches scroll containers when setting frozen columns back to 0 at runtime", () => {
+        const div = container();
+        const layout = new FrozenLayout();
+        const grid = new Grid(div, [], threeCols(), {
+            frozenColumns: 2,
+            layoutEngine: layout
+        });
+        const cols = grid.getColumns();
+        expect(cols[0].frozen).toBe(true);
+        expect(cols[1].frozen).toBe(true);
+        expect(cols[2].frozen).toBeFalsy();
 
+        const viewportTopLeft = div.querySelector(`.${slickPaneTop}.${slickPaneLeft} > .slick-viewport`) as HTMLDivElement;
+        const viewportTopRight = div.querySelector(`.${slickPaneTop}.${slickPaneRight} > .slick-viewport`) as HTMLDivElement;
+        expect(viewportTopLeft).toBeDefined();
+        expect(viewportTopRight).toBeDefined();
+        expect(layout.getScrollContainerX()).toBe(viewportTopRight);
+        expect(layout.getScrollContainerY()).toBe(viewportTopRight);
+        grid.setOptions({
+            frozenColumns: 0
+        });
+        expect(layout.getScrollContainerX()).toBe(viewportTopLeft);
+        expect(layout.getScrollContainerY()).toBe(viewportTopLeft);
+        const cols2 = grid.getColumns();
+        expect(cols2[0].frozen).toBeFalsy();
+        expect(cols2[1].frozen).toBeFalsy();
+        expect(cols2[2].frozen).toBeFalsy();
+    });
+
+    it("switches scroll containers when setting frozen columns > 0 at runtime", () => {
+        const div = container();
+        const layout = new FrozenLayout();
+        const grid = new Grid(div, [], threeCols(), {
+            frozenColumns: 0,
+            layoutEngine: layout
+        });
+        const cols = grid.getColumns();
+        expect(cols[0].frozen).toBeFalsy();
+        expect(cols[1].frozen).toBeFalsy();
+        expect(cols[2].frozen).toBeFalsy();
+
+        const viewportTopLeft = div.querySelector(`.${slickPaneTop}.${slickPaneLeft} > .slick-viewport`) as HTMLDivElement;
+        const viewportTopRight = div.querySelector(`.${slickPaneTop}.${slickPaneRight} > .slick-viewport`) as HTMLDivElement;
+        expect(viewportTopLeft).toBeDefined();
+        expect(viewportTopRight).toBeDefined();
+        expect(layout.getScrollContainerX()).toBe(viewportTopLeft);
+        expect(layout.getScrollContainerY()).toBe(viewportTopLeft);
+        grid.setOptions({
+            frozenColumns: 2
+        });
+        expect(layout.getScrollContainerX()).toBe(viewportTopRight);
+        expect(layout.getScrollContainerY()).toBe(viewportTopRight);
+        const cols2 = grid.getColumns();
+        expect(cols2[0].frozen).toBe(true);
+        expect(cols2[1].frozen).toBe(true);
+        expect(cols2[2].frozen).toBeFalsy();
+    });
+
+    it("moves frozen columns to the left on init", () => {
+        var cols = threeCols();
+        cols[1].frozen = true;
+        cols[2].frozen = true;
+        const div = container();
+        const layout = new FrozenLayout();
+        const grid = new Grid(div, [], cols, {
+            enableColumnReorder: false,
+            layoutEngine: layout
+        });
+        const cols2 = grid.getColumns();
+        expect(cols2[0].id).toBe('c2');
+        expect(cols2[0].frozen).toBe(true);
+        expect(cols2[1].id).toBe('c3');
+        expect(cols2[1].frozen).toBe(true);
+        expect(cols2[2].id).toBe('c1');
+        expect(cols2[2].frozen).toBeFalsy();
+    });
 });

@@ -144,7 +144,7 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         disableSelection(headerColsL);
         disableSelection(headerColsR);
 
-        adjustFrozenRowOption();
+        adjustFrozenRowsOption();
     }
 
     function getHeaderCols() {
@@ -607,19 +607,24 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         var frozenColumns = viewCols.filter(x => x.frozen);
         const scrollChange = (frozenCols > 0) !== (frozenColumns.length > 0);
         frozenCols = frozenColumns.length;
-        if (frozenCols)
-            return frozenColumns.concat(viewCols.filter(x => !x.frozen));
         if (scrollChange)
             setScroller();
-        return viewCols;
+        if (frozenCols)
+            return frozenColumns.concat(viewCols.filter(x => !x.frozen));
+        return null;
     }
 
     function afterSetOptions(arg: GridOptions) {
         if (arg.frozenRows != null || arg.frozenBottom != null)
-            adjustFrozenRowOption();
+            adjustFrozenRowsOption();
+        if (arg.frozenColumns != null && arg.columns == null) {
+            const columns = reorderViewColumns(host.getInitialColumns(), arg);
+            if (columns != null)
+                arg.columns = columns;
+        }
     }
 
-    function adjustFrozenRowOption(): void {
+    function adjustFrozenRowsOption(): void {
         const options = host.getOptions();
         if (options.autoHeight) {
             frozenRows = 0;

@@ -219,6 +219,7 @@ export class Grid<TItem = any> implements EditorHost {
             getCellFromPoint: this.getCellFromPoint.bind(this),
             getColumnCssRules: this.getColumnCssRules.bind(this),
             getColumns: this.getColumns.bind(this),
+            getInitialColumns: this.getInitialColumns.bind(this),
             getContainerNode: this.getContainerNode.bind(this),
             getDataLength: this.getDataLength.bind(this),
             getOptions: this.getOptions.bind(this),
@@ -1449,7 +1450,7 @@ export class Grid<TItem = any> implements EditorHost {
                 viewCols.push(m);
         }
 
-        viewCols = this._layout.reorderViewColumns(viewCols, this._options);
+        viewCols = this._layout.reorderViewColumns(viewCols, this._options) ?? viewCols;
 
         this._postRenderActive = this._options.enableAsyncPostRender ?? false;
         this._postCleanupActive = this._options.enableAsyncPostRenderCleanup ?? false;
