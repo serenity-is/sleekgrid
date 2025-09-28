@@ -569,6 +569,7 @@ export interface LayoutHost {
 		left: any;
 	};
 	getColumns(): Column[];
+	getInitialColumns(): Column[];
 	getContainerNode(): HTMLElement;
 	getDataLength(): number;
 	getOptions(): GridOptions;
