@@ -137,7 +137,7 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: Form
         node.appendChild(html);
     }
     else
-        node.innerHTML = ctx.sanitizer?.("" + html) ?? ("" + html);
+        node.innerHTML = (ctx.sanitizer ?? escapeHtml)(("" + html));
 
     if (ctx.addAttrs != null) {
         var keys = Object.keys(ctx.addAttrs);

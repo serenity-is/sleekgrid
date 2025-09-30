@@ -1949,7 +1949,7 @@ export class Grid<TItem = any> implements EditorHost {
             ctx.value = this.getDataItemValueForColumn(item, column);
             formatResult = this.getFormatter(row, column)(ctx);
             if (typeof formatResult === "string" && formatResult.length) {
-                formatResult = this._options.sanitizer?.(formatResult);
+                formatResult = (ctx.sanitizer ?? escapeHtml)(formatResult);
             }
         }
 
@@ -2122,7 +2122,7 @@ export class Grid<TItem = any> implements EditorHost {
         if (ctx.item) {
             formatResult = this.getFormatter(row, ctx.column)(ctx);
             if (typeof formatResult === "string" && formatResult.length) {
-                formatResult = this._options.sanitizer?.(formatResult);
+                formatResult = (ctx.sanitizer ?? escapeHtml)(formatResult);
             }
         }
         this._emptyNode(cellNode);
