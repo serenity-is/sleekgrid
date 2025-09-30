@@ -192,6 +192,11 @@ export class Grid<TItem = any> implements EditorHost {
         if (this._options.useLegacyUI)
             this._container.classList.add("ui-widget");
 
+        if ((this._options as any).groupTotalsFormatter &&
+            !this._options.groupTotalsFormat) {
+            this._options.groupTotalsFormat = convertCompatFormatter((this._options as any).groupTotalsFormatter);
+        }
+
         // set up a positioning container if needed
         if (!/relative|absolute|fixed/.test(getComputedStyle(this._container).position)) {
             this._container.style.position = "relative";
@@ -2657,18 +2662,33 @@ export class Grid<TItem = any> implements EditorHost {
         var cols = this._cols;
         for (var m of cols) {
             if (m.id != void 0) {
-                var formatter = m.groupTotalsFormatter ?? this._options.groupTotalsFormatter;
+                const formatter = m.groupTotalsFormat ??
+                    (m as any).groupTotalsFormatter ? convertCompatFormatter((m as any).groupTotalsFormatter) :
+                    (this._options as any).groupTotalsFormat;
                 if (!formatter)
                     continue;
-                var content = formatter(totals, m, this) ?? '';
-                this.getFooterRowColumn(m.id).innerHTML = content;
+                const ctx = this.getFormatterContext(-1, -1);
+                ctx.item = totals;
+                ctx.column = m;
+                ctx.purpose = "grouptotal";
+                const fmtResult = formatter(ctx);
+                const footerNode = this.getFooterRowColumn(m.id);
+                this._emptyNode(footerNode);
+                applyFormatterResultToCellNode(formatterContext({
+                    sanitizer: ctx.sanitizer
+                }), fmtResult, footerNode);
             }
         }
     }
 
     // for usage as fallback by the groupmetadataitemprovider
-    groupTotalsFormatter(p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: any): string {
-        return this._options.groupTotalsFormatter ? this._options.groupTotalsFormatter(p1, p2, grid ?? this) : "";
+    groupTotalsFormat(ctx: FormatterContext<IGroupTotals<TItem>>): FormatterResult {
+        return this._options.groupTotalsFormat ? this._options.groupTotalsFormat(ctx) : "";
+    }
+
+    /** @deprecated, use @see groupTotalsFormat instead  */
+    groupTotalsFormatter(totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: any): string {
+        return (this._options as any).groupTotalsFormatter ? (this._options as any).groupTotalsFormatter(totals, column, grid ?? this) : "";
     }
 
     public render = (): void => {

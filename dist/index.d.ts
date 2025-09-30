@@ -297,7 +297,7 @@ export type CellStylesHash = {
 };
 export declare function defaultColumnFormat(ctx: FormatterContext): any;
 export declare function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat;
-export declare function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement): void;
+export declare function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult: FormatterResult, node: HTMLElement): void;
 export declare function formatterContext<TItem = any>(opt?: Partial<Exclude<FormatterContext<TItem>, "addAttrs" | "addClass" | "tooltip">>): FormatterContext<TItem>;
 /***
  * Information about a group of rows.
@@ -430,9 +430,11 @@ export interface Column<TItem = any> {
 	focusable?: boolean;
 	footerCssClass?: string;
 	format?: ColumnFormat<TItem>;
-	/** @deprecated */
+	/** @deprecated, use @see format */
 	formatter?: CompatFormatter<TItem>;
-	groupTotalsFormatter?: (p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: unknown) => string;
+	groupTotalsFormat?: (ctx: FormatterContext<IGroupTotals<TItem>>) => FormatterResult;
+	/** @deprecated, use @see groupTotalsFormat */
+	groupTotalsFormatter?: (totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: unknown) => string;
 	headerCssClass?: string;
 	id?: string;
 	maxWidth?: any;
@@ -811,8 +813,10 @@ export interface GridOptions<TItem = any> {
 	 * Defaults to `30`. Height of the grouping panel in pixels.
 	 */
 	groupingPanelHeight?: number;
+	groupTotalsFormat?: (ctx: FormatterContext<IGroupTotals<TItem>>) => FormatterResult;
 	/**
 	 * Function to format group totals for display in the grouping panel.
+	 * @deprecated Use `groupTotalsFormat` with `FormatterContext<IGroupTotals>` signature instead.
 	 */
 	groupTotalsFormatter?: (p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
 	/**

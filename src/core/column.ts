@@ -1,5 +1,5 @@
 import { EditorClass, ValidationResult } from "./editing";
-import type { AsyncPostCleanup, AsyncPostRender, ColumnFormat, CompatFormatter } from "./formatting";
+import type { AsyncPostCleanup, AsyncPostRender, ColumnFormat, CompatFormatter, FormatterContext, FormatterResult } from "./formatting";
 import { IGroupTotals } from "./group";
 
 export interface Column<TItem = any> {
@@ -16,9 +16,11 @@ export interface Column<TItem = any> {
     focusable?: boolean;
     footerCssClass?: string;
     format?: ColumnFormat<TItem>;
-    /** @deprecated */
+    /** @deprecated, use @see format */
     formatter?: CompatFormatter<TItem>;
-    groupTotalsFormatter?: (p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: unknown) => string;
+    groupTotalsFormat?: (ctx: FormatterContext<IGroupTotals<TItem>>) => FormatterResult;
+    /** @deprecated, use @see groupTotalsFormat */
+    groupTotalsFormatter?: (totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: unknown) => string;
     headerCssClass?: string;
     id?: string;
     maxWidth?: any;

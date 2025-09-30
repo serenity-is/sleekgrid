@@ -1,4 +1,4 @@
-import { Column, ColumnFormat, CompatFormatter, convertCompatFormatter, FormatterContext, Group, IGroupTotals, ItemMetadata } from "../core";
+import { Column, ColumnFormat, CompatFormatter, convertCompatFormatter, FormatterContext, FormatterResult, Group, IGroupTotals, ItemMetadata } from "../core";
 import { ArgsCell, Grid, IPlugin } from "../grid";
 
 export interface GroupItemMetadataProviderOptions {
@@ -60,12 +60,21 @@ export class GroupItemMetadataProvider implements IPlugin {
 <span class="${ctx.escape(opt.groupTitleCssClass)}" level="${ctx.escape(item.level)}">${item.title}</span>`;
     }
 
-    public static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): string {
-        var item = ctx.item as IGroupTotals;
+    public static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): FormatterResult {
+        let item = ctx.item as IGroupTotals;
         if (!item.__groupTotals && (item as any).totals)
-            item = (item as any).totals;
-        return (ctx.column?.groupTotalsFormatter?.(item as IGroupTotals, ctx.column)) ??
-            ((grid ?? ctx.grid)?.groupTotalsFormatter?.(item, ctx.column)) ?? "";
+            ctx.item = item = (item as any).totals;
+
+        if (ctx.column.groupTotalsFormat) {
+            return ctx.column.groupTotalsFormat(ctx);
+        }
+
+        if ((ctx.column as any)?.groupTotalsFormatter) {
+            return (ctx.column as any)?.groupTotalsFormatter?.(item as IGroupTotals, ctx.column) ?? "";
+        }
+
+        grid ??= ctx.grid;
+        return grid.groupTotalsFormat?.(ctx) ?? "";
     }
 
     init(grid: Grid) {

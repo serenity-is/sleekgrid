@@ -1,6 +1,8 @@
-import type { Column, EditCommand, EditorFactory, EditorLock, IGroupTotals } from ".";
-import { ColumnFormat, CompatFormatter, FormatterFactory, GlobalEditorLock, defaultColumnFormat } from ".";
-import type { LayoutEngine } from "../grid/layout";
+import { type LayoutEngine } from "../grid/layout";
+import { type Column } from "./column";
+import { GlobalEditorLock, type EditCommand, type EditorFactory, type EditorLock } from "./editing";
+import { defaultColumnFormat, type ColumnFormat, type CompatFormatter, type FormatterContext, type FormatterFactory, type FormatterResult } from "./formatting";
+import { type IGroupTotals } from "./group";
 
 /**
  * Configuration options for the SleekGrid component.
@@ -228,7 +230,13 @@ export interface GridOptions<TItem = any> {
     /**
      * Function to format group totals for display in the grouping panel.
      */
-    groupTotalsFormatter?: (p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
+    groupTotalsFormat?: (ctx: FormatterContext<IGroupTotals<TItem>>) => FormatterResult;
+
+    /**
+     * Function to format group totals for display in the grouping panel.
+     * @deprecated Use `groupTotalsFormat` with `FormatterContext<IGroupTotals>` signature instead.
+     */
+    groupTotalsFormatter?: (totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: any) => string;
 
     /**
      * Defaults to `30`. Height of the header row in pixels.

@@ -109,7 +109,7 @@ export function convertCompatFormatter(compatFormatter: CompatFormatter): Column
     }
 }
 
-export function applyFormatterResultToCellNode(ctx: FormatterContext, html: FormatterResult, node: HTMLElement) {
+export function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult: FormatterResult, node: HTMLElement) {
     var oldFmtAtt = node.dataset.fmtatt as string;
     if (oldFmtAtt?.length > 0) {
         for (var k of oldFmtAtt.split(','))
@@ -131,13 +131,13 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, html: Form
     if (ctx.tooltip !== undefined && oldTooltip != ctx.tooltip)
         node.setAttribute('tooltip', ctx.tooltip);
 
-    if (html == void 0)
+    if (fmtResult == void 0)
         node.innerHTML = "";
-    else if (html instanceof Node) {
-        node.appendChild(html);
+    else if (fmtResult instanceof Node) {
+        node.appendChild(fmtResult);
     }
     else
-        node.innerHTML = (ctx.sanitizer ?? escapeHtml)(("" + html));
+        node.innerHTML = (ctx.sanitizer ?? escapeHtml)(("" + fmtResult));
 
     if (ctx.addAttrs != null) {
         var keys = Object.keys(ctx.addAttrs);
