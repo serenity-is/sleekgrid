@@ -813,12 +813,15 @@ export interface GridOptions<TItem = any> {
 	 * Defaults to `30`. Height of the grouping panel in pixels.
 	 */
 	groupingPanelHeight?: number;
+	/**
+	 * Function to format group totals for display in the grouping panel.
+	 */
 	groupTotalsFormat?: (ctx: FormatterContext<IGroupTotals<TItem>>) => FormatterResult;
 	/**
 	 * Function to format group totals for display in the grouping panel.
 	 * @deprecated Use `groupTotalsFormat` with `FormatterContext<IGroupTotals>` signature instead.
 	 */
-	groupTotalsFormatter?: (p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: any) => string;
+	groupTotalsFormatter?: (totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: any) => string;
 	/**
 	 * Defaults to `30`. Height of the header row in pixels.
 	 */
@@ -1197,7 +1200,9 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private invalidatePostProcessingResults;
 	private updateRowPositions;
 	private updateGrandTotals;
-	groupTotalsFormatter(p1?: IGroupTotals<TItem>, p2?: Column<TItem>, grid?: any): string;
+	groupTotalsFormat(ctx: FormatterContext<IGroupTotals<TItem>>): FormatterResult;
+	/** @deprecated, use @see groupTotalsFormat instead  */
+	groupTotalsFormatter(totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: any): string;
 	render: () => void;
 	private handleHeaderRowScroll;
 	private handleFooterRowScroll;
@@ -1493,7 +1498,7 @@ export declare class GroupItemMetadataProvider implements IPlugin {
 	constructor(opt?: GroupItemMetadataProviderOptions);
 	static readonly defaults: GroupItemMetadataProviderOptions;
 	static defaultGroupFormat(ctx: FormatterContext, opt?: GroupItemMetadataProviderOptions): string;
-	static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): string;
+	static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): FormatterResult;
 	init(grid: Grid): void;
 	readonly pluginName = "GroupItemMetadataProvider";
 	destroy(): void;
