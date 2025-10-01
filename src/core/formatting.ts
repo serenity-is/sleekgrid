@@ -53,7 +53,7 @@ export interface FormatterContext<TItem = any> {
     /**
      * Purpose of the call, e.g. "autowidth", "excelexport", "groupheader", "headerfilter", "pdfexport", "print".
      */
-    purpose?: "autowidth" | "excelexport" | "groupheader" | "grouptotal" | "headerfilter" | "pdfexport" | "print";
+    purpose?: "autowidth" | "excelexport" | "groupheader" | "grand-totals" | "group-totals" | "headerfilter" | "pdfexport" | "print";
 
     /**
      * Sanitizer function to clean up dirty HTML.

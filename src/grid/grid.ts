@@ -2680,7 +2680,7 @@ export class Grid<TItem = any> implements EditorHost {
                 const ctx = this.getFormatterContext(-1, -1);
                 ctx.item = totals;
                 ctx.column = m;
-                ctx.purpose = "grouptotal";
+                ctx.purpose = "grand-totals";
                 const fmtResult = formatter(ctx);
                 const footerNode = this.getFooterRowColumn(m.id);
                 this._emptyNode(footerNode);
