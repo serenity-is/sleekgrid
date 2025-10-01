@@ -1160,6 +1160,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private scrollTo;
 	getFormatter(row: number, column: Column<TItem>): ColumnFormat<TItem>;
 	getFormatterContext(row: number, cell: number): FormatterContext;
+	getTotalsFormatter(column: Column<TItem>): ColumnFormat<TItem>;
 	private getEditor;
 	getDataItemValueForColumn(item: TItem, columnDef: Column<TItem>): any;
 	private appendRowHtml;
@@ -1200,9 +1201,6 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private invalidatePostProcessingResults;
 	private updateRowPositions;
 	private updateGrandTotals;
-	groupTotalsFormat(ctx: FormatterContext<IGroupTotals<TItem>>): FormatterResult;
-	/** @deprecated, use @see groupTotalsFormat instead  */
-	groupTotalsFormatter(totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: any): string;
 	render: () => void;
 	private handleHeaderRowScroll;
 	private handleFooterRowScroll;
@@ -1479,6 +1477,7 @@ export interface GroupItemMetadataProviderOptions {
 	groupIndentation?: number;
 	groupFocusable?: boolean;
 	groupFormat?: ColumnFormat<Group>;
+	/** @deprecated see @use groupFormat */
 	groupFormatter?: CompatFormatter<Group>;
 	groupLevelPrefix?: string;
 	groupRowTotals?: boolean;
@@ -1490,6 +1489,7 @@ export interface GroupItemMetadataProviderOptions {
 	totalsCssClass?: string;
 	totalsFocusable?: boolean;
 	totalsFormat?: ColumnFormat<IGroupTotals>;
+	/** @deprecated see @use totalsFormat */
 	totalsFormatter?: CompatFormatter<IGroupTotals>;
 }
 export declare class GroupItemMetadataProvider implements IPlugin {

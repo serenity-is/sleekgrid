@@ -8,6 +8,7 @@ export interface GroupItemMetadataProviderOptions {
     groupIndentation?: number;
     groupFocusable?: boolean;
     groupFormat?: ColumnFormat<Group>;
+    /** @deprecated see @use groupFormat */
     groupFormatter?: CompatFormatter<Group>;
     groupLevelPrefix?: string;
     groupRowTotals?: boolean;
@@ -19,6 +20,7 @@ export interface GroupItemMetadataProviderOptions {
     totalsCssClass?: string;
     totalsFocusable?: boolean;
     totalsFormat?: ColumnFormat<IGroupTotals>;
+    /** @deprecated see @use totalsFormat */
     totalsFormatter?: CompatFormatter<IGroupTotals>;
 }
 
@@ -28,9 +30,9 @@ export class GroupItemMetadataProvider implements IPlugin {
 
     constructor(opt?: GroupItemMetadataProviderOptions) {
         this.options = Object.assign({}, GroupItemMetadataProvider.defaults, opt);
-        this.options.groupFormat ??= opt?.groupFormatter ? convertCompatFormatter(opt.groupFormatter) :
+        this.options.groupFormat ??= (opt as any)?.groupFormatter ? convertCompatFormatter((opt as any).groupFormatter) :
             ctx => GroupItemMetadataProvider.defaultGroupFormat(ctx, this.options);
-        this.options.totalsFormat ??= opt?.totalsFormatter ? convertCompatFormatter(opt.totalsFormatter) :
+        this.options.totalsFormat ??= (opt as any)?.totalsFormatter ? convertCompatFormatter((opt as any).totalsFormatter) :
             ctx => GroupItemMetadataProvider.defaultTotalsFormat(ctx, this.grid);
     }
 
@@ -65,16 +67,15 @@ export class GroupItemMetadataProvider implements IPlugin {
         if (!item.__groupTotals && (item as any).totals)
             ctx.item = item = (item as any).totals;
 
-        if (ctx.column.groupTotalsFormat) {
-            return ctx.column.groupTotalsFormat(ctx);
-        }
+        grid = ctx.grid ?? grid;
+        const formatter = grid ? grid.getTotalsFormatter(ctx.column) :
+            (ctx.column as any)?.groupTotalsFormatter ? convertCompatFormatter((ctx.column as any)?.groupTotalsFormatter) :
+            ctx.column.groupTotalsFormat;
 
-        if ((ctx.column as any)?.groupTotalsFormatter) {
-            return (ctx.column as any)?.groupTotalsFormatter?.(item as IGroupTotals, ctx.column) ?? "";
-        }
+        if (formatter)
+            return formatter(ctx);
 
-        grid ??= ctx.grid;
-        return grid.groupTotalsFormat?.(ctx) ?? "";
+        return "";
     }
 
     init(grid: Grid) {

@@ -192,11 +192,6 @@ export class Grid<TItem = any> implements EditorHost {
         if (this._options.useLegacyUI)
             this._container.classList.add("ui-widget");
 
-        if ((this._options as any).groupTotalsFormatter &&
-            !this._options.groupTotalsFormat) {
-            this._options.groupTotalsFormat = convertCompatFormatter((this._options as any).groupTotalsFormatter);
-        }
-
         // set up a positioning container if needed
         if (!/relative|absolute|fixed/.test(getComputedStyle(this._container).position)) {
             this._container.style.position = "relative";
@@ -1828,6 +1823,23 @@ export class Grid<TItem = any> implements EditorHost {
         });
     }
 
+    getTotalsFormatter(column: Column<TItem>): ColumnFormat<TItem> {
+        if (column.groupTotalsFormat)
+            return column.groupTotalsFormat;
+
+        if ((column as any).groupTotalsFormatter)
+            return convertCompatFormatter((column as any).groupTotalsFormatter);
+
+        const opt = this._options;
+        if (opt.groupTotalsFormat)
+            return opt.groupTotalsFormat;
+
+        if ((opt as any).groupTotalsFormatter)
+            return convertCompatFormatter((opt as any).groupTotalsFormatter);
+
+        return null;
+    }
+
     private getEditor(row: number, cell: number): EditorClass {
         var column = this._cols[cell];
         var itemMetadata = (this._data as IDataView).getItemMetadata?.(row) as ItemMetadata;
@@ -2662,9 +2674,7 @@ export class Grid<TItem = any> implements EditorHost {
         var cols = this._cols;
         for (var m of cols) {
             if (m.id != void 0) {
-                const formatter = m.groupTotalsFormat ??
-                    (m as any).groupTotalsFormatter ? convertCompatFormatter((m as any).groupTotalsFormatter) :
-                    (this._options as any).groupTotalsFormat;
+                const formatter = this.getTotalsFormatter(m);
                 if (!formatter)
                     continue;
                 const ctx = this.getFormatterContext(-1, -1);
@@ -2679,16 +2689,6 @@ export class Grid<TItem = any> implements EditorHost {
                 }), fmtResult, footerNode);
             }
         }
-    }
-
-    // for usage as fallback by the groupmetadataitemprovider
-    groupTotalsFormat(ctx: FormatterContext<IGroupTotals<TItem>>): FormatterResult {
-        return this._options.groupTotalsFormat ? this._options.groupTotalsFormat(ctx) : "";
-    }
-
-    /** @deprecated, use @see groupTotalsFormat instead  */
-    groupTotalsFormatter(totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: any): string {
-        return (this._options as any).groupTotalsFormatter ? (this._options as any).groupTotalsFormatter(totals, column, grid ?? this) : "";
     }
 
     public render = (): void => {
