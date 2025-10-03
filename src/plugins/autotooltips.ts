@@ -68,7 +68,7 @@ export class AutoTooltips implements IPlugin {
         var column = args.column;
         if (column && !column.toolTip) {
             var node = (e.target as HTMLElement).closest(".slick-header-column") as HTMLElement;
-            node && (node.title = (node.clientWidth < node.scrollWidth ? column.name : ""));
+            node && (node.title = (node.clientWidth < node.scrollWidth ? (typeof column.name === "string" ? column.name : "") : ""));
         }
     }
 

@@ -542,7 +542,7 @@ export class Grid<TItem = any> implements EditorHost {
         this._boundAncestorScroll = [];
     }
 
-    updateColumnHeader(columnId: string, title?: string, toolTip?: string): void {
+    updateColumnHeader(columnId: string, title?: string | ColumnFormat<any>, toolTip?: string): void {
         if (!this._initialized) {
             return;
         }
@@ -558,7 +558,10 @@ export class Grid<TItem = any> implements EditorHost {
             return;
 
         if (title !== undefined) {
-            columnDef.name = title;
+            if (typeof title === "function")
+                columnDef.nameFormat = title;
+            else
+                columnDef.name = title;
         }
         if (toolTip !== undefined) {
             columnDef.toolTip = toolTip;
@@ -572,12 +575,18 @@ export class Grid<TItem = any> implements EditorHost {
         if (toolTip !== undefined)
             header.title = toolTip || "";
 
-        if (title !== undefined) {
-            var child = header.firstElementChild;
-            if (columnDef.nameIsHtml)
-                child && (child.innerHTML = title ?? '');
+        const nameSpan = (header.querySelector("> .slick-column-name") ?? header.firstElementChild) as HTMLElement;
+        if (nameSpan) {
+            this._emptyNode(nameSpan);
+            if (typeof columnDef.nameFormat === "function") {
+                const ctx = this.getFormatterContext(-1, idx);
+                (ctx as any).enableHtmlRendering = false;
+                ctx.value = columnDef.name;
+                const fmtResult = columnDef.nameFormat(ctx);
+                applyFormatterResultToCellNode(ctx, fmtResult, nameSpan, contentOnly);
+            }
             else
-                child && (child.textContent = title ?? '')
+                nameSpan.textContent = columnDef.name ?? '';
         }
 
         this.trigger(this.onHeaderCellRendered, {
@@ -713,18 +722,23 @@ export class Grid<TItem = any> implements EditorHost {
         });
 
         var cols = this._cols, frozenCols = this._layout.getFrozenCols();
-        const sanitizer = this.getOptions().sanitizer ?? formatterContext().sanitizer;
         for (var i = 0; i < cols.length; i++) {
             var m = cols[i];
 
             var headerTarget = this._layout.getHeaderColsFor(i);
 
-            var name = document.createElement("span");
-            name.className = "slick-column-name";
-            if (m.nameIsHtml)
-                name.innerHTML = sanitizer(m.name ?? '');
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "slick-column-name";
+
+            if (typeof m.nameFormat === "function") {
+                const ctx = this.getFormatterContext(-1, i);
+                (ctx as any).enableHtmlRendering = false;
+                ctx.value = m.name;
+                const fmtResult = m.nameFormat(ctx);
+                applyFormatterResultToCellNode(ctx, fmtResult, nameSpan, contentOnly);
+            }
             else
-                name.textContent = (m.name ?? '');
+                nameSpan.textContent = m.name ?? '';
 
             var header = H("div", {
                 class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default " : ""),
@@ -732,7 +746,7 @@ export class Grid<TItem = any> implements EditorHost {
                 id: "" + this._uid + m.id,
                 title: m.toolTip || "",
                 style: "width: " + (m.width - this._headerColumnWidthDiff) + "px"
-            }, name);
+            }, nameSpan);
 
             header.dataset.c = i.toString();
             this._jQuery && this._jQuery(header).data("column", m);

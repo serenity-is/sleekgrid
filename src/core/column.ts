@@ -26,7 +26,7 @@ export interface Column<TItem = any> {
     maxWidth?: any;
     minWidth?: number;
     name?: string;
-    nameIsHtml?: boolean;
+    nameFormat?: (ctx: FormatterContext<TItem>) => FormatterResult;
     previousWidth?: number;
     referencedFields?: string[];
     rerenderOnResize?: boolean;
@@ -41,7 +41,6 @@ export interface Column<TItem = any> {
 }
 
 export const columnDefaults: Partial<Column> = {
-    nameIsHtml: false,
     resizable: true,
     sortable: false,
     minWidth: 30,
@@ -108,7 +107,6 @@ export function initializeColumns(columns: Column[], defaults: Partial<Column<an
 
         if (m.name === void 0) {
             m.name = titleize(m.field ?? m.id);
-            delete m.nameIsHtml;
         }
     }
 }

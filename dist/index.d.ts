@@ -450,7 +450,7 @@ export interface Column<TItem = any> {
 	maxWidth?: any;
 	minWidth?: number;
 	name?: string;
-	nameIsHtml?: boolean;
+	nameFormat?: (ctx: FormatterContext<TItem>) => FormatterResult;
 	previousWidth?: number;
 	referencedFields?: string[];
 	rerenderOnResize?: boolean;
@@ -1101,7 +1101,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private getAvailableWidth;
 	private updateCanvasWidth;
 	private unbindAncestorScrollEvents;
-	updateColumnHeader(columnId: string, title?: string, toolTip?: string): void;
+	updateColumnHeader(columnId: string, title?: string | ColumnFormat<any>, toolTip?: string): void;
 	getHeader(): HTMLElement;
 	getHeaderColumn(columnIdOrIdx: string | number): HTMLElement;
 	getGroupingPanel(): HTMLElement;
