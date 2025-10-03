@@ -13,22 +13,6 @@ describe("initializeColumns", () => {
         expect(column.cssClass).toBe('test');
     });
 
-    it('should delete nameIsHtml if name is undefined', () => {
-        const columns: Column[] = [
-            { name: 'test', nameIsHtml: true },
-            { name: null, nameIsHtml: true },
-            { name: undefined, nameIsHtml: true },
-        ];
-
-        initializeColumns(columns, {
-            nameIsHtml: true
-        });
-
-        expect(columns[0].nameIsHtml).toBe(true);
-        expect(columns[1].nameIsHtml).toBe(true);
-        expect(columns[2].nameIsHtml).toBe(undefined);
-    });
-
     it('should create new id if column id is used', () => {
         const columns: Column[] = [
             { id: 'test', name: 'test' },

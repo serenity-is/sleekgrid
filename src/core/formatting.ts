@@ -152,7 +152,7 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult:
     else
         node.textContent = "" + fmtResult;
 
-    if (opt?.contentOnly) {
+    if (!opt?.contentOnly) {
         if (ctx.addAttrs != null) {
             var keys = Object.keys(ctx.addAttrs);
             if (keys.length) {

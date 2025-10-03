@@ -63,24 +63,30 @@ describe('updateColumnHeader', () => {
         expect(onHeaderCellRenderedCalled).toBe(true);
     });
 
-    it('should update innerHTML when column.nameIsHtml is truthy', () => {
+    it('should update innerHTML when passed a function', () => {
         const columns = getTestColumns();
-        columns[0].nameIsHtml = true;
         const grid = new Grid(document.createElement('div'), [], columns, {});
 
-        grid.updateColumnHeader(columns[0].id, `<i><span id="test">abc</span></i>`, 'def');
+        grid.updateColumnHeader(columns[0].id, () => {
+            const i = document.createElement('i');
+            const span = document.createElement('span');
+            span.id = 'test';
+            span.textContent = 'abc';
+            i.appendChild(span);
+            return i;
+        }, 'def');
 
         expect(grid.getHeaderColumn(columns[0].id).querySelector("#test").innerHTML).toBe('abc');
     });
 
-    it('should update textContent when column.nameIsHtml is falsy', () => {
+    it('should update textContent when passed a string', () => {
         const columns = getTestColumns();
-        columns[0].nameIsHtml = false;
         const grid = new Grid(document.createElement('div'), [], columns, {});
 
         grid.updateColumnHeader(columns[0].id, `<i><span id="test">abc</span></i>`, 'def');
 
         expect(grid.getHeaderColumn(columns[0].id).querySelector("#test")).toBeNull();
+        expect(grid.getHeaderColumn(columns[0].id).textContent).toBe(`<i><span id="test">abc</span></i>`);
     });
 
     it('should not update column header if grid is not initialized', () => {

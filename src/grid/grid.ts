@@ -575,7 +575,7 @@ export class Grid<TItem = any> implements EditorHost {
         if (toolTip !== undefined)
             header.title = toolTip || "";
 
-        const nameSpan = (header.querySelector("> .slick-column-name") ?? header.firstElementChild) as HTMLElement;
+        const nameSpan = (header.querySelector(":scope > .slick-column-name") ?? header.firstElementChild) as HTMLElement;
         if (nameSpan) {
             this._emptyNode(nameSpan);
             if (typeof columnDef.nameFormat === "function") {
