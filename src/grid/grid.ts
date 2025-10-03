@@ -2136,16 +2136,16 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private updateCellWithFormatter(cellNode: HTMLElement, row: number, cell: number): void {
-        var formatResult: string | Element | DocumentFragment;
+        let fmtResult: FormatterResult;
         const ctx = this.getFormatterContext(row, cell);
         if (ctx.item) {
-            formatResult = this.getFormatter(row, ctx.column)(ctx);
-            if (typeof formatResult === "string" && formatResult.length) {
-                formatResult = (ctx.sanitizer ?? escapeHtml)(formatResult);
+            fmtResult = this.getFormatter(row, ctx.column)(ctx);
+            if (typeof fmtResult === "string" && fmtResult.length) {
+                fmtResult = (ctx.sanitizer ?? escapeHtml)(fmtResult);
             }
         }
         this._emptyNode(cellNode);
-        applyFormatterResultToCellNode(ctx, formatResult, cellNode);
+        applyFormatterResultToCellNode(ctx, fmtResult, cellNode);
     }
 
     updateRow(row: number): void {
