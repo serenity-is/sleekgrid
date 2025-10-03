@@ -2684,7 +2684,7 @@ export class Grid<TItem = any> implements EditorHost {
                 const fmtResult = formatter(ctx);
                 const footerNode = this.getFooterRowColumn(m.id);
                 this._emptyNode(footerNode);
-                applyFormatterResultToCellNode(ctx, fmtResult, footerNode, { contentOnly: true });
+                applyFormatterResultToCellNode(ctx, fmtResult, footerNode, contentOnly);
             }
         }
     }
@@ -4100,4 +4100,8 @@ export class Grid<TItem = any> implements EditorHost {
 
 function isPollutingKey(key: string | null | undefined): boolean {
     return key === '__proto__' || key === 'constructor' || key === 'prototype';
+}
+
+const contentOnly = {
+    contentOnly: true
 }
