@@ -2707,6 +2707,9 @@ export class Grid<TItem = any> implements EditorHost {
 
     public render = (): void => {
         if (!this._initialized) { return; }
+        if (this._hRender) {
+            clearTimeout(this._hRender);
+        }
         var visible = this.getVisibleRange();
         var rendered = this.getRenderedRange();
 
@@ -2839,12 +2842,14 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         if (hScrollDist || vScrollDist) {
+            const wasScheduled = !!this._hRender;
             if (this._hRender) {
                 clearTimeout(this._hRender);
             }
 
             if (Math.abs(this._scrollTopRendered - this._scrollTop) > 20 ||
-                Math.abs(this._scrollLeftRendered - this._scrollLeft) > 20) {
+                Math.abs(this._scrollLeftRendered - this._scrollLeft) > 20 ||
+                wasScheduled) {
                 if (this._options.forceSyncScrolling ||
                     (this._options.forceSyncScrollInterval &&
                         (this._lastRenderTime < new Date().getTime() - this._options.forceSyncScrollInterval))) {
