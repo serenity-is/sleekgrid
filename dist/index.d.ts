@@ -297,7 +297,9 @@ export type CellStylesHash = {
 };
 export declare function defaultColumnFormat(ctx: FormatterContext): any;
 export declare function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat;
-export declare function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult: FormatterResult, node: HTMLElement): void;
+export declare function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult: FormatterResult, node: HTMLElement, opt?: {
+	contentOnly?: boolean;
+}): void;
 export declare function formatterContext<TItem = any>(opt?: Partial<Exclude<FormatterContext<TItem>, "addAttrs" | "addClass" | "tooltip">>): FormatterContext<TItem>;
 /***
  * Information about a group of rows.

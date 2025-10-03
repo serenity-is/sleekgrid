@@ -2684,9 +2684,7 @@ export class Grid<TItem = any> implements EditorHost {
                 const fmtResult = formatter(ctx);
                 const footerNode = this.getFooterRowColumn(m.id);
                 this._emptyNode(footerNode);
-                applyFormatterResultToCellNode(formatterContext({
-                    sanitizer: ctx.sanitizer
-                }), fmtResult, footerNode);
+                applyFormatterResultToCellNode(ctx, fmtResult, footerNode, { contentOnly: true });
             }
         }
     }

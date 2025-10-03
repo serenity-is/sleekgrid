@@ -109,27 +109,29 @@ export function convertCompatFormatter(compatFormatter: CompatFormatter): Column
     }
 }
 
-export function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult: FormatterResult, node: HTMLElement) {
-    var oldFmtAtt = node.dataset.fmtatt as string;
-    if (oldFmtAtt?.length > 0) {
-        for (var k of oldFmtAtt.split(','))
-            node.removeAttribute(k);
-        delete node.dataset.fmtatt;
+export function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult: FormatterResult, node: HTMLElement, opt?: { contentOnly?: boolean }) {
+    if (!opt?.contentOnly) {
+        var oldFmtAtt = node.dataset.fmtatt as string;
+        if (oldFmtAtt?.length > 0) {
+            for (var k of oldFmtAtt.split(','))
+                node.removeAttribute(k);
+            delete node.dataset.fmtatt;
+        }
+
+        var oldFmtCls = node.dataset.fmtcls;
+        if (oldFmtCls?.length && (ctx.addClass != oldFmtCls)) {
+            removeClass(node, oldFmtCls);
+            if (!ctx.addClass?.length)
+                delete node.dataset.fmtcls;
+        }
+
+        var oldTooltip = node.getAttribute('tooltip');
+        if (oldTooltip != null && ctx.tooltip != oldTooltip)
+            node.removeAttribute('tooltip');
+
+        if (ctx.tooltip !== undefined && oldTooltip != ctx.tooltip)
+            node.setAttribute('tooltip', ctx.tooltip);
     }
-
-    var oldFmtCls = node.dataset.fmtcls;
-    if (oldFmtCls?.length && (ctx.addClass != oldFmtCls)) {
-        removeClass(node, oldFmtCls);
-        if (!ctx.addClass?.length)
-            delete node.dataset.fmtcls;
-    }
-
-    var oldTooltip = node.getAttribute('tooltip');
-    if (oldTooltip != null && ctx.tooltip != oldTooltip)
-        node.removeAttribute('tooltip');
-
-    if (ctx.tooltip !== undefined && oldTooltip != ctx.tooltip)
-        node.setAttribute('tooltip', ctx.tooltip);
 
     if (fmtResult == void 0)
         node.innerHTML = "";
@@ -139,19 +141,21 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult:
     else
         node.innerHTML = (ctx.sanitizer ?? escapeHtml)(("" + fmtResult));
 
-    if (ctx.addAttrs != null) {
-        var keys = Object.keys(ctx.addAttrs);
-        if (keys.length) {
-            for (var k of keys) {
-                node.setAttribute(k, ctx.addAttrs[k]);
+    if (opt?.contentOnly) {
+        if (ctx.addAttrs != null) {
+            var keys = Object.keys(ctx.addAttrs);
+            if (keys.length) {
+                for (var k of keys) {
+                    node.setAttribute(k, ctx.addAttrs[k]);
+                }
+                node.dataset.fmtatt = keys.join(',');
             }
-            node.dataset.fmtatt = keys.join(',');
         }
-    }
 
-    if (ctx.addClass?.length) {
-        addClass(node, ctx.addClass);
-        node.dataset.fmtcls = ctx.addClass;
+        if (ctx.addClass?.length) {
+            addClass(node, ctx.addClass);
+            node.dataset.fmtcls = ctx.addClass;
+        }
     }
 }
 
