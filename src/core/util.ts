@@ -34,6 +34,9 @@ export function escapeHtml(s: any) {
     if (typeof s !== "string")
         s = "" + s;
 
+    if (this && this.enableHtmlRendering === false)
+        return s;
+
     return s.replace(/[<>"'&]/g, escFunc)
 }
 

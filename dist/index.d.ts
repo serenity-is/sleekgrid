@@ -237,8 +237,16 @@ export interface FormatterContext<TItem = any> {
 	 */
 	addClass?: string;
 	/**
-	 * Returns html escaped ctx.value if called without arguments.
-	 * prefer this over ctx.value to avoid html injection attacks!
+	 * True if the formatter is allowed to return raw HTML that will be set using innerHTML.
+	 * This is set from grid options and defaults to true for backward compatibility.
+	 * When set to false, the formatter should return plain text and the result will be set using textContent
+	 * and the escape() method is a noop in that case.
+	 */
+	readonly enableHtmlRendering: boolean;
+	/**
+	 * Returns html escaped ctx.value if called without arguments. Prefer this over
+	 * ctx.value when returning as HTML string to avoid html injection attacks!
+	 * Note that when enableHtmlRendering is false, this is simply a noop and returns the value as string.
 	 */
 	escape(value?: any): string;
 	/**
@@ -273,7 +281,7 @@ export interface FormatterContext<TItem = any> {
 	 * Tooltip text to be added to the cell node as title attribute.
 	 */
 	tooltip?: string;
-	/** when returning a formatter result, prefer ctx.escape() to avoid script injection attacks! */
+	/** when returning a formatter result as HTML string, prefer ctx.escape() to avoid script injection attacks! */
 	value?: any;
 }
 export type FormatterResult = (string | Element | DocumentFragment);
@@ -753,6 +761,11 @@ export interface GridOptions<TItem = any> {
 	 * Defaults to `true`. If `true`, enables column reordering.
 	 */
 	enableColumnReorder?: boolean;
+	/**
+	 * Allow returning raw HTML strings from formatters and use `innerHTML` to render them. Defaults to `true` for backward compatibility.
+	 * It is recommended to set this to `false` for better security and to avoid XSS vulnerabilities. In that case, formatters should return plain text or DOM elements.
+	 */
+	enableHtmlRendering?: boolean;
 	/**
 	 * Defaults to `false`. If `true`, enables row reordering.
 	 */

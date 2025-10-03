@@ -713,6 +713,7 @@ export class Grid<TItem = any> implements EditorHost {
         });
 
         var cols = this._cols, frozenCols = this._layout.getFrozenCols();
+        const sanitizer = this.getOptions().sanitizer ?? formatterContext().sanitizer;
         for (var i = 0; i < cols.length; i++) {
             var m = cols[i];
 
@@ -721,7 +722,7 @@ export class Grid<TItem = any> implements EditorHost {
             var name = document.createElement("span");
             name.className = "slick-column-name";
             if (m.nameIsHtml)
-                name.innerHTML = m.name ?? '';
+                name.innerHTML = sanitizer(m.name ?? '');
             else
                 name.textContent = (m.name ?? '');
 
@@ -1818,7 +1819,6 @@ export class Grid<TItem = any> implements EditorHost {
             grid: this,
             item,
             row,
-            sanitizer: this._options.sanitizer,
             value: item ? this.getDataItemValueForColumn(item, column) : void 0
         });
     }
@@ -1952,11 +1952,10 @@ export class Grid<TItem = any> implements EditorHost {
         }
 
         // if there is a corresponding row (if not, this is the Add New row or this data hasn't been loaded yet)
-        var formatResult: FormatterResult;
+        var fmtResult: FormatterResult;
         const ctx = formatterContext<TItem>({
             cell,
             column,
-            sanitizer: this._options.sanitizer,
             grid: this,
             item,
             row
@@ -1964,9 +1963,12 @@ export class Grid<TItem = any> implements EditorHost {
 
         if (item) {
             ctx.value = this.getDataItemValueForColumn(item, column);
-            formatResult = this.getFormatter(row, column)(ctx);
-            if (typeof formatResult === "string" && formatResult.length) {
-                formatResult = (ctx.sanitizer ?? escapeHtml)(formatResult);
+            fmtResult = this.getFormatter(row, column)(ctx);
+            if (typeof fmtResult === "string" && fmtResult.length) {
+                if (ctx.enableHtmlRendering)
+                    fmtResult = (ctx.sanitizer ?? escapeHtml)(fmtResult);
+                else
+                    fmtResult = escapeHtml(fmtResult);
             }
         }
 
@@ -1995,19 +1997,19 @@ export class Grid<TItem = any> implements EditorHost {
             if (toolTip != null && toolTip.length)
                 sb.push('tooltip="' + escapeHtml(toolTip) + '"');
 
-            if (formatResult != null && !(formatResult instanceof Node))
-                sb.push('>' + formatResult + '</div>');
+            if (fmtResult != null && !(fmtResult instanceof Node))
+                sb.push('>' + fmtResult + '</div>');
             else
                 sb.push('></div>');
         }
-        else if (formatResult != null && !(formatResult instanceof Node))
-            sb.push('<div class="' + klass + '">' + formatResult + '</div>');
+        else if (fmtResult != null && !(fmtResult instanceof Node))
+            sb.push('<div class="' + klass + '">' + fmtResult + '</div>');
         else
             sb.push('<div class="' + klass + '"></div>');
 
         var cache = this._rowsCache[row];
         cache.cellRenderQueue.push(cell);
-        cache.cellRenderContent.push(formatResult instanceof Node ? formatResult : void 0);
+        cache.cellRenderContent.push(fmtResult instanceof Node ? fmtResult : void 0);
         this._rowsCache[row].cellColSpans[cell] = colspan;
     }
 

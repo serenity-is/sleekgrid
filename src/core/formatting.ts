@@ -1,5 +1,5 @@
 import type { Column } from "./column";
-import { gridDefaults } from "./gridoptions";
+import { gridDefaults, GridOptions } from "./gridoptions";
 import { addClass, basicDOMSanitizer, escapeHtml, removeClass } from "./util";
 
 /**
@@ -20,9 +20,18 @@ export interface FormatterContext<TItem = any> {
     addClass?: string;
 
     /**
-     * Returns html escaped ctx.value if called without arguments.
-     * prefer this over ctx.value to avoid html injection attacks!
+     * True if the formatter is allowed to return raw HTML that will be set using innerHTML.
+     * This is set from grid options and defaults to true for backward compatibility.
+     * When set to false, the formatter should return plain text and the result will be set using textContent
+     * and the escape() method is a noop in that case.
      */
+    readonly enableHtmlRendering: boolean;
+
+	/**
+	 * Returns html escaped ctx.value if called without arguments. Prefer this over
+	 * ctx.value when returning as HTML string to avoid html injection attacks!
+     * Note that when enableHtmlRendering is false, this is simply a noop and returns the value as string.
+	 */
     escape(value?: any): string;
 
     /**
@@ -65,7 +74,7 @@ export interface FormatterContext<TItem = any> {
      */
     tooltip?: string;
 
-    /** when returning a formatter result, prefer ctx.escape() to avoid script injection attacks! */
+    /** when returning a formatter result as HTML string, prefer ctx.escape() to avoid script injection attacks! */
     value?: any;
 }
 
@@ -138,8 +147,10 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult:
     else if (fmtResult instanceof Node) {
         node.appendChild(fmtResult);
     }
-    else
+    else if (ctx.enableHtmlRendering ?? true)
         node.innerHTML = (ctx.sanitizer ?? escapeHtml)(("" + fmtResult));
+    else
+        node.textContent = "" + fmtResult;
 
     if (opt?.contentOnly) {
         if (ctx.addAttrs != null) {
@@ -160,10 +171,12 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult:
 }
 
 export function formatterContext<TItem = any>(opt?: Partial<Exclude<FormatterContext<TItem>, "addAttrs" | "addClass" | "tooltip">>): FormatterContext<TItem> {
+    const gridOptions: GridOptions = opt?.grid?.getOptions?.();
     return {
         ...opt,
+        enableHtmlRendering: opt?.enableHtmlRendering ?? gridOptions?.enableHtmlRendering ?? gridDefaults.enableHtmlRendering ?? true,
         escape: opt?.escape ?? escapeHtml,
-        sanitizer: opt?.sanitizer ?? gridDefaults.sanitizer ??
+        sanitizer: opt?.sanitizer ?? gridOptions?.sanitizer ?? gridDefaults.sanitizer ??
             // @ts-ignore
             ((typeof DOMPurify !== "undefined" && typeof DOMPurify.sanitize == "function") ? DOMPurify.sanitize
                 : basicDOMSanitizer),
