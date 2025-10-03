@@ -1,15 +1,19 @@
-import { FormatterContext } from "../core";
+import { FormatterContext, FormatterResult } from "../core";
 
 export function PercentCompleteFormatter(ctx: FormatterContext) {
     if (ctx.value == null || ctx.value === "")
         return "-";
+    const span = document.createElement('span');
+    span.textContent = ctx.value + "%";
+    span.style.fontWeight = 'bold';
     if (ctx.value < 50)
-        return "<span style='color:red; font-weight:bold;'>" + ctx.escape() + "%</span>";
-
-    return "<span style='color:green'>" + ctx.escape() + "%</span>";
+        span.style.color = 'red';
+    else
+        span.style.color = 'green';
+    return span;
 }
 
-export function PercentCompleteBarFormatter(ctx: FormatterContext) {
+export function PercentCompleteBarFormatter(ctx: FormatterContext): FormatterResult {
     if (ctx.value == null || ctx.value === "")
         return "";
 
@@ -21,19 +25,31 @@ export function PercentCompleteBarFormatter(ctx: FormatterContext) {
     else
         color = "green";
 
-    return "<span class='percent-complete-bar slick-percentcomplete-bar' style='background:" + color + ";width:" + ctx.escape() + "%' title='" + ctx.escape() + "%'></span>";
+    const span = document.createElement('span');
+    span.className = 'percent-complete-bar slick-percentcomplete-bar';
+    span.style.background = color;
+    span.style.width = ctx.value + '%';
+    span.title = ctx.value + '%';
+    return span;
 }
 
-export function YesNoFormatter(ctx: FormatterContext) {
+export function YesNoFormatter(ctx: FormatterContext): FormatterResult {
     return ctx.value ? 'Yes' : 'No';
 }
 
 
-export function CheckboxFormatter(ctx: FormatterContext) {
-    return `<i class="slick-checkbox slick-edit-preclick${ctx.value ? " checked" : ""}"></i>`;
+export function CheckboxFormatter(ctx: FormatterContext): FormatterResult {
+    const i = document.createElement('i');
+    i.className = 'slick-checkbox slick-edit-preclick' + (ctx.value ? ' checked' : '');
+    return i;
 }
 
-export function CheckmarkFormatter(ctx: FormatterContext) {
-    return ctx.value ? '<i class="slick-checkmark"></i>' : '';
+export function CheckmarkFormatter(ctx: FormatterContext): FormatterResult {
+    if (!ctx.value)
+        return '';
+
+    const i = document.createElement('i');
+    i.className = 'slick-checkmark';
+    return i;
 }
 

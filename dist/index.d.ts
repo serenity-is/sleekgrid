@@ -1381,17 +1381,17 @@ export declare const BasicLayout: {
 export declare const FrozenLayout: {
 	new (): LayoutEngine;
 };
-export declare function PercentCompleteFormatter(ctx: FormatterContext): string;
-export declare function PercentCompleteBarFormatter(ctx: FormatterContext): string;
-export declare function YesNoFormatter(ctx: FormatterContext): "Yes" | "No";
-export declare function CheckboxFormatter(ctx: FormatterContext): string;
-export declare function CheckmarkFormatter(ctx: FormatterContext): "" | "<i class=\"slick-checkmark\"></i>";
+export declare function PercentCompleteFormatter(ctx: FormatterContext): HTMLSpanElement | "-";
+export declare function PercentCompleteBarFormatter(ctx: FormatterContext): FormatterResult;
+export declare function YesNoFormatter(ctx: FormatterContext): FormatterResult;
+export declare function CheckboxFormatter(ctx: FormatterContext): FormatterResult;
+export declare function CheckmarkFormatter(ctx: FormatterContext): FormatterResult;
 export declare namespace Formatters {
-	function PercentComplete(_row: number, _cell: number, value: any): string;
-	function PercentCompleteBar(_row: number, _cell: number, value: any): string;
-	function YesNo(_row: number, _cell: number, value: any): "Yes" | "No";
-	function Checkbox(_row: number, _cell: number, value: any): string;
-	function Checkmark(_row: number, _cell: number, value: any): "" | "<i class=\"slick-checkmark\"></i>";
+	function PercentComplete(_row: number, _cell: number, value: any): HTMLSpanElement | "-";
+	function PercentCompleteBar(_row: number, _cell: number, value: any): FormatterResult;
+	function YesNo(_row: number, _cell: number, value: any): FormatterResult;
+	function Checkbox(_row: number, _cell: number, value: any): FormatterResult;
+	function Checkmark(_row: number, _cell: number, value: any): FormatterResult;
 }
 declare abstract class BaseCellEdit {
 	protected _input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
@@ -1512,7 +1512,7 @@ export declare class GroupItemMetadataProvider implements IPlugin {
 	private options;
 	constructor(opt?: GroupItemMetadataProviderOptions);
 	static readonly defaults: GroupItemMetadataProviderOptions;
-	static defaultGroupFormat(ctx: FormatterContext, opt?: GroupItemMetadataProviderOptions): string;
+	static defaultGroupFormat(ctx: FormatterContext, opt?: GroupItemMetadataProviderOptions): string | HTMLSpanElement;
 	static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): FormatterResult;
 	init(grid: Grid): void;
 	readonly pluginName = "GroupItemMetadataProvider";

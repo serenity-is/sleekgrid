@@ -58,8 +58,15 @@ export class GroupItemMetadataProvider implements IPlugin {
         if (!opt.enableExpandCollapse)
             return item?.title;
         let indentation = item.level * opt.groupIndentation;
-        return `<span class="${ctx.escape(opt.toggleCssClass + " " + (item.collapsed ? opt.toggleCollapsedCssClass : opt.toggleExpandedCssClass))}" style="margin-left: ${indentation}px">
-<span class="${ctx.escape(opt.groupTitleCssClass)}" level="${ctx.escape(item.level)}">${item.title}</span>`;
+        const span = document.createElement("span");
+        span.className = opt.toggleCssClass + " " + (item.collapsed ? opt.toggleCollapsedCssClass : opt.toggleExpandedCssClass);
+        span.style.marginLeft = indentation + "px";
+        const titleSpan = document.createElement("span");
+        titleSpan.className = opt.groupTitleCssClass;
+        titleSpan.setAttribute("level", item.level.toString());
+        titleSpan.textContent = item.title ?? "";
+        span.appendChild(titleSpan);
+        return span;
     }
 
     public static defaultTotalsFormat(ctx: FormatterContext, grid?: Grid): FormatterResult {
