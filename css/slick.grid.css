@@ -205,6 +205,15 @@ classes should alter those!
   outline: none;
 }
 
+.slick-focus-sink {
+  position: fixed;
+  width: 0 !important;
+  height: 0 !important;
+  top: 0;
+  left: 0;
+  outline: 0 !important;
+}
+
 .slick-reorder-proxy {
   display: inline-block;
   background: blue;

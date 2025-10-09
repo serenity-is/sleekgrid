@@ -200,7 +200,6 @@ export class Grid<TItem = any> implements EditorHost {
         this._container.appendChild(this._focusSink1 = H('div', {
             class: "slick-focus-sink",
             hideFocus: '',
-            style: 'position:fixed;width:0!important;height:0!important;top:0;left:0;outline:0!important;',
             tabIndex: '0'
         }));
 
