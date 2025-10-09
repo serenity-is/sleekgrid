@@ -507,45 +507,6 @@ export interface IDataView<TItem = any> {
 	/** Event fired when specific rows change */
 	readonly onRowsChanged?: EventEmitter<any, IEventData>;
 }
-export declare class CellRange {
-	fromRow: number;
-	fromCell: number;
-	toRow: number;
-	toCell: number;
-	constructor(fromRow: number, fromCell: number, toRow?: number, toCell?: number);
-	/***
-	 * Returns whether a range represents a single row.
-	 */
-	isSingleRow(): boolean;
-	/***
-	 * Returns whether a range represents a single cell.
-	 */
-	isSingleCell(): boolean;
-	/***
-	 * Returns whether a range contains a given cell.
-	 */
-	contains(row: number, cell: number): boolean;
-	/***
-	 * Returns a readable representation of a range.
-	 */
-	toString(): string;
-}
-export declare function addClass(el: Element, cls: string): void;
-export declare function escapeHtml(s: any): any;
-export declare function basicDOMSanitizer(dirtyHtml: string): string;
-export declare function disableSelection(target: HTMLElement): void;
-export declare function removeClass(el: Element, cls: string): void;
-export declare function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: {
-	ref?: (el?: HTMLElementTagNameMap[K]) => void;
-	[key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void) | null | undefined;
-}, ...children: (string | Node)[]): HTMLElementTagNameMap[K];
-export declare function spacerDiv(width: string): HTMLDivElement;
-export declare function parsePx(str: string): number;
-export interface IPlugin {
-	init(grid: Grid): void;
-	pluginName?: string;
-	destroy?: () => void;
-}
 export interface ViewportInfo {
 	height: number;
 	width: number;
@@ -559,11 +520,6 @@ export interface ViewportInfo {
 	headerRowHeight: number;
 	footerRowHeight: number;
 	numVisibleRows: number;
-}
-export interface SelectionModel extends IPlugin {
-	setSelectedRanges(ranges: CellRange[]): void;
-	onSelectedRangesChanged: EventEmitter<CellRange[]>;
-	refreshSelections?(): void;
 }
 export interface ViewRange {
 	top?: number;
@@ -958,6 +914,53 @@ export interface GridOptions<TItem = any> {
 	viewportClass?: string;
 }
 export declare const gridDefaults: GridOptions;
+export declare class CellRange {
+	fromRow: number;
+	fromCell: number;
+	toRow: number;
+	toCell: number;
+	constructor(fromRow: number, fromCell: number, toRow?: number, toCell?: number);
+	/***
+	 * Returns whether a range represents a single row.
+	 */
+	isSingleRow(): boolean;
+	/***
+	 * Returns whether a range represents a single cell.
+	 */
+	isSingleCell(): boolean;
+	/***
+	 * Returns whether a range contains a given cell.
+	 */
+	contains(row: number, cell: number): boolean;
+	/***
+	 * Returns a readable representation of a range.
+	 */
+	toString(): string;
+}
+export declare function addClass(el: Element, cls: string): void;
+export declare function escapeHtml(s: any): any;
+export declare function basicDOMSanitizer(dirtyHtml: string): string;
+export declare function disableSelection(target: HTMLElement): void;
+export declare function removeClass(el: Element, cls: string): void;
+export declare function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: {
+	ref?: (el?: HTMLElementTagNameMap[K]) => void;
+	[key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void) | null | undefined;
+}, ...children: (string | Node)[]): HTMLElementTagNameMap[K];
+export declare function spacerDiv(width: string): HTMLDivElement;
+export declare function parsePx(str: string): number;
+export declare const BasicLayout: {
+	new (): LayoutEngine;
+};
+export interface IPlugin {
+	init(grid: Grid): void;
+	pluginName?: string;
+	destroy?: () => void;
+}
+export interface SelectionModel extends IPlugin {
+	setSelectedRanges(ranges: CellRange[]): void;
+	onSelectedRangesChanged: EventEmitter<CellRange[]>;
+	refreshSelections?(): void;
+}
 export declare class Grid<TItem = any> implements EditorHost {
 	private _absoluteColMinWidth;
 	private _activeCanvasNode;
@@ -1375,9 +1378,6 @@ export interface ArgsValidationError extends ArgsCell {
 	cellNode: HTMLElement;
 	validationResults: ValidationResult;
 }
-export declare const BasicLayout: {
-	new (): LayoutEngine;
-};
 export declare const FrozenLayout: {
 	new (): LayoutEngine;
 };

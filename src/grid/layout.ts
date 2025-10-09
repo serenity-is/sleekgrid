@@ -1,7 +1,8 @@
 import { RowCell } from "../core";
 import { Column } from "../core/column";
 import { GridOptions } from "../core/gridoptions";
-import { ViewportInfo, ViewRange } from "./types";
+import { ViewportInfo } from "../core/viewportinfo";
+import { ViewRange } from "../core/viewrange";
 
 export interface LayoutHost {
     bindAncestorScroll(el: HTMLElement): void;

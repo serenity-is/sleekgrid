@@ -8,4 +8,6 @@ export * from "./gridoptions";
 export * from "./group";
 export * from "./cellrange";
 export * from "./util";
+export * from "./viewrange";
+export * from "./viewportinfo";
 
