@@ -100,7 +100,18 @@ export type AsyncPostCleanup<TItem = any> = (cellNode: HTMLElement, row?: number
 export type CellStylesHash = { [row: number]: { [columnId: string]: string } }
 
 export function defaultColumnFormat(ctx: FormatterContext) {
-    return (ctx.escape ?? escapeHtml)(ctx.value);
+    if (ctx?.escape)
+        return ctx.escape();
+
+    if (ctx?.enableHtmlRendering === false) {
+        if (ctx.value == null)
+            return "";
+        if (typeof ctx.value !== "string")
+            return "" + ctx.value;
+        return ctx.value;
+    }
+
+    return escapeHtml(ctx?.value);
 }
 
 export function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat {

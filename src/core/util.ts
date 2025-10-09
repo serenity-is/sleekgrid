@@ -24,7 +24,7 @@ function escFunc(a: string) {
 }
 
 export function escapeHtml(s: any) {
-    if (!arguments.length && this) {
+    if (!arguments.length && this && this !== globalThis) {
         s = this.value;
     }
 
@@ -34,7 +34,7 @@ export function escapeHtml(s: any) {
     if (typeof s !== "string")
         s = "" + s;
 
-    if (this && this.enableHtmlRendering === false)
+    if (this && this !== globalThis && this.enableHtmlRendering === false)
         return s;
 
     return s.replace(/[<>"'&]/g, escFunc)
