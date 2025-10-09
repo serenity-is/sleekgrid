@@ -151,8 +151,8 @@ export interface GridOptions<TItem = any> {
     enableColumnReorder?: boolean;
 
     /**
-     * Allow returning raw HTML strings from formatters and use `innerHTML` to render them. Defaults to `true` for backward compatibility.
-     * It is recommended to set this to `false` for better security and to avoid XSS vulnerabilities. In that case, formatters should return plain text or DOM elements.
+     * Allow returning raw HTML strings from formatters and use `innerHTML` to render them. Defaults to `false` for tighter security.
+     * It is recommended to leave this as `false` for better security and to avoid XSS vulnerabilities. In that case, formatters should return plain text or DOM elements.
      */
     enableHtmlRendering?: boolean;
 
@@ -412,7 +412,7 @@ export const gridDefaults: GridOptions = {
     enableAsyncPostRenderCleanup: false,
     enableCellNavigation: true,
     enableColumnReorder: true,
-    enableHtmlRendering: true,
+    enableHtmlRendering: false,
     enableTabKeyNavigation: true,
     enableTextSelectionOnCells: false,
     explicitInitialization: false,
