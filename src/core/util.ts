@@ -40,6 +40,8 @@ export function escapeHtml(s: any) {
     return s.replace(/[<>"'&]/g, escFunc)
 }
 
+const maybeHtmlRegex = /<|>|&|"|'/;
+
 export function basicDOMSanitizer(dirtyHtml: string): string {
     if (!dirtyHtml) {
         return "";
@@ -47,7 +49,7 @@ export function basicDOMSanitizer(dirtyHtml: string): string {
 
     // Fast path: if the input contains no HTML tags or entities, it's safe to return as-is
     // This avoids the expensive DOMParser overhead for simple text content
-    if (!/<|>|&|"|'/.test(dirtyHtml)) {
+    if (!maybeHtmlRegex.test(dirtyHtml)) {
         return dirtyHtml;
     }
 
