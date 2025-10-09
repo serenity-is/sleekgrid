@@ -42,7 +42,7 @@ export function escapeHtml(s: any) {
 
 export function basicDOMSanitizer(dirtyHtml: string): string {
     if (!dirtyHtml) {
-        return dirtyHtml ?? '';
+        return "";
     }
 
     // Fast path: if the input contains no HTML tags or entities, it's safe to return as-is
