@@ -1,5 +1,4 @@
 export * from "./eventargs";
-export * from "../core/gridoptions";
 export * from "./grid";
 export { BasicLayout } from "./basiclayout"
 export type { LayoutEngine, LayoutHost } from "./layout";

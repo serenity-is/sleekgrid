@@ -1,5 +1,6 @@
 ﻿import { Column, columnDefaults } from "../../src/core/column";
-import { BasicLayout, gridDefaults, GridOptions, LayoutHost } from "../../src/grid/";
+import { gridDefaults, GridOptions } from "../../src/core/gridoptions";
+import { BasicLayout, LayoutHost } from "../../src/grid/";
 import { Grid } from "../../src/grid/grid";
 
 function threeCols(): Column[] {

@@ -6,46 +6,84 @@ import {
     formatterContext as ctx,
     FormatterContext
 } from "../../src/core/formatting";
+import { gridDefaults } from "../../src/core/gridoptions";
 
-describe('defaultFormatter', () => {
-    it('should encode & as &amp;', () => {
-        expect(defaultColumnFormat(ctx({ value: '&' }))).toBe('&amp;');
+describe('defaultFormatter with enableHtmlRendering: true', () => {
+    let previousHtmlRenderingSetting: boolean;
+    beforeEach(() => {
+        previousHtmlRenderingSetting = gridDefaults.enableHtmlRendering;
+        gridDefaults.enableHtmlRendering = true;
     });
+    afterEach(() => gridDefaults.enableHtmlRendering = previousHtmlRenderingSetting);
+    try {
+        it('should encode & as &amp;', () => {
+            expect(defaultColumnFormat(ctx({ value: '&' }))).toBe('&amp;');
+        });
 
-    it('should encode < as &lt;', () => {
-        expect(defaultColumnFormat(ctx({ value: '<' }))).toBe('&lt;');
-    });
+        it('should encode < as &lt;', () => {
+            expect(defaultColumnFormat(ctx({ value: '<' }))).toBe('&lt;');
+        });
 
-    it('should encode > as &gt;', () => {
-        expect(defaultColumnFormat(ctx({ value: '>' }))).toBe('&gt;');
-    });
+        it('should encode > as &gt;', () => {
+            expect(defaultColumnFormat(ctx({ value: '>' }))).toBe('&gt;');
+        });
 
-    it('should encode multiple & as &amp;', () => {
-        expect(defaultColumnFormat(ctx({ value: '&&' }))).toBe('&amp;&amp;');
-    });
+        it('should encode multiple & as &amp;', () => {
+            expect(defaultColumnFormat(ctx({ value: '&&' }))).toBe('&amp;&amp;');
+        });
 
-    it('should encode multiple < as &lt;', () => {
-        expect(defaultColumnFormat(ctx({ value: '<<' }))).toBe('&lt;&lt;');
-    });
+        it('should encode multiple < as &lt;', () => {
+            expect(defaultColumnFormat(ctx({ value: '<<' }))).toBe('&lt;&lt;');
+        });
 
-    it('should encode multiple > as &gt;', () => {
-        expect(defaultColumnFormat(ctx({ value: '>>' }))).toBe('&gt;&gt;');
-    });
+        it('should encode multiple > as &gt;', () => {
+            expect(defaultColumnFormat(ctx({ value: '>>' }))).toBe('&gt;&gt;');
+        });
 
-    it('should encode all characters', () => {
-        expect(defaultColumnFormat(ctx({ value: '&<>' }))).toBe('&amp;&lt;&gt;');
-    });
+        it('should encode all characters', () => {
+            expect(defaultColumnFormat(ctx({ value: '&<>' }))).toBe('&amp;&lt;&gt;');
+        });
 
-    it('should return empty string if parameter is null or undefined', () => {
-        expect(defaultColumnFormat(ctx({ value: null }))).toBe('');
-        expect(defaultColumnFormat(ctx({ value: undefined }))).toBe('');
-    });
+        it('should return empty string if parameter is null or undefined', () => {
+            expect(defaultColumnFormat(ctx({ value: null }))).toBe('');
+            expect(defaultColumnFormat(ctx({ value: undefined }))).toBe('');
+        });
 
-    it('should convert any type to a string', () => {
-        expect(defaultColumnFormat(ctx({ value: 1 }))).toBe('1');
-        expect(defaultColumnFormat(ctx({ value: true }))).toBe('true');
-        expect(defaultColumnFormat(ctx({ value: {} }))).toBe('[object Object]');
+        it('should convert any type to a string', () => {
+            expect(defaultColumnFormat(ctx({ value: 1 }))).toBe('1');
+            expect(defaultColumnFormat(ctx({ value: true }))).toBe('true');
+            expect(defaultColumnFormat(ctx({ value: {} }))).toBe('[object Object]');
+        });
+    } finally {
+        gridDefaults.enableHtmlRendering = previousHtmlRenderingSetting;
+    }
+});
+
+describe('defaultFormatter with enableHtmlRendering: false', () => {
+    let previousHtmlRenderingSetting: boolean;
+    beforeEach(() => {
+        previousHtmlRenderingSetting = gridDefaults.enableHtmlRendering;
+        gridDefaults.enableHtmlRendering = false;
     });
+    afterEach(() => gridDefaults.enableHtmlRendering = previousHtmlRenderingSetting);
+    try {
+        it('should not encode html characters', () => {
+            expect(defaultColumnFormat(ctx({ value: '&<>!"\'' }))).toBe('&<>!"\'');
+        });
+
+        it('should return empty string if parameter is null or undefined', () => {
+            expect(defaultColumnFormat(ctx({ value: null }))).toBe('');
+            expect(defaultColumnFormat(ctx({ value: undefined }))).toBe('');
+        });
+
+        it('should convert any type to a string', () => {
+            expect(defaultColumnFormat(ctx({ value: 1 }))).toBe('1');
+            expect(defaultColumnFormat(ctx({ value: true }))).toBe('true');
+            expect(defaultColumnFormat(ctx({ value: {} }))).toBe('[object Object]');
+        });
+    } finally {
+        gridDefaults.enableHtmlRendering = previousHtmlRenderingSetting;
+    }
 });
 
 describe('applyFormatterResultToCellNode', () => {

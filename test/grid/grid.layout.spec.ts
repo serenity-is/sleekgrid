@@ -1,4 +1,5 @@
-import { BasicLayout, GridOptions, ViewportInfo } from "../../src/grid/";
+import { GridOptions } from "../../src/core/gridoptions";
+import { BasicLayout, ViewportInfo } from "../../src/grid/";
 import { Grid } from "../../src/grid/grid";
 
 describe('canvas', () => {

@@ -103,7 +103,7 @@ export function defaultColumnFormat(ctx: FormatterContext) {
     if (ctx?.escape)
         return ctx.escape();
 
-    if (ctx?.enableHtmlRendering === false) {
+    if (!ctx?.enableHtmlRendering) {
         if (ctx.value == null)
             return "";
         if (typeof ctx.value !== "string")
@@ -158,7 +158,7 @@ export function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult:
     else if (fmtResult instanceof Node) {
         node.appendChild(fmtResult);
     }
-    else if (ctx.enableHtmlRendering ?? true)
+    else if (!ctx.enableHtmlRendering)
         node.innerHTML = (ctx.sanitizer ?? escapeHtml)(("" + fmtResult));
     else
         node.textContent = "" + fmtResult;
@@ -185,7 +185,7 @@ export function formatterContext<TItem = any>(opt?: Partial<Exclude<FormatterCon
     const gridOptions: GridOptions = opt?.grid?.getOptions?.();
     return {
         ...opt,
-        enableHtmlRendering: opt?.enableHtmlRendering ?? gridOptions?.enableHtmlRendering ?? gridDefaults.enableHtmlRendering ?? true,
+        enableHtmlRendering: opt?.enableHtmlRendering ?? gridOptions?.enableHtmlRendering ?? gridDefaults.enableHtmlRendering ?? false,
         escape: opt?.escape ?? escapeHtml,
         sanitizer: opt?.sanitizer ?? gridOptions?.sanitizer ?? gridDefaults.sanitizer ??
             // @ts-ignore
