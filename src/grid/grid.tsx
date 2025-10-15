@@ -1,4 +1,4 @@
-import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, H, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, ViewRange, ViewportInfo, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, formatterContext, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, ViewRange, ViewportInfo, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, formatterContext, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { GridOptions, gridDefaults } from "../core/gridoptions";
 import { IDataView } from "../core/idataview";
 import { BasicLayout } from "./basiclayout";
@@ -189,19 +189,12 @@ export class Grid<TItem = any> implements EditorHost {
         this._container.style.outline = "0";
         this._container.classList.add(this._uid);
 
-        if (this._options.useLegacyUI)
-            this._container.classList.add("ui-widget");
-
         // set up a positioning container if needed
         if (!/relative|absolute|fixed/.test(getComputedStyle(this._container).position)) {
             this._container.style.position = "relative";
         }
 
-        this._container.appendChild(this._focusSink1 = H('div', {
-            class: "slick-focus-sink",
-            hideFocus: '',
-            tabIndex: '0'
-        }));
+        this._container.appendChild(<div class="slick-focus-sink" tabindex={0} ref={el => this._focusSink1 = el} />);
 
         this._layout = options.layoutEngine ?? new BasicLayout();
         this.setInitialCols(columns);
@@ -243,17 +236,14 @@ export class Grid<TItem = any> implements EditorHost {
     }
 
     private createGroupingPanel() {
-        if (this._groupingPanel || !this._focusSink1)
+        if (this._groupingPanel)
             return;
 
-        this._focusSink1.insertAdjacentElement("afterend", this._groupingPanel = H('div', {
-            class: "slick-grouping-panel",
-            style: (!this._options.showGroupingPanel ? "display: none" : null)
-        }));
+        this._groupingPanel = <div class={["slick-grouping-panel", !this._options.showGroupingPanel && "slick-hidden"]}>
+            {this._options.createPreHeaderPanel && <div class="slick-preheader-panel" />}
+        </div> as HTMLElement;
 
-        if (this._options.createPreHeaderPanel) {
-            this._groupingPanel.appendChild(H('div', { class: 'slick-preheader-panel' }));
-        }
+        this._focusSink1?.insertAdjacentElement("afterend", this._groupingPanel);
     }
 
     private bindAncestorScroll(elem: HTMLElement) {
@@ -663,7 +653,7 @@ export class Grid<TItem = any> implements EditorHost {
         for (var i = 0; i < cols.length; i++) {
             var m = cols[i];
 
-            var footerRowCell = H("div", { class: "slick-footerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? ' ui-state-default' : '') });
+            const footerRowCell = <div class={"slick-footerrow-column l" + i + " r" + i} /> as HTMLElement;
             footerRowCell.dataset.c = i.toString();
             this._jQuery && this._jQuery(footerRowCell).data("column", m);
 
@@ -720,14 +710,11 @@ export class Grid<TItem = any> implements EditorHost {
             }
         });
 
-        var cols = this._cols, frozenCols = this._layout.getFrozenCols();
-        for (var i = 0; i < cols.length; i++) {
-            var m = cols[i];
+        const cols = this._cols, frozenCols = this._layout.getFrozenCols();
+        for (let i = 0; i < cols.length; i++) {
+            const m = cols[i];
 
-            var headerTarget = this._layout.getHeaderColsFor(i);
-
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "slick-column-name";
+            const nameSpan = <span class="slick-column-name" /> as HTMLElement;
 
             if (typeof m.nameFormat === "function") {
                 const ctx = this.getFormatterContext(-1, i);
@@ -739,56 +726,22 @@ export class Grid<TItem = any> implements EditorHost {
             else
                 nameSpan.textContent = m.name ?? '';
 
-            var header = H("div", {
-                class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default " : ""),
-                ["data-id"]: m.id,
-                id: "" + this._uid + m.id,
-                title: m.toolTip || "",
-                style: "width: " + (m.width - this._headerColumnWidthDiff) + "px"
-            }, nameSpan);
+            const header = this._layout.getHeaderColsFor(i).appendChild(
+                <div class={["slick-header-column", m.headerCssClass, i < frozenCols && "frozen", m.sortable && "slick-header-sortable"]}
+                    data-id={m.id} data-c={i} id={`${this._uid}${m.id}`} title={m.toolTip || ""}
+                    style={{ width: `${m.width - this._headerColumnWidthDiff}px` }}>
+                    {nameSpan}
+                    {m.sortable && <span class="slick-sort-indicator" />}
+                </div> as HTMLElement);
 
-            header.dataset.c = i.toString();
-            this._jQuery && this._jQuery(header).data("column", m);
-
-            m.headerCssClass && addClass(header, m.headerCssClass);
-
-            (i < frozenCols) && header.classList.add("frozen");
-
-            headerTarget.appendChild(header);
-
-            if ((this._options.enableColumnReorder || m.sortable) && this._options.useLegacyUI) {
-                if (this._jQuery) {
-                    this._jQuery(header).on("mouseenter", addUiStateHover);
-                    this._jQuery(header).on("mouseleave", removeUiStateHover);
-                }
-                else {
-                    header.addEventListener('mouseenter', addUiStateHover);
-                    header.addEventListener('mouseleave', removeUiStateHover);
-                }
-            }
-
-            if (m.sortable) {
-                header.classList.add("slick-header-sortable");
-                header.appendChild(H("span", { class: "slick-sort-indicator" }));
-            }
-
-            this.trigger(this.onHeaderCellRendered, {
-                node: header,
-                column: m
-            });
+            this._jQuery?.(header).data("column", m);
+            this.trigger(this.onHeaderCellRendered, { node: header, column: m });
 
             if (this._options.showHeaderRow) {
-                var headerRowTarget = this._layout.getHeaderRowColsFor(i);
-
-                var headerRowCell = H("div", { class: "slick-headerrow-column l" + i + " r" + i + (this._options.useLegacyUI ? " ui-state-default" : "") });
-                headerRowCell.dataset.c = i.toString();
-                this._jQuery && this._jQuery(headerRowCell).data("column", m);
-                headerRowTarget.appendChild(headerRowCell);
-
-                this.trigger(this.onHeaderRowCellRendered, {
-                    node: headerRowCell,
-                    column: m
-                });
+                const headerRowCell = this._layout.getHeaderRowColsFor(i).appendChild(
+                    <div class={"slick-headerrow-column l" + i + " r" + i} data-c={i} /> as HTMLElement);
+                this._jQuery?.(headerRowCell).data("column", m);
+                this.trigger(this.onHeaderRowCellRendered, { node: headerRowCell, column: m });
             }
         }
 
@@ -1101,15 +1054,16 @@ export class Grid<TItem = any> implements EditorHost {
         const h = ["border-left-width", "border-right-width", "padding-left", "padding-right"];
         const v = ["border-top-width", "border-bottom-width", "padding-top", "padding-bottom"];
 
-        var el = this._layout.getHeaderColsFor(0).appendChild(H("div", { class: "slick-header-column" + (this._options.useLegacyUI ? " ui-state-default" : ""), style: "visibility:hidden" }));
+        let el = this._layout.getHeaderColsFor(0).appendChild(<div class="slick-header-column" style="visibility: hidden" /> as HTMLElement);
         this._headerColumnWidthDiff = 0;
-        var cs = getComputedStyle(el);
+        let cs = getComputedStyle(el);
         if (cs.boxSizing != "border-box")
             h.forEach(val => this._headerColumnWidthDiff += parsePx(cs.getPropertyValue(val)) || 0);
         el.remove();
 
-        var r = this._layout.getCanvasNodeFor(0, 0).appendChild(H("div", { class: "slick-row" },
-            el = H("div", { class: "slick-cell", id: "", style: "visibility: hidden" })));
+        const r = this._layout.getCanvasNodeFor(0, 0).appendChild(<div class="slick-row">
+            {el = <div class="slick-cell" id="" style="visibility: hidden" /> as HTMLElement};
+        </div>);
         el.innerHTML = "-";
         this._cellWidthDiff = this._cellHeightDiff = 0;
         cs = getComputedStyle(el);
@@ -1645,61 +1599,32 @@ export class Grid<TItem = any> implements EditorHost {
     setTopPanelVisibility(visible: boolean): void {
         if (this._options.showTopPanel != visible) {
             this._options.showTopPanel = !!visible;
-
-            this._layout.getTopPanelNodes().forEach(el => {
-                if (this._jQuery)
-                    this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
-                else {
-                    el.style.display = visible ? '' : 'none';
-                    this.resizeCanvas();
-                }
-            });
+            this._layout.getTopPanelNodes().forEach(el => el.classList.toggle("slick-hidden", !visible));
+            this.resizeCanvas();
         }
     }
 
-    setColumnHeaderVisibility(visible: boolean, animate?: boolean) {
+    setColumnHeaderVisibility(visible: boolean) {
         if (this._options.showColumnHeader != visible) {
             this._options.showColumnHeader = visible;
-            this._layout.getHeaderCols().forEach(n => {
-                const el = n.parentElement;
-                if (animate && this._jQuery)
-                    this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
-                else {
-                    el.style.display = visible ? '' : 'none';
-                    this.resizeCanvas();
-                }
-            });
+            this._layout.getHeaderCols().forEach(n => n.parentElement?.classList.toggle("slick-hidden", !visible));
+            this.resizeCanvas();
         }
     }
 
     setFooterRowVisibility(visible: boolean): void {
         if (this._options.showFooterRow != visible) {
             this._options.showFooterRow = !!visible;
-            this._layout.getFooterRowCols().forEach(n => {
-                const el = n.parentElement;
-                if (this._jQuery)
-                    this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
-                else {
-                    el.style.display = visible ? '' : 'none';
-                    this.resizeCanvas();
-                }
-            });
+            this._layout.getFooterRowCols().forEach(n => n.parentElement?.classList.toggle("slick-hidden", !visible));
+            this.resizeCanvas();
         }
     }
 
     setGroupingPanelVisibility(visible: boolean): void {
         if (this._options.showGroupingPanel != visible) {
             this._options.showGroupingPanel = visible;
-            if (!this._options.groupingPanel)
-                return;
-
-            const el = this._groupingPanel;
-            if (this._jQuery)
-                this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
-            else {
-                el.style.display = visible ? '' : 'none';
-                this.resizeCanvas();
-            }
+            this._groupingPanel?.classList.toggle("slick-hidden", !visible);
+            this.resizeCanvas();
         }
     }
 
@@ -1711,14 +1636,9 @@ export class Grid<TItem = any> implements EditorHost {
         if (this._options.showHeaderRow != visible) {
             this._options.showHeaderRow = visible;
             this._layout.getHeaderRowCols().forEach(n => {
-                const el = n.parentElement;
-                if (this._jQuery)
-                    this._jQuery(el)[visible ? "slideDown" : "slideUp"]("fast", this.resizeCanvas);
-                else {
-                    el.style.display = visible ? '' : 'none';
-                    this.resizeCanvas();
-                }
+                n.parentElement?.classList.toggle("slick-hidden", !visible);
             });
+            this.resizeCanvas();
         }
     }
 
@@ -1895,7 +1815,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         var rowOffset = this._layout.getFrozenRowOffset(row);
 
-        var rowHtml = "<div class='" + (this._options.useLegacyUI ? "ui-widget-content " : "") + rowCss + "' style='top:"
+        var rowHtml = "<div class='" + rowCss + "' style='top:"
             + (this.getRowTop(row) - rowOffset)
             + "px'>";
 

@@ -8,6 +8,8 @@
         "ES2015",
         "DOM"
       ],
+      "jsx": "react-jsx",
+      "jsxImportSource": "@serenity-is/sleekdom",
       "module": "ESNext",
       "moduleResolution": "Bundler",
       "newLine": "lf",

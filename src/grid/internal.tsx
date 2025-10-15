@@ -1,4 +1,4 @@
-import { Column, H, parsePx, Position } from "../core";
+import { Column, parsePx, Position } from "../core";
 
 // shared across all grids on the page
 let maxSupportedCssHeight: number;  // browser's breaking point
@@ -126,9 +126,7 @@ export function getMaxSupportedCssHeight(recalc?: boolean): number {
 
 export function getScrollBarDimensions(recalc?: boolean): { width: number; height: number; } {
     if (!scrollbarDimensions || recalc) {
-        var c = document.body.appendChild(H('div', {
-            style: 'position:absolute;top:-10000px;left:-10000px;width:100px;height:100px;overflow: scroll;border:0'
-        }));
+        const c = document.body.appendChild(<div style="position:absolute;top:-10000px;left:-10000px;width:100px;height:100px;overflow: scroll;border:0" /> as HTMLElement);
         scrollbarDimensions = {
             width: Math.round(c.offsetWidth - c.clientWidth),
             height: Math.round(c.offsetWidth - c.clientHeight)

@@ -1,4 +1,4 @@
-import { Editor, EditorOptions, H, parsePx, Position } from "../core";
+import { Editor, EditorOptions, parsePx, Position } from "../core";
 
 abstract class BaseCellEdit {
     declare protected _input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
@@ -69,7 +69,7 @@ export class TextCellEdit extends BaseCellEdit {
     declare _input: HTMLInputElement;
 
     init() {
-        const input = this._input = this._args.container.appendChild(H("input", { type: "text", class: 'editor-text slick-editor-text' }));
+        const input = this._input = this._args.container.appendChild(<input type="text" class='editor-text slick-editor-text' /> as HTMLInputElement);
         input.addEventListener('keydown', this._args.editorCellNavOnLRKeys ? handleKeydownLRNav : handleKeydownLRNoNav);
         input.focus();
         input.select();
@@ -219,9 +219,10 @@ export class YesNoSelectCellEdit extends BaseCellEdit {
     declare _input: HTMLSelectElement;
 
     init() {
-        this._args.container.appendChild(this._input = H("select", { tabIndex: "0", class: "editor-yesno slick-editor-yesno" },
-            H("option", { value: "yes" }, "Yes"),
-            H("option", { value: "no" }, "No")));
+        this._args.container.appendChild(this._input = <select tabIndex="0" class="editor-yesno slick-editor-yesno">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+        </select> as HTMLSelectElement);
 
         this._input.focus();
 
@@ -253,7 +254,7 @@ export class CheckboxCellEdit extends BaseCellEdit {
     declare _input: HTMLInputElement;
 
     init() {
-        this._input = this._args.container.appendChild(H("input", { type: "checkbox", value: "true", class: "editor-checkbox slick-editor-checkbox", hideFocus: true }));
+        this._input = this._args.container.appendChild(<input type="checkbox" value="true" class="editor-checkbox slick-editor-checkbox" /> as HTMLInputElement);
         this._input.focus();
 
         addCompositeChangeListener(this, this._args, this._input);
@@ -298,14 +299,18 @@ export class PercentCompleteCellEdit extends IntegerCellEdit {
 
         var slider: HTMLDivElement;
         this._picker = this._args.container.appendChild(
-            H("div", { class: "slick-editor-percentcomplete-picker" },
-                H("div", { class: "slick-editor-percentcomplete-helper" },
-                    H("div", { class: "slick-editor-percentcomplete-wrapper" },
-                        H("div", { class: "slick-editor-percentcomplete-slider", ref: el => slider = el }),
-                        H("div", { class: "slick-editor-percentcomplete-buttons" },
-                            H("button", { "data-val": 0 }, "Not started"),
-                            H("button", { "data-val": 50 }, "In Progress"),
-                            H("button", { "data-val": 100 }, "Complete"))))));
+            <div class="slick-editor-percentcomplete-picker">
+                <div class="slick-editor-percentcomplete-helper">
+                    <div class="slick-editor-percentcomplete-wrapper">
+                        <div class="slick-editor-percentcomplete-slider" ref={el => slider = el} />
+                        <div class="slick-editor-percentcomplete-buttons">
+                            <button data-val={0}>Not started</button>
+                            <button data-val={50}>In Progress</button>
+                            <button data-val={100}>Complete</button>
+                        </div>
+                    </div>
+                </div>
+            </div> as HTMLDivElement);
 
         this._input.focus();
         this._input.select();
@@ -354,20 +359,20 @@ export class LongTextCellEdit extends BaseCellEdit {
         const isComposite = this._args.compositeEditorOptions;
         this._container = isComposite ? this._args.container : document.body;
 
-        this._wrapper = this._container.appendChild(H("div", {
-            class: "large-editor-text slick-large-editor-text",
-            style: `z-index:10000; background:white; padding:5px; border:3px solid gray; border-radius:10px;${isComposite ? "position: relative; padding: 0; border: 0" : "position: absolute"}`
-        },
-            H("textarea", { hidefocus: true, rows: "5", style: "background:white; width:250px; height:80px; border:0; outline:0", ref: el => this._input = el })));
+        this._wrapper = this._container.appendChild(<div class="large-editor-text slick-large-editor-text"
+            style={`z-index:10000; background:white; padding:5px; border:3px solid gray; border-radius:10px;${isComposite ? "position: relative; padding: 0; border: 0" : "position: absolute"}`}>
+            <textarea rows={5} style={{ background: "white", width: "250px", height: "80px", border: "0", outline: "0" }}
+                onKeyDown={this.handleKeyDown.bind(this)} ref={el => this._input = el} />
+        </div> as HTMLDivElement);
 
         if (isComposite)
             addCompositeChangeListener(this, this._args, this._input)
         else {
-            this._wrapper.appendChild(H("div", { style: "text-align: right" },
-                H("button", { ref: el => el.addEventListener('click', this.save.bind(this)) }, "Save"),
-                H("button", { ref: el => el.addEventListener('click', this.cancel.bind(this)) }, "Cancel")));
+            this._wrapper.appendChild(<div style={{ textAlign: "right" }}>
+                <button onClick={this.save.bind(this)}>Save</button>
+                <button onClick={this.cancel.bind(this)}>Cancel</button>
+            </div>);
 
-            this._input.addEventListener('keydown', this.handleKeyDown.bind(this));
             this.position(this._args.position);
         }
 
@@ -411,11 +416,11 @@ export class LongTextCellEdit extends BaseCellEdit {
     }
 
     hide() {
-        this._wrapper.style.display = "none";
+        this._wrapper.classList.add("slick-hidden");
     }
 
     show() {
-        this._wrapper.style.display = null;
+        this._wrapper.classList.remove("slick-hidden");
     }
 
     position(position: Position) {

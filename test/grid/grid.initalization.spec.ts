@@ -237,17 +237,6 @@ describe('layout', () => {
         expect(container.classList.contains(uid)).toBe(true);
     });
 
-    it('should add ui-widget class if useLegacyUI is true', () => {
-        const container = document.createElement("div");
-        new Grid(container, [], [], { useLegacyUI: true });
-
-        const container2 = document.createElement("div");
-        new Grid(container2, [], [], { useLegacyUI: false });
-
-        expect(container.classList.contains("ui-widget")).toBe(true);
-        expect(container2.classList.contains("ui-widget")).toBe(false);
-    });
-
     it('should set position to relative if its not relative or absolute or fixed', () => {
         const oldGetComputedStyle = window.getComputedStyle;
         window.getComputedStyle = () => {
@@ -299,7 +288,7 @@ describe('layout', () => {
         const container = document.createElement("div");
         new Grid(container, [], [], { groupingPanel: true, showGroupingPanel: false });
 
-        expect(container.querySelector<HTMLElement>(".slick-grouping-panel")?.style.display).toBe("none");
+        expect(container.querySelector<HTMLElement>(".slick-grouping-panel")?.classList.contains("slick-hidden")).toBe(true);
     });
 
     it('should bind grid instance to the layout functions', () => {

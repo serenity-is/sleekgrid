@@ -1,46 +1,46 @@
-import { Column, disableSelection, GridOptions, H, parsePx, spacerDiv, ViewRange } from "../core";
+import { Column, disableSelection, GridOptions, parsePx, spacerDiv, ViewRange } from "../core";
 import { LayoutEngine, LayoutHost } from "../grid";
 
 export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
-    var canvasWidth: number;
-    var canvasWidthL: number;
-    var canvasWidthR: number;
-    var frozenBottom: boolean;
-    var frozenRowIdx: number;
-    var frozenCols: number;
-    var frozenRows: number;
-    var headersWidthL: number;
-    var headersWidthR: number;
-    var viewportTopH: number;
+    let canvasWidth: number;
+    let canvasWidthL: number;
+    let canvasWidthR: number;
+    let frozenBottom: boolean;
+    let frozenRowIdx: number;
+    let frozenCols: number;
+    let frozenRows: number;
+    let headersWidthL: number;
+    let headersWidthR: number;
+    let viewportTopH: number;
 
-    var canvasBottomL: HTMLDivElement;
-    var canvasBottomR: HTMLDivElement;
-    var canvasTopL: HTMLDivElement;
-    var canvasTopR: HTMLDivElement;
-    var headerColsL: HTMLDivElement;
-    var headerColsR: HTMLDivElement;
-    var headerRowColsL: HTMLDivElement;
-    var headerRowColsR: HTMLDivElement;
-    var headerRowSpacerL: HTMLDivElement;
-    var headerRowSpacerR: HTMLDivElement;
-    var footerRowColsL: HTMLDivElement;
-    var footerRowColsR: HTMLDivElement;
-    var footerRowSpacerL: HTMLDivElement;
-    var footerRowSpacerR: HTMLDivElement;
-    var paneBottomL: HTMLDivElement;
-    var paneBottomR: HTMLDivElement;
-    var paneHeaderL: HTMLDivElement;
-    var paneHeaderR: HTMLDivElement;
-    var paneTopL: HTMLDivElement;
-    var paneTopR: HTMLDivElement;
-    var scrollContainerX: HTMLDivElement;
-    var scrollContainerY: HTMLDivElement;
-    var topPanelL: HTMLDivElement;
-    var topPanelR: HTMLDivElement;
-    var viewportBottomL: HTMLDivElement;
-    var viewportBottomR: HTMLDivElement;
-    var viewportTopL: HTMLDivElement;
-    var viewportTopR: HTMLDivElement;
+    let canvasBottomL: HTMLDivElement;
+    let canvasBottomR: HTMLDivElement;
+    let canvasTopL: HTMLDivElement;
+    let canvasTopR: HTMLDivElement;
+    let headerColsL: HTMLDivElement;
+    let headerColsR: HTMLDivElement;
+    let headerRowColsL: HTMLDivElement;
+    let headerRowColsR: HTMLDivElement;
+    let headerRowSpacerL: HTMLDivElement;
+    let headerRowSpacerR: HTMLDivElement;
+    let footerRowColsL: HTMLDivElement;
+    let footerRowColsR: HTMLDivElement;
+    let footerRowSpacerL: HTMLDivElement;
+    let footerRowSpacerR: HTMLDivElement;
+    let paneBottomL: HTMLDivElement;
+    let paneBottomR: HTMLDivElement;
+    let paneHeaderL: HTMLDivElement;
+    let paneHeaderR: HTMLDivElement;
+    let paneTopL: HTMLDivElement;
+    let paneTopR: HTMLDivElement;
+    let scrollContainerX: HTMLDivElement;
+    let scrollContainerY: HTMLDivElement;
+    let topPanelL: HTMLDivElement;
+    let topPanelR: HTMLDivElement;
+    let viewportBottomL: HTMLDivElement;
+    let viewportBottomR: HTMLDivElement;
+    let viewportTopL: HTMLDivElement;
+    let viewportTopR: HTMLDivElement;
 
     function appendCachedRow(row: number, rowNodeL: HTMLDivElement, rowNodeR: HTMLDivElement): void {
         var bottom = frozenRows && row >= frozenRowIdx + (frozenBottom ? 0 : 1);
@@ -77,68 +77,68 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         host = hostGrid;
         const spacerW = calcCanvasWidth() + host.getScrollDims().width + 'px';
         const options = host.getOptions();
-        const uisd = options.useLegacyUI ? ' ui-state-default' : '';
 
-        // -- PANE HEADER LEFT
-        headerColsL = H('div', { class: 'slick-header-columns slick-header-columns-left', style: (options.rtl ? "right" : "left") + ':-1000px' });
-        paneHeaderL = H('div', { class: "slick-pane slick-pane-header slick-pane-left", tabIndex: '0' },
-            H('div', { class: 'slick-header slick-header-left' + uisd, style: !options.showColumnHeader && 'display: none' }, headerColsL));
+        const rl1000 = (options.rtl ? "right" : "left") + ':-1000px';
 
-        // -- PANE HEADER RIGHT
-        headerColsR = H('div', { class: 'slick-header-columns slick-header-columns-right', style: (options.rtl ? "right" : "left") + ':-1000px' });
-        paneHeaderR = H('div', { class: "slick-pane slick-pane-header slick-pane-right", tabIndex: '0' },
-            H('div', { class: 'slick-header slick-header-right' + uisd, style: !options.showColumnHeader && 'display: none' }, headerColsR));
 
-        // -- PANE TOP LEFT (headerrow left + top panel left + viewport top left + footer row right)
-        headerRowColsL = H('div', { class: 'slick-headerrow-columns slick-headerrow-columns-left' });
-        headerRowSpacerL = spacerDiv(spacerW);
-        var headerRowL = H('div', { class: 'slick-headerrow' + uisd, style: !options.showHeaderRow && 'display: none' }, headerRowColsL, headerRowSpacerL);
+        host.getContainerNode().append(<>
+            <div class="slick-pane slick-pane-header slick-pane-left" tabindex="0" ref={el => paneHeaderL = el}>
+                <div class={["slick-header slick-header-left", !options.showColumnHeader && "slick-hidden"]}>
+                    <div class="slick-header-columns slick-header-columns-left" style={rl1000} ref={el => headerColsL = el} />
+                </div>
+            </div>
 
-        topPanelL = H('div', { class: 'slick-top-panel', style: 'width: 10000px' })
-        var topPanelLS = H('div', { class: 'slick-top-panel-scroller' + uisd, style: !options.showTopPanel && 'display: none' }, topPanelL);
+            <div class="slick-pane slick-pane-header slick-pane-right" tabindex="0" ref={el => paneHeaderR = el}>
+                <div class={["slick-header slick-header-right", !options.showColumnHeader && "slick-hidden"]}>
+                    <div class="slick-header-columns slick-header-columns-right" style={rl1000} ref={el => headerColsR = el} />
+                </div>
+            </div>
+            <div class="slick-pane slick-pane-top slick-pane-left" tabindex="0" ref={el => paneTopL = el}>
+                <div class={["slick-headerrow", !options.showHeaderRow && "slick-hidden"]}>
+                    <div class="slick-headerrow-columns slick-headerrow-columns-left" ref={el => headerRowColsL = el} />
+                    {headerRowSpacerL = spacerDiv(spacerW)}
+                </div>
+                <div class={["slick-top-panel-scroller", !options.showTopPanel && "slick-hidden"]}>
+                    <div class="slick-top-panel" style="width: 10000px" ref={el => topPanelL = el} />
+                </div>
+                <div class="slick-viewport slick-viewport-top slick-viewport-left" tabindex="0" ref={el => viewportTopL = el}>
+                    <div class="grid-canvas grid-canvas-top grid-canvas-left" tabindex="0" ref={el => canvasTopL = el} />
+                </div>
+                <div class={["slick-footerrow", !options.showFooterRow && "slick-hidden"]}>
+                    <div class="slick-footerrow-columns slick-footerrow-columns-left" ref={el => footerRowColsL = el} />
+                    {footerRowSpacerL = spacerDiv(spacerW)}
+                </div>
+            </div>
 
-        canvasTopL = H('div', { class: "grid-canvas grid-canvas-top grid-canvas-left", tabIndex: "0", hideFocus: '' });
-        viewportTopL = H('div', { class: "slick-viewport slick-viewport-top slick-viewport-left", tabIndex: "0", hideFocus: '' }, canvasTopL);
+            <div class="slick-pane slick-pane-top slick-pane-right" tabindex="0" ref={el => paneTopR = el}>
+                <div class={["slick-headerrow", !options.showHeaderRow && "slick-hidden"]}>
+                    <div class="slick-headerrow-columns slick-headerrow-columns-right" ref={el => headerRowColsR = el} />
+                    {headerRowSpacerR = spacerDiv(spacerW)}
+                </div>
+                <div class={["slick-top-panel-scroller", !options.showTopPanel && "slick-hidden"]}>
+                    <div class="slick-top-panel" style="width: 10000px" ref={el => topPanelR = el} />
+                </div>
+                <div class="slick-viewport slick-viewport-top slick-viewport-right" tabindex="0" ref={el => viewportTopR = el}>
+                    <div class="grid-canvas grid-canvas-top grid-canvas-right" tabindex="0" ref={el => canvasTopR = el} />
+                </div>
+                <div class={["slick-footerrow", !options.showFooterRow && "slick-hidden"]}>
+                    <div class="slick-footerrow-columns slick-footerrow-columns-right" ref={el => footerRowColsR = el} />
+                    {footerRowSpacerR = spacerDiv(spacerW)}
+                </div>
+            </div>
 
-        footerRowColsL = H('div', { class: 'slick-footerrow-columns slick-footerrow-columns-left' });
-        footerRowSpacerL = spacerDiv(spacerW);
-        var footerRowL = H('div', { class: 'slick-footerrow' + uisd, style: !options.showFooterRow && 'display: none' }, footerRowColsL, footerRowSpacerL);
+            <div class="slick-pane slick-pane-bottom slick-pane-left" tabindex="0" ref={el => paneBottomL = el}>
+                <div class="slick-viewport slick-viewport-bottom slick-viewport-left" tabindex="0" ref={el => viewportBottomL = el}>
+                    <div class="grid-canvas grid-canvas-bottom grid-canvas-left" tabindex="0" ref={el => canvasBottomL = el} />
+                </div>
+            </div>
 
-        paneTopL = H('div', { class: "slick-pane slick-pane-top slick-pane-left", tabIndex: "0" }, headerRowL, topPanelLS, viewportTopL, footerRowL);
-
-        // -- PANE TOP RIGHT (headerrow right + top panel right + viewport top right + footer row right)
-        headerRowColsR = H('div', { class: 'slick-headerrow-columns slick-headerrow-columns-right' });
-        headerRowSpacerR = spacerDiv(spacerW);
-        var headerRowR = H('div', { class: 'slick-headerrow' + uisd, style: !options.showHeaderRow && 'display: none' }, headerRowColsR, headerRowSpacerR);
-
-        topPanelR = H('div', { class: 'slick-top-panel', style: 'width: 10000px' });
-        var topPanelRS = H('div', { class: 'slick-top-panel-scroller' + uisd, style: !options.showTopPanel && 'display: none' }, topPanelR);
-
-        canvasTopR = H('div', { class: "grid-canvas grid-canvas-top grid-canvas-right", tabIndex: "0", hideFocus: '' })
-        viewportTopR = H('div', { class: "slick-viewport slick-viewport-top slick-viewport-right", tabIndex: "0", hideFocus: '' }, canvasTopR);
-
-        footerRowColsR = H('div', { class: 'slick-footerrow-columns slick-footerrow-columns-right' });
-        footerRowSpacerR = H('div', { style: 'display:block;height:1px;position:absolute;top:0;left:0;', width: spacerW });
-        var footerRowR = H('div', { class: 'slick-footer-row' + uisd, style: !options.showFooterRow && 'display: none' }, footerRowColsR, footerRowSpacerR);
-
-        paneTopR = H('div', { class: "slick-pane slick-pane-top slick-pane-right", tabIndex: "0" }, headerRowR, topPanelRS, viewportTopR, footerRowR);
-
-        // -- PANE BOTTOM LEFT
-        canvasBottomL = H('div', { class: "grid-canvas grid-canvas-bottom grid-canvas-left", tabIndex: "0", hideFocus: '' });
-        viewportBottomL = H('div', { class: "slick-viewport slick-viewport-bottom slick-viewport-left", tabIndex: "0", hideFocus: '' }, canvasBottomL);
-        paneBottomL = H('div', { class: "slick-pane slick-pane-bottom slick-pane-left", tabIndex: "0" }, viewportBottomL);
-
-        canvasBottomR = H('div', { class: "grid-canvas grid-canvas-bottom grid-canvas-right", tabIndex: "0", hideFocus: '' });
-        viewportBottomR = H('div', { class: "slick-viewport slick-viewport-bottom slick-viewport-right", tabIndex: "0", hideFocus: '' });
-        paneBottomR = H('div', { class: "slick-pane slick-pane-bottom slick-pane-right", tabIndex: "0" }, viewportBottomR);
-
-        host.getContainerNode().append(
-            paneHeaderL,
-            paneHeaderR,
-            paneTopL,
-            paneTopR,
-            paneBottomL,
-            paneBottomR);
+            <div class="slick-pane slick-pane-bottom slick-pane-right" tabindex="0" ref={el => paneBottomR = el}>
+                <div class="slick-viewport slick-viewport-bottom slick-viewport-right" tabindex="0" ref={el => viewportBottomR = el}>
+                    <div class="grid-canvas grid-canvas-bottom grid-canvas-right" tabindex="0" ref={el => canvasBottomR = el} />
+                </div>
+            </div>
+        </>);
 
         // disable all text selection in header (including input and textarea)
         disableSelection(headerColsL);
@@ -215,15 +215,15 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         var vpi = host.getViewportInfo();
 
         if (widthChanged || frozenCols || frozenRows) {
-            var cwlPX = canvasWidthL + 'px'
-            var cwrPX = canvasWidthR + 'px';
+            var cwlPX = canvasWidthL + "px"
+            var cwrPX = canvasWidthR + "px";
 
             canvasTopL.style.width = cwlPX;
 
             calcHeaderWidths();
 
             if (frozenCols) {
-                var vpminusPX = (vpi.width - canvasWidthL) + 'px';
+                var vpminusPX = (vpi.width - canvasWidthL) + "px";
                 const rtl = host.getOptions().rtl;
 
                 canvasTopR.style.width = cwrPX;
@@ -259,16 +259,16 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
                     canvasBottomR.style.width = cwrPX;
                 }
             } else {
-                paneHeaderL.style.width = '100%';
-                paneTopL.style.width = '100%';
-                headerRowColsL.parentElement.style.width = '100%';
-                headerRowColsL.style.width = canvasWidth + 'px';
-                footerRowColsL.parentElement.style.width = '100%';
-                footerRowColsL.style.width = canvasWidth + 'px';
-                viewportTopL.style.width = '100%';
+                paneHeaderL.style.width = "100%";
+                paneTopL.style.width = "100%";
+                headerRowColsL.parentElement.style.width = "100%";
+                headerRowColsL.style.width = canvasWidth + "px";
+                footerRowColsL.parentElement.style.width = "100%";
+                footerRowColsL.style.width = canvasWidth + "px";
+                viewportTopL.style.width = "100%";
 
                 if (frozenRows) {
-                    viewportBottomL.style.width = '100%';
+                    viewportBottomL.style.width = "100%";
                     canvasBottomL.style.width = cwlPX;
                 }
             }
@@ -420,9 +420,10 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     }
 
     const setPaneVisibility = () => {
-        paneHeaderR.style.display = paneTopR.style.display = frozenCols ? '' : 'none';
-        paneBottomL.style.display = frozenRows ? '' : 'none';
-        paneBottomR.style.display = frozenRows && frozenCols ? '' : 'none';
+        paneHeaderR.classList.toggle("slick-hidden", !frozenCols);
+        paneTopR.classList.toggle("slick-hidden", !frozenCols);
+        paneBottomL.classList.toggle("slick-hidden", !frozenRows);
+        paneBottomR.classList.toggle("slick-hidden", !frozenRows || !frozenCols);
     }
 
     const setOverflow = () => {

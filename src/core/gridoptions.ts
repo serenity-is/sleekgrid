@@ -374,7 +374,7 @@ export interface GridOptions<TItem = any> {
     topPanelHeight?: number;
 
     /**
-     * Defaults to `false`. If `true`, uses legacy jQuery UI classes like ui-state-default and ui-widget-content.
+     * @deprecated This option has no effect.
      */
     useLegacyUI?: boolean;
 
@@ -440,6 +440,5 @@ export const gridDefaults: GridOptions = {
     showTopPanel: false,
     suppressActiveCellChangeOnEdit: false,
     topPanelHeight: 30,
-    useLegacyUI: false,
     useCssVars: true
 }

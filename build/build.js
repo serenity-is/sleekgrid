@@ -109,7 +109,7 @@ const compatEditors = {
 
 const compatLayoutsFrozen = {
     ...compatDefaults,
-    entryPoints: ['./src/layouts/frozenlayout.ts'],
+    entryPoints: ['./src/layouts/frozenlayout.tsx'],
     outfile: './dist/compat/layouts/slick.frozenlayout.js',
     plugins: [globalExternals(/\.\.\/core/, {
         Slick: ["disableSelection", "H", "parsePx", "spacerDiv"]

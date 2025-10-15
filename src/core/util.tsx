@@ -148,32 +148,8 @@ export function removeClass(el: Element, cls: string) {
         el.classList.remove(cls);
 }
 
-export function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: { ref?: (el?: HTMLElementTagNameMap[K]) => void, [key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void) | null | undefined }, ...children: (string | Node)[]): HTMLElementTagNameMap[K] {
-    var el = document.createElement(tag);
-    var k: string, v: any, c: Node | string;
-    if (attr) {
-        for (k in attr) {
-            v = attr[k];
-            if (v != null && v !== false) {
-                if (k === "ref" && typeof v === "function") {
-                    (v as any)(el);
-                    continue;
-                }
-
-                var key = k === "className" ? "class" : k;
-                el.setAttribute(key, v === true ? '' : v as string);
-            }
-        }
-    }
-
-    if (children && children.length)
-        el.append(...children);
-
-    return el;
-}
-
 export function spacerDiv(width: string): HTMLDivElement {
-    return H('div', { style: 'display:block;height:1px;position:absolute;top:0;left:0;', width });
+    return <div class="slick-spacer-line" style={{ width }} /> as HTMLDivElement;
 }
 
 export function parsePx(str: string) {

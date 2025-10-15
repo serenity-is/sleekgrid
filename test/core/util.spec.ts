@@ -1,4 +1,5 @@
-import { addClass, basicDOMSanitizer, disableSelection, escapeHtml, H, removeClass, spacerDiv } from "../../src/core/util";
+import { addClass, basicDOMSanitizer, disableSelection, escapeHtml, removeClass, spacerDiv } from "../../src/core/util";
+import { jsx as H } from "@serenity-is/sleekdom";
 
 describe('addClass', () => {
     it('should not do anything if classes to add is null or undefined', () => {
@@ -128,7 +129,7 @@ describe('H', () => {
     });
 
     it('should create a div with children', () => {
-        const element: HTMLDivElement = H('div', {}, H('span'));
+        const element: HTMLDivElement = H('div', { children: H('span') });
 
         expect(element.tagName).toBe('DIV');
         expect(element.childElementCount).toBe(1);
@@ -136,7 +137,7 @@ describe('H', () => {
     });
 
     it('should create a div with children and attributes', () => {
-        const element: HTMLDivElement = H('div', { 'data-test': 'test' }, H('span'));
+        const element: HTMLDivElement = H('div', { 'data-test': 'test', children: H('span') });
 
         expect(element.tagName).toBe('DIV');
         expect(element.childElementCount).toBe(1);
@@ -145,7 +146,7 @@ describe('H', () => {
     });
 
     it('should create a div with children which have attributes and classes and id', () => {
-        const element: HTMLDivElement = H('div', { 'data-test': 'test' }, H('span', { class: 'test', id: 'test' }));
+        const element: HTMLDivElement = H('div', { 'data-test': 'test', children: H('span', { class: 'test', id: 'test' }) });
 
         expect(element.tagName).toBe('DIV');
         expect(element.getAttribute('data-test')).toBe('test');
@@ -156,13 +157,13 @@ describe('H', () => {
     });
 
     it('should leave attribute value empty on div if value is true', () => {
-        const element: HTMLDivElement = H('div', { 'data-test': true });
+        const element: HTMLDivElement = H('div', { 'data-test': true as any });
 
         expect(element.getAttribute('data-test')).toBe('');
     });
 
     it('should not add attribute if value is false', () => {
-        const element: HTMLDivElement = H('div', { 'data-test': false });
+        const element: HTMLDivElement = H('div', { 'data-test': false as any });
 
         expect(element.hasAttribute('data-test')).toBe(false);
     });
@@ -176,8 +177,10 @@ describe('H', () => {
     it('should call ref method with the element reference', () => {
         var divRef: HTMLSpanElement;
         var spanRef: HTMLSpanElement;
-        var element = H('div', { ref: el => divRef = el },
-            H('span', { ref: el => spanRef = el }));
+        var element = H('div', {
+            ref: el => divRef = el, children:
+                H('span', { ref: el => spanRef = el })
+        });
         expect(divRef).toBeDefined();
         expect(divRef === element).toBe(true);
         expect(spanRef).toBeDefined();
@@ -208,7 +211,7 @@ describe('spacerDiv', () => {
     it('sets the width of the div', () => {
         const div = spacerDiv("100px");
 
-        expect(div.getAttribute('width')).toBe('100px');
+        expect(div.style.width).toBe('100px');
     });
 });
 

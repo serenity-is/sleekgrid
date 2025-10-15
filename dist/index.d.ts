@@ -901,7 +901,7 @@ export interface GridOptions<TItem = any> {
 	 */
 	topPanelHeight?: number;
 	/**
-	 * Defaults to `false`. If `true`, uses legacy jQuery UI classes like ui-state-default and ui-widget-content.
+	 * @deprecated This option has no effect.
 	 */
 	useLegacyUI?: boolean;
 	/**
@@ -942,10 +942,6 @@ export declare function escapeHtml(s: any): any;
 export declare function basicDOMSanitizer(dirtyHtml: string): string;
 export declare function disableSelection(target: HTMLElement): void;
 export declare function removeClass(el: Element, cls: string): void;
-export declare function H<K extends keyof HTMLElementTagNameMap>(tag: K, attr?: {
-	ref?: (el?: HTMLElementTagNameMap[K]) => void;
-	[key: string]: string | number | boolean | ((el?: HTMLElementTagNameMap[K]) => void) | null | undefined;
-}, ...children: (string | Node)[]): HTMLElementTagNameMap[K];
 export declare function spacerDiv(width: string): HTMLDivElement;
 export declare function parsePx(str: string): number;
 export declare const BasicLayout: {
@@ -1166,7 +1162,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	getDataItem(row: number): TItem;
 	getTopPanel(): HTMLElement;
 	setTopPanelVisibility(visible: boolean): void;
-	setColumnHeaderVisibility(visible: boolean, animate?: boolean): void;
+	setColumnHeaderVisibility(visible: boolean): void;
 	setFooterRowVisibility(visible: boolean): void;
 	setGroupingPanelVisibility(visible: boolean): void;
 	setPreHeaderPanelVisibility(visible: boolean): void;

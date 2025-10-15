@@ -1,45 +1,46 @@
-import { Column, H, parsePx, spacerDiv } from "../core";
+import { Column, parsePx, spacerDiv } from "../core";
 import { LayoutEngine, LayoutHost } from "./layout";
 
 export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
-    var host: LayoutHost;
-    var canvasWidth: number;
-    var headersWidth: number;
+    let host: LayoutHost;
+    let canvasWidth: number;
+    let headersWidth: number;
 
-    var canvas: HTMLDivElement;
-    var headerCols: HTMLDivElement;
-    var headerRowCols: HTMLDivElement;
-    var headerRowSpacer: HTMLDivElement;
-    var footerRowCols: HTMLDivElement;
-    var footerRowSpacer: HTMLDivElement;
-    var topPanel: HTMLDivElement;
-    var viewport: HTMLDivElement;
+    let headerCols: HTMLElement;
+    let headerRowCols: HTMLElement;
+    let headerRowSpacer: HTMLElement;
+    let canvas: HTMLElement;
+    let topPanel: HTMLElement;
+    let viewport: HTMLElement;
+    let footerRowCols: HTMLElement;
+    let footerRowSpacer: HTMLElement;
 
     function init(hostGrid: LayoutHost) {
         host = hostGrid;
-        const spacerW = calcCanvasWidth() + host.getScrollDims().width + 'px';
+        const spacerW = calcCanvasWidth() + host.getScrollDims().width + "px";
         const options = host.getOptions();
-        const uisd = options.useLegacyUI ? ' ui-state-default' : '';
 
-        headerCols = H('div', { class: 'slick-header-columns', style: (options.rtl ? 'right' : 'left') + ':-1000px' });
-        var headerColsS = H('div', { class: 'slick-header' + uisd, style: !options.showColumnHeader && 'display: none' }, headerCols);
+        host.getContainerNode().append(<>
+            <div class={["slick-header", !options.showColumnHeader && "slick-hidden"]}>
+                <div class="slick-header-columns" style={{ [(options.rtl ? "right" : "left")]: "-1000px" }} ref={el => headerCols = el} />
+            </div>
+            <div class={["slick-headerrow", !options.showHeaderRow && "slick-hidden"]}>
+                <div class="slick-headerrow-columns" ref={el => headerRowCols = el} />
+                {headerRowSpacer = spacerDiv(spacerW)}
+            </div>
+            <div class={["slick-top-panel-scroller", !options.showTopPanel && "slick-hidden"]}>
+                <div class="slick-top-panel" style={{ width: "10000px" }} ref={el => topPanel = el} />
+            </div>
+            <div class="slick-viewport" tabindex="0" ref={el => viewport = el}>
+                <div class="grid-canvas" tabindex="0" ref={el => canvas = el} />
+            </div>
+            <div class={["slick-footerrow", !options.showFooterRow && "slick-hidden"]}>
+                <div class="slick-footerrow-columns" ref={el => footerRowCols = el} />
+                {footerRowSpacer = spacerDiv(spacerW)}
+            </div>
+        </>);
+
         updateHeadersWidth();
-
-        headerRowCols = H('div', { class: 'slick-headerrow-columns' });
-        headerRowSpacer = spacerDiv(spacerW);
-        var headerRow = H('div', { class: 'slick-headerrow' + uisd, style: !options.showHeaderRow && 'display: none' }, headerRowCols, headerRowSpacer);
-
-        topPanel = H('div', { class: 'slick-top-panel', style: 'width: 10000px' });
-        var topPanelS = H('div', { class: 'slick-top-panel-scroller' + uisd, style: !options.showTopPanel && 'display: none' }, topPanel);
-
-        canvas = H('div', { class: "grid-canvas", tabIndex: "0", hideFocus: '' })
-        viewport = H('div', { class: "slick-viewport", tabIndex: "0", hideFocus: '' }, canvas);
-
-        footerRowCols = H('div', { class: 'slick-footerrow-columns' });
-        footerRowSpacer = spacerDiv(spacerW);
-        var footerRow = H('div', { class: 'slick-footerrow' + uisd, style: !options.showFooterRow && 'display: none' }, footerRowCols, footerRowSpacer);
-
-        host.getContainerNode().append(headerColsS, headerRow, topPanelS, viewport, footerRow);
     }
 
     function appendCachedRow(_: number, rowNode: HTMLDivElement): void {
@@ -70,8 +71,8 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
             for (var i = 0; i < cols.length; i++) {
                 w = cols[i].width;
                 rule = host.getColumnCssRules(i);
-                rule[rtl ? 'right' : 'left'].style[rtl ? 'right' : 'left'] = x + "px";
-                rule[rtl ? 'left' : 'right'].style[rtl ? 'left' : 'right'] = (canvasWidth - x - w) + "px";
+                rule[rtl ? "right" : "left"].style[rtl ? "right" : "left"] = x + "px";
+                rule[rtl ? "left" : "right"].style[rtl ? "left" : "right"] = (canvasWidth - x - w) + "px";
                 x += w;
             }
         }
@@ -109,58 +110,58 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
 
         headersWidth += scrollWidth;
         headersWidth = Math.max(headersWidth, host.getViewportInfo().width) + 1000;
-        headerCols.style.width = headersWidth + 'px';
+        headerCols.style.width = headersWidth + "px";
     }
 
     const destroy = () => {
         host = null;
     }
 
-    function getCanvasNodeFor() {
+    function getCanvasNodeFor(): HTMLElement {
         return canvas;
     }
 
-    function getCanvasNodes() {
+    function getCanvasNodes(): HTMLElement[] {
         return [canvas];
     }
 
-    function getCanvasWidth() {
+    function getCanvasWidth(): number {
         return canvasWidth;
     }
 
-    function getHeaderCols() {
+    function getHeaderCols(): HTMLElement[] {
         return [headerCols];
     }
 
-    function getHeaderColumn(cell: number) {
-        return headerCols.children.item(cell) as HTMLDivElement;
+    function getHeaderColumn(cell: number): HTMLElement {
+        return headerCols.children.item(cell) as HTMLElement;
     }
 
-    function getHeaderRowCols() {
+    function getHeaderRowCols(): HTMLElement[] {
         return [headerRowCols];
     }
 
-    function getHeaderRowColumn(cell: number) {
-        return headerRowCols.childNodes.item(cell) as HTMLDivElement;
+    function getHeaderRowColumn(cell: number): HTMLElement {
+        return headerRowCols.childNodes.item(cell) as HTMLElement;
     }
 
-    function getHeaderRowColsFor() {
+    function getHeaderRowColsFor(): HTMLElement {
         return headerRowCols;
     }
 
-    function getFooterRowColumn(cell: number) {
-        return footerRowCols.childNodes.item(cell) as HTMLDivElement;
+    function getFooterRowColumn(cell: number): HTMLElement {
+        return footerRowCols.childNodes.item(cell) as HTMLElement;
     }
 
-    function getFooterRowColsFor() {
+    function getFooterRowColsFor(): HTMLElement {
         return footerRowCols;
     }
 
-    function getHeaderColsFor() {
+    function getHeaderColsFor(): HTMLElement {
         return headerCols;
     }
 
-    function getFooterRowCols(): HTMLDivElement[] {
+    function getFooterRowCols(): HTMLElement[] {
         return [footerRowCols];
     }
 
@@ -168,19 +169,19 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         return host.getRowFromNode(cellNode.parentElement);
     }
 
-    function getTopPanelFor() {
+    function getTopPanelFor(): HTMLElement {
         return topPanel;
     }
 
-    function getTopPanelNodes() {
+    function getTopPanelNodes(): HTMLElement[] {
         return [topPanel];
     }
 
-    function getViewportNodeFor(): HTMLDivElement {
+    function getViewportNodeFor(): HTMLElement {
         return viewport;
     }
 
-    function getViewportNodes(): HTMLDivElement[] {
+    function getViewportNodes(): HTMLElement[] {
         return [viewport];
     }
 
@@ -194,23 +195,23 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     function noop(): void {
     }
 
-    function realScrollHeightChange() {
-        canvas.style.height = host.getViewportInfo().realScrollHeight + 'px'
+    function realScrollHeightChange(): void {
+        canvas.style.height = host.getViewportInfo().realScrollHeight + "px"
     }
 
     function reorderViewColumns(viewCols: Column[]): Column[] {
         return null;
     }
 
-    function returnFalse() {
+    function returnFalse(): boolean {
         return false;
     }
 
     function setOverflow(): void {
         var alwaysVS = host.getOptions().alwaysShowVerticalScroll;
 
-        viewport.style.overflowX = 'auto';
-        viewport.style.overflowY = alwaysVS ? 'scroll' : (host.getOptions().autoHeight ? 'hidden' : 'auto');
+        viewport.style.overflowX = "auto";
+        viewport.style.overflowY = alwaysVS ? "scroll" : (host.getOptions().autoHeight ? "hidden" : "auto");
     }
 
     function updateCanvasWidth(): boolean {
@@ -219,14 +220,14 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         var scrollWidth = host.getScrollDims().width;
 
         const vpi = host.getViewportInfo();
-        var canvasWidthPx = canvasWidth + 'px'
+        var canvasWidthPx = canvasWidth + "px"
         canvas.style.width = canvasWidthPx;
         headerRowCols.style.width = canvasWidthPx;
         footerRowCols.style.width = canvasWidthPx;
         updateHeadersWidth();
         vpi.hasHScroll = (canvasWidth > host.getViewportInfo().width - scrollWidth);
 
-        var spacerWidthPx = (canvasWidth + (vpi.hasVScroll ? scrollWidth : 0)) + 'px';
+        var spacerWidthPx = (canvasWidth + (vpi.hasVScroll ? scrollWidth : 0)) + "px";
         headerRowSpacer.style.width = spacerWidthPx;
         footerRowSpacer.style.width = spacerWidthPx;
 
@@ -239,18 +240,18 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         const options = host.getOptions();
         if (options.autoHeight) {
             host.getContainerNode().style.height = (_paneTopH + vs.groupingPanelHeight +
-                parsePx(getComputedStyle(headerCols.parentElement).height)) + 'px';
-            viewport.style.height = '';
+                parsePx(getComputedStyle(headerCols.parentElement).height)) + "px";
+            viewport.style.height = "";
         }
         else
-            viewport.style.height = vs.height + 'px'
+            viewport.style.height = vs.height + "px"
     }
 
     function returnZero() {
         return 0;
     }
 
-    var intf: LayoutEngine = {
+    const intf: LayoutEngine = {
         afterHeaderColumnDrag: noop,
         afterRenderRows: noop,
         afterSetOptions: noop,

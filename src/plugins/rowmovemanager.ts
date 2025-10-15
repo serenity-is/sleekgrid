@@ -1,4 +1,4 @@
-import { EventEmitter, EventSubscriber, H } from "../core";
+import { EventEmitter, EventSubscriber } from "../core";
 import { Grid, IPlugin } from "../grid";
 
 export interface RowMoveManagerOptions {
@@ -77,14 +77,12 @@ export class RowMoveManager implements IPlugin {
 
         dd.selectedRows = selectedRows;
         let canvas = this.grid.getCanvasNode();
-        dd.selectionProxy = canvas.appendChild(H('div', {
-            'class': 'slick-reorder-proxy',
-            'style': `position: absolute; z-index: 9999; width: ${canvas.clientWidth}px; height: ${rowHeight * selectedRows.length}px`
-        }));
-        dd.guide = canvas.appendChild(H('div', {
-            'class': 'slick-reorder-guide',
-            'style': `position: absolute; z-index: 99998; width: ${canvas.clientWidth}px; top: -1000`
-        }));
+        const sp = dd.selectionProxy = canvas.appendChild(document.createElement('div'));
+        sp.style = `position: absolute; z-index: 9999; width: ${canvas.clientWidth}px; height: ${rowHeight * selectedRows.length}px`;
+        sp.className = 'slick-row-move-proxy';
+        const g = dd.guide = canvas.appendChild(document.createElement('div'));
+        g.style = `position: absolute; z-index: 9998; width: ${canvas.clientWidth}px; height: ${rowHeight}px; top: -1000px`;
+        g.className = 'slick-row-move-guide';
 
         dd.insertBefore = -1;
     }
