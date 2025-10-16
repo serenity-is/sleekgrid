@@ -436,7 +436,7 @@ export interface Column<TItem = any> {
 	editor?: EditorClass;
 	editorFixedDecimalPlaces?: number;
 	field?: string;
-	frozen?: boolean;
+	frozen?: boolean | "start" | "end";
 	focusable?: boolean;
 	footerCssClass?: string;
 	format?: ColumnFormat<TItem>;
@@ -552,7 +552,7 @@ export interface LayoutHost {
 	renderRows(range: ViewRange): void;
 }
 export interface LayoutEngine {
-	appendCachedRow(row: number, rowNodes: HTMLElement[]): void;
+	appendCachedRow(row: number, rowNodeS: HTMLElement, rowNodeC: HTMLElement, rowNodeE: HTMLElement): void;
 	afterHeaderColumnDrag(): void;
 	afterSetOptions(args: GridOptions): void;
 	applyColumnWidths(): void;
@@ -570,9 +570,11 @@ export interface LayoutEngine {
 	getFooterRowCols(): HTMLElement[];
 	getFooterRowColsFor(cell: number): HTMLElement;
 	getFooterRowColumn(cell: number): HTMLElement;
-	getFrozenCols(): number;
+	getFrozenTopLastRow(): number;
+	getFrozenBottomFirstRow(): number;
 	getFrozenRowOffset(row: number): number;
-	getFrozenRows(): number;
+	getPinnedStartLastCol(): number;
+	getPinnedEndFirstCol(): number;
 	getHeaderCols(): HTMLElement[];
 	getHeaderColsFor(cell: number): HTMLElement;
 	getHeaderColumn(cell: number): HTMLElement;
@@ -761,7 +763,7 @@ export interface GridOptions<TItem = any> {
 	/**
 	 * Defaults to `false`. If `true`, places frozen rows at the bottom edge of the grid.
 	 */
-	frozenBottom?: boolean;
+	frozenBottom?: boolean | number;
 	/**
 	 * Defaults to `undefined`. If specified, freezes the given number of columns on the left edge of the grid.
 	 * Prefer setting column.frozen = 'true' for individual columns as this is only for compatibility.
@@ -769,7 +771,7 @@ export interface GridOptions<TItem = any> {
 	frozenColumns?: number;
 	/**
 	 * Defaults to `undefined`. If specified, freezes the given number of rows at the top or bottom
-	 * edge of the grid based on `frozenBottom`.
+	 * edge (if frozenBottom === true).
 	 */
 	frozenRows?: number;
 	/**
@@ -1073,8 +1075,6 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private createGroupingPanel;
 	private bindAncestorScroll;
 	init(): void;
-	private hasFrozenColumns;
-	private hasFrozenRows;
 	registerPlugin(plugin: IPlugin): void;
 	unregisterPlugin(plugin: IPlugin): void;
 	getPluginByName(name: string): IPlugin;
@@ -1114,6 +1114,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private setupColumnSort;
 	private static offset;
 	private sortableColInstances;
+	private hasPinnedCols;
 	private setupColumnReorder;
 	private setupColumnResize;
 	columnsResized(invalidate?: boolean): void;
