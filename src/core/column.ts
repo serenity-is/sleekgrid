@@ -12,7 +12,7 @@ export interface Column<TItem = any> {
     editor?: EditorClass;
     editorFixedDecimalPlaces?: number;
     field?: string;
-    frozen?: boolean;
+    frozen?: boolean | "start" | "end";
     focusable?: boolean;
     footerCssClass?: string;
     format?: ColumnFormat<TItem>;
@@ -39,6 +39,7 @@ export interface Column<TItem = any> {
     visible?: boolean;
     width?: number;
 }
+
 
 export const columnDefaults: Partial<Column> = {
     resizable: true,

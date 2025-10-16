@@ -43,8 +43,8 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         updateHeadersWidth();
     }
 
-    function appendCachedRow(_: number, rowNode: HTMLDivElement): void {
-        rowNode && canvas.appendChild(rowNode);
+    function appendCachedRow(_: number, _rowNodeS: HTMLDivElement, rowNodeC: HTMLDivElement, _rowNodeE: HTMLDivElement): void {
+        rowNodeC && canvas.appendChild(rowNodeC);
     }
 
     function applyColumnWidths() {
@@ -276,9 +276,11 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         getHeaderRowColsFor,
         getHeaderRowColumn,
         getRowFromCellNode,
-        getFrozenCols: returnZero,
+        getFrozenTopLastRow: () => -1,
+        getFrozenBottomFirstRow: () => Infinity,
+        getPinnedStartLastCol: () => -1,
+        getPinnedEndFirstCol: () => Infinity,
         getFrozenRowOffset: returnZero,
-        getFrozenRows: returnZero,
         getScrollCanvasY: getCanvasNodeFor,
         getScrollContainerX: getViewportNodeFor,
         getScrollContainerY: getViewportNodeFor,

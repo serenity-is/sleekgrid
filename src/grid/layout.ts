@@ -24,7 +24,7 @@ export interface LayoutHost {
 }
 
 export interface LayoutEngine {
-    appendCachedRow(row: number, rowNodeL: HTMLElement, rowNodeR: HTMLElement): void;
+    appendCachedRow(row: number, rowNodeS: HTMLElement, rowNodeC: HTMLElement, rowNodeE: HTMLElement): void;
     afterHeaderColumnDrag(): void;
     afterSetOptions(args: GridOptions): void;
     applyColumnWidths(): void;
@@ -42,9 +42,11 @@ export interface LayoutEngine {
     getFooterRowCols(): HTMLElement[];
     getFooterRowColsFor(cell: number): HTMLElement;
     getFooterRowColumn(cell: number): HTMLElement;
-    getFrozenCols(): number;
+    getFrozenTopLastRow(): number;
+    getFrozenBottomFirstRow(): number;
     getFrozenRowOffset(row: number): number;
-    getFrozenRows(): number;
+    getPinnedStartLastCol(): number;
+    getPinnedEndFirstCol(): number;
     getHeaderCols(): HTMLElement[];
     getHeaderColsFor(cell: number): HTMLElement;
     getHeaderColumn(cell: number): HTMLElement;

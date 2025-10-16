@@ -552,7 +552,7 @@ export interface LayoutHost {
 	renderRows(range: ViewRange): void;
 }
 export interface LayoutEngine {
-	appendCachedRow(row: number, rowNodeL: HTMLElement, rowNodeR: HTMLElement): void;
+	appendCachedRow(row: number, rowNodes: HTMLElement[]): void;
 	afterHeaderColumnDrag(): void;
 	afterSetOptions(args: GridOptions): void;
 	applyColumnWidths(): void;

@@ -361,8 +361,9 @@ export function getInnerWidth(el: HTMLElement): number {
 }
 
 export interface CachedRow {
-    rowNodeL: HTMLElement,
-    rowNodeR: HTMLElement,
+    rowNodeS: HTMLElement,
+    rowNodeC: HTMLElement,
+    rowNodeE: HTMLElement,
     // ColSpans of rendered cells (by column idx).
     // Can also be used for checking whether a cell has been rendered.
     cellColSpans: number[],
@@ -389,8 +390,9 @@ export interface PostProcessCleanupEntry {
     groupId: number,
     cellNode?: HTMLElement,
     columnIdx?: number,
-    rowNodeL?: HTMLElement;
-    rowNodeR?: HTMLElement;
+    rowNodeS?: HTMLElement;
+    rowNodeC?: HTMLElement;
+    rowNodeE?: HTMLElement;
     rowIdx?: number;
 }
 

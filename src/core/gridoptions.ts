@@ -204,7 +204,7 @@ export interface GridOptions<TItem = any> {
     /**
      * Defaults to `false`. If `true`, places frozen rows at the bottom edge of the grid.
      */
-    frozenBottom?: boolean;
+    frozenBottom?: boolean | number;
 
     /**
      * Defaults to `undefined`. If specified, freezes the given number of columns on the left edge of the grid.
@@ -214,7 +214,7 @@ export interface GridOptions<TItem = any> {
 
     /**
      * Defaults to `undefined`. If specified, freezes the given number of rows at the top or bottom
-     * edge of the grid based on `frozenBottom`.
+     * edge (if frozenBottom === true).
      */
     frozenRows?: number;
 

@@ -42,15 +42,25 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     let viewportTopL: HTMLDivElement;
     let viewportTopR: HTMLDivElement;
 
-    function appendCachedRow(row: number, rowNodeL: HTMLDivElement, rowNodeR: HTMLDivElement): void {
+    function appendCachedRow(row: number, rowNodeS: HTMLDivElement, rowNodeC: HTMLDivElement, _rowNodeE: HTMLDivElement): void {
         var bottom = frozenRows && row >= frozenRowIdx + (frozenBottom ? 0 : 1);
         if (bottom) {
-            rowNodeL && canvasBottomL.appendChild(rowNodeL);
-            frozenCols && rowNodeR && canvasBottomR.appendChild(rowNodeR);
+            if (frozenCols) {
+                rowNodeS && canvasBottomL.appendChild(rowNodeS);
+                rowNodeC && canvasBottomR.appendChild(rowNodeC);
+            }
+            else {
+                rowNodeC && canvasBottomL.appendChild(rowNodeC);
+            }
         }
         else {
-            rowNodeL && canvasTopL.appendChild(rowNodeL);
-            frozenCols && rowNodeR && canvasTopR.appendChild(rowNodeR);
+            if (frozenCols) {
+                rowNodeS && canvasTopL.appendChild(rowNodeS);
+                rowNodeC && canvasTopR.appendChild(rowNodeC);
+            }
+            else {
+                rowNodeC && canvasTopL.appendChild(rowNodeC);
+            }
         }
     }
 
@@ -736,12 +746,20 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         return row;
     }
 
-    function getFrozenCols() {
-        return frozenCols;
+    function getPinnedStartLastCol() {
+        return frozenCols - 1;
     }
 
-    function getFrozenRows() {
-        return frozenRows;
+    function getPinnedEndFirstCol() {
+        return Infinity;
+    }
+
+    function getFrozenTopLastRow() {
+        return frozenBottom ? -1 : frozenRowIdx;
+    }
+
+    function getFrozenBottomFirstRow() {
+        return frozenBottom ? frozenRowIdx : Infinity;
     }
 
     function destroy(): void {
@@ -766,8 +784,10 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         getFooterRowCols,
         getFooterRowColsFor,
         getFooterRowColumn,
-        getFrozenCols,
-        getFrozenRows,
+        getPinnedStartLastCol,
+        getPinnedEndFirstCol,
+        getFrozenTopLastRow,
+        getFrozenBottomFirstRow,
         getHeaderCols,
         getHeaderColsFor,
         getHeaderColumn,
