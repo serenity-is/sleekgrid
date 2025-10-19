@@ -22,12 +22,8 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     let headerColsR: HTMLDivElement;
     let headerRowColsL: HTMLDivElement;
     let headerRowColsR: HTMLDivElement;
-    let headerRowSpacerL: HTMLDivElement;
-    let headerRowSpacerR: HTMLDivElement;
     let footerRowColsL: HTMLDivElement;
     let footerRowColsR: HTMLDivElement;
-    let footerRowSpacerL: HTMLDivElement;
-    let footerRowSpacerR: HTMLDivElement;
     let paneBottomL: HTMLDivElement;
     let paneBottomR: HTMLDivElement;
     let paneHeaderL: HTMLDivElement;
@@ -106,13 +102,13 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
                 </div>
             </div>
             <div class="slick-pane slick-pane-top slick-pane-left" tabindex="0" ref={el => paneTopL = el}>
-                <IfElse when={optSignals.showHeaderRow} else={new Comment("headerrow-left")}>
+                <IfElse when={optSignals.showHeaderRow} else={placeholder("headerrow-left")}>
                     <div class="slick-headerrow">
                         <div class="slick-headerrow-columns slick-headerrow-columns-left" ref={el => headerRowColsL = el} />
-                        {headerRowSpacerL = spacerDiv(spacerWidth)}
+                        {spacerDiv(spacerWidth)}
                     </div>
                 </IfElse>
-                <IfElse when={optSignals.showTopPanel} else={new Comment("top-panel-left")}>
+                <IfElse when={optSignals.showTopPanel} else={placeholder("top-panel-left")}>
                     <div class={"slick-top-panel-scroller"}>
                         <div class="slick-top-panel" style="width: 10000px" ref={el => topPanelL = el} />
                     </div>
@@ -120,22 +116,22 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
                 <div class="slick-viewport slick-viewport-top slick-viewport-left" tabindex="0" ref={el => viewportTopL = el}>
                     <div class="grid-canvas grid-canvas-top grid-canvas-left" tabindex="0" ref={el => canvasTopL = el} />
                 </div>
-                <IfElse when={optSignals.showFooterRow} else={new Comment("footerrow-left")}>
+                <IfElse when={optSignals.showFooterRow} else={placeholder("footerrow-left")}>
                     <div class="slick-footerrow">
                         <div class="slick-footerrow-columns slick-footerrow-columns-left" ref={el => footerRowColsL = el} />
-                        {footerRowSpacerL = spacerDiv(spacerWidth)}
+                        {spacerDiv(spacerWidth)}
                     </div>
                 </IfElse>
             </div>
 
             <div class="slick-pane slick-pane-top slick-pane-right" tabindex="0" ref={el => paneTopR = el}>
-                <IfElse when={optSignals.showHeaderRow} else={new Comment("headerrow-right")}>
+                <IfElse when={optSignals.showHeaderRow} else={placeholder("headerrow-right")}>
                     <div class="slick-headerrow">
                         <div class="slick-headerrow-columns slick-headerrow-columns-right" ref={el => headerRowColsR = el} />
-                        {headerRowSpacerR = spacerDiv(spacerWidth)}
+                        {spacerDiv(spacerWidth)}
                     </div>
                 </IfElse>
-                <IfElse when={optSignals.showTopPanel} else={new Comment("top-panel-right")}>
+                <IfElse when={optSignals.showTopPanel} else={placeholder("top-panel-right")}>
                     <div class={"slick-top-panel-scroller"}>
                         <div class="slick-top-panel" style="width: 10000px" ref={el => topPanelR = el} />
                     </div>
@@ -146,7 +142,7 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
                 <IfElse when={optSignals.showFooterRow} else={new Comment("footerrow-right")}>
                     <div class={"slick-footerrow"}>
                         <div class="slick-footerrow-columns slick-footerrow-columns-right" ref={el => footerRowColsR = el} />
-                        {footerRowSpacerR = spacerDiv(spacerWidth)}
+                        {spacerDiv(spacerWidth)}
                     </div>
                 </IfElse>
             </div>
@@ -301,11 +297,6 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         }
 
         var w = (canvasWidth + (vpi.hasHScroll ? scrollWidth : 0)) + 'px';
-
-        headerRowSpacerL.style.width = w;
-        headerRowSpacerR.style.width = w;
-        footerRowSpacerL.style.width = w;
-        footerRowSpacerR.style.width = w;
 
         return widthChanged;
     }
@@ -829,3 +820,4 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
 } as any;
 
 function exceptNull<T>(x: T[]) { return x.filter(y => y != null); }
+function placeholder(text: string) { return new Comment("placeholder:" + text); }

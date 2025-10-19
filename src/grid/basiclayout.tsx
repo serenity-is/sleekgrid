@@ -25,13 +25,13 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
             <div class={["slick-header", !options.showColumnHeader && "slick-hidden"]}>
                 <div class="slick-header-columns" style={{ [(options.rtl ? "right" : "left")]: "-1000px" }} ref={el => headerCols = el} />
             </div>
-            <IfElse when={optSignals.showHeaderRow} else={new Comment("headerrow")}>
+            <IfElse when={optSignals.showHeaderRow} else={placeholder("headerrow")}>
                 <div class="slick-headerrow">
                     <div class="slick-headerrow-columns" ref={el => headerRowCols = el} />
                     {spacerDiv(spacerWidth)}
                 </div>
             </IfElse>
-            <IfElse when={optSignals.showTopPanel} else={new Comment("top-panel")}>
+            <IfElse when={optSignals.showTopPanel} else={placeholder("top-panel")}>
                 <div class="slick-top-panel-scroller">
                     <div class="slick-top-panel" style={{ width: "10000px" }} ref={el => topPanel = el} />
                 </div>
@@ -39,7 +39,7 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
             <div class="slick-viewport" tabindex="0" ref={el => viewport = el}>
                 <div class="grid-canvas" tabindex="0" ref={el => canvas = el} />
             </div>
-            <IfElse when={optSignals.showFooterRow} else={new Comment("footerrow")}>
+            <IfElse when={optSignals.showFooterRow} else={placeholder("footerrow")}>
                 <div class="slick-footerrow">
                     <div class="slick-footerrow-columns" ref={el => footerRowCols = el} />
                     {spacerDiv(spacerWidth)}
@@ -304,3 +304,4 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
 } as any;
 
 function exceptNull<T>(x: T[]) { return x.filter(y => y != null); }
+function placeholder(text: string) { return new Comment("placeholder:" + text); }
