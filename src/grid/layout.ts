@@ -1,8 +1,15 @@
+import type { Signal } from "@serenity-is/signals";
 import { RowCell } from "../core";
 import { Column } from "../core/column";
 import { GridOptions } from "../core/gridoptions";
 import { ViewportInfo } from "../core/viewportinfo";
 import { ViewRange } from "../core/viewrange";
+
+export interface GridOptionSignals {
+    showHeaderRow: Signal<boolean>;
+    showFooterRow: Signal<boolean>;
+    showTopPanel: Signal<boolean>;
+}
 
 export interface LayoutHost {
     bindAncestorScroll(el: HTMLElement): void;
@@ -15,6 +22,7 @@ export interface LayoutHost {
     getContainerNode(): HTMLElement;
     getDataLength(): number;
     getOptions(): GridOptions;
+    getOptionSignals(): GridOptionSignals;
     getRowFromNode(rowNode: HTMLElement): number;
     getScrollDims(): { width: number, height: number };
     getScrollLeft(): number;
@@ -57,7 +65,6 @@ export interface LayoutEngine {
     getScrollContainerX(): HTMLElement;
     getScrollContainerY(): HTMLElement;
     getTopPanelFor(arg0: number): HTMLElement;
-    getTopPanelNodes(): HTMLElement[];
     getViewportNodeFor(cell: number, row: number): HTMLElement;
     getViewportNodes(): HTMLElement[];
     handleScrollH(): void;

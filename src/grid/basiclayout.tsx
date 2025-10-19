@@ -1,3 +1,4 @@
+import { IfElse, signal } from "@serenity-is/signals";
 import { Column, parsePx, spacerDiv } from "../core";
 import { LayoutEngine, LayoutHost } from "./layout";
 
@@ -8,36 +9,42 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
 
     let headerCols: HTMLElement;
     let headerRowCols: HTMLElement;
-    let headerRowSpacer: HTMLElement;
     let canvas: HTMLElement;
     let topPanel: HTMLElement;
     let viewport: HTMLElement;
     let footerRowCols: HTMLElement;
-    let footerRowSpacer: HTMLElement;
+    let spacerWidth = signal<string>(null);
 
     function init(hostGrid: LayoutHost) {
         host = hostGrid;
-        const spacerW = calcCanvasWidth() + host.getScrollDims().width + "px";
+        spacerWidth.value = calcCanvasWidth() + host.getScrollDims().width + "px";
         const options = host.getOptions();
+        const optSignals = host.getOptionSignals();
 
         host.getContainerNode().append(<>
             <div class={["slick-header", !options.showColumnHeader && "slick-hidden"]}>
                 <div class="slick-header-columns" style={{ [(options.rtl ? "right" : "left")]: "-1000px" }} ref={el => headerCols = el} />
             </div>
-            <div class={["slick-headerrow", !options.showHeaderRow && "slick-hidden"]}>
-                <div class="slick-headerrow-columns" ref={el => headerRowCols = el} />
-                {headerRowSpacer = spacerDiv(spacerW)}
-            </div>
-            <div class={["slick-top-panel-scroller", !options.showTopPanel && "slick-hidden"]}>
-                <div class="slick-top-panel" style={{ width: "10000px" }} ref={el => topPanel = el} />
-            </div>
+            <IfElse when={optSignals.showHeaderRow} else={new Comment("headerrow")}>
+                <div class="slick-headerrow">
+                    <div class="slick-headerrow-columns" ref={el => headerRowCols = el} />
+                    {spacerDiv(spacerWidth)}
+                </div>
+            </IfElse>
+            <IfElse when={optSignals.showTopPanel} else={new Comment("top-panel")}>
+                <div class="slick-top-panel-scroller">
+                    <div class="slick-top-panel" style={{ width: "10000px" }} ref={el => topPanel = el} />
+                </div>
+            </IfElse>
             <div class="slick-viewport" tabindex="0" ref={el => viewport = el}>
                 <div class="grid-canvas" tabindex="0" ref={el => canvas = el} />
             </div>
-            <div class={["slick-footerrow", !options.showFooterRow && "slick-hidden"]}>
-                <div class="slick-footerrow-columns" ref={el => footerRowCols = el} />
-                {footerRowSpacer = spacerDiv(spacerW)}
-            </div>
+            <IfElse when={optSignals.showFooterRow} else={new Comment("footerrow")}>
+                <div class="slick-footerrow">
+                    <div class="slick-footerrow-columns" ref={el => footerRowCols = el} />
+                    {spacerDiv(spacerWidth)}
+                </div>
+            </IfElse>
         </>);
 
         updateHeadersWidth();
@@ -138,7 +145,7 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     }
 
     function getHeaderRowCols(): HTMLElement[] {
-        return [headerRowCols];
+        return exceptNull([headerRowCols])
     }
 
     function getHeaderRowColumn(cell: number): HTMLElement {
@@ -162,7 +169,7 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     }
 
     function getFooterRowCols(): HTMLElement[] {
-        return [footerRowCols];
+        return exceptNull([footerRowCols]);
     }
 
     function getRowFromCellNode(cellNode: HTMLElement): number {
@@ -171,10 +178,6 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
 
     function getTopPanelFor(): HTMLElement {
         return topPanel;
-    }
-
-    function getTopPanelNodes(): HTMLElement[] {
-        return [topPanel];
     }
 
     function getViewportNodeFor(): HTMLElement {
@@ -227,10 +230,7 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         updateHeadersWidth();
         vpi.hasHScroll = (canvasWidth > host.getViewportInfo().width - scrollWidth);
 
-        var spacerWidthPx = (canvasWidth + (vpi.hasVScroll ? scrollWidth : 0)) + "px";
-        headerRowSpacer.style.width = spacerWidthPx;
-        footerRowSpacer.style.width = spacerWidthPx;
-
+        spacerWidth.value = (canvasWidth + (vpi.hasVScroll ? scrollWidth : 0)) + "px";
         return canvasWidth != oldCanvasWidth;
     }
 
@@ -244,7 +244,7 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
             viewport.style.height = "";
         }
         else
-            viewport.style.height = vs.height + "px"
+            viewport.style.height = vs.height + "px";
     }
 
     function returnZero() {
@@ -285,7 +285,6 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         getScrollContainerX: getViewportNodeFor,
         getScrollContainerY: getViewportNodeFor,
         getTopPanelFor,
-        getTopPanelNodes,
         getViewportNodeFor,
         getViewportNodes,
         handleScrollH,
@@ -303,3 +302,5 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
 
     return intf;
 } as any;
+
+function exceptNull<T>(x: T[]) { return x.filter(y => y != null); }

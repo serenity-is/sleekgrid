@@ -507,6 +507,14 @@ export interface IDataView<TItem = any> {
 	/** Event fired when specific rows change */
 	readonly onRowsChanged?: EventEmitter<any, IEventData>;
 }
+export interface SignalLike<T> {
+	value: T;
+	peek(): T;
+	subscribe(fn: (value: T) => void): ((() => void) | null);
+}
+export type SignalOrValue<T> = T | SignalLike<T>;
+export interface Signal<T> extends SignalLike<T> {
+}
 export interface ViewportInfo {
 	height: number;
 	width: number;
@@ -527,6 +535,11 @@ export interface ViewRange {
 	leftPx?: number;
 	rightPx?: number;
 }
+export interface GridOptionSignals {
+	showHeaderRow: Signal<boolean>;
+	showFooterRow: Signal<boolean>;
+	showTopPanel: Signal<boolean>;
+}
 export interface LayoutHost {
 	bindAncestorScroll(el: HTMLElement): void;
 	cleanUpAndRenderCells(range: ViewRange): void;
@@ -541,6 +554,7 @@ export interface LayoutHost {
 	getContainerNode(): HTMLElement;
 	getDataLength(): number;
 	getOptions(): GridOptions;
+	getOptionSignals(): GridOptionSignals;
 	getRowFromNode(rowNode: HTMLElement): number;
 	getScrollDims(): {
 		width: number;
@@ -585,7 +599,6 @@ export interface LayoutEngine {
 	getScrollContainerX(): HTMLElement;
 	getScrollContainerY(): HTMLElement;
 	getTopPanelFor(arg0: number): HTMLElement;
-	getTopPanelNodes(): HTMLElement[];
 	getViewportNodeFor(cell: number, row: number): HTMLElement;
 	getViewportNodes(): HTMLElement[];
 	handleScrollH(): void;
@@ -944,7 +957,7 @@ export declare function escapeHtml(s: any): any;
 export declare function basicDOMSanitizer(dirtyHtml: string): string;
 export declare function disableSelection(target: HTMLElement): void;
 export declare function removeClass(el: Element, cls: string): void;
-export declare function spacerDiv(width: string): HTMLDivElement;
+export declare function spacerDiv(width: SignalOrValue<string>): HTMLDivElement;
 export declare function parsePx(str: string): number;
 export declare const BasicLayout: {
 	new (): LayoutEngine;
@@ -998,6 +1011,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private _layout;
 	private _numberOfPages;
 	private _options;
+	private _optionSignals;
 	private _page;
 	private _pageHeight;
 	private _pageOffset;
@@ -1151,6 +1165,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	getOptions(): GridOptions<TItem>;
 	setOptions(args: GridOptions<TItem>, suppressRender?: boolean, suppressColumnSet?: boolean, suppressSetOverflow?: boolean): void;
 	private validateAndEnforceOptions;
+	private setOptionSignals;
 	private viewOnRowCountChanged;
 	private viewOnRowsChanged;
 	private viewOnDataChanged;

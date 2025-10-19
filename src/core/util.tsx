@@ -1,3 +1,5 @@
+import type { SignalOrValue } from "@serenity-is/sleekdom";
+
 export function addClass(el: Element, cls: string) {
     if (cls == null || !cls.length)
         return;
@@ -148,7 +150,7 @@ export function removeClass(el: Element, cls: string) {
         el.classList.remove(cls);
 }
 
-export function spacerDiv(width: string): HTMLDivElement {
+export function spacerDiv(width: SignalOrValue<string>): HTMLDivElement {
     return <div class="slick-spacer-line" style={{ width }} /> as HTMLDivElement;
 }
 

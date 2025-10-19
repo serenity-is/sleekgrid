@@ -1,3 +1,4 @@
+import { signal, type Signal } from "@serenity-is/signals";
 import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, ViewRange, ViewportInfo, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, formatterContext, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { GridOptions, gridDefaults } from "../core/gridoptions";
 import { IDataView } from "../core/idataview";
@@ -6,7 +7,7 @@ import { CellNavigator } from "./cellnavigator";
 import { Draggable } from "./draggable";
 import { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "./eventargs";
 import { CachedRow, PostProcessCleanupEntry, absBox, autosizeColumns, calcMinMaxPageXOnDragStart, getInnerWidth, getMaxSupportedCssHeight, getScrollBarDimensions, getVBoxDelta, shrinkOrStretchColumn, simpleArrayEquals, sortToDesiredOrderAndKeepRest } from "./internal";
-import { LayoutEngine } from "./layout";
+import { LayoutEngine, type GridOptionSignals } from "./layout";
 import { IPlugin, SelectionModel } from "./types";
 
 export class Grid<TItem = any> implements EditorHost {
@@ -48,6 +49,11 @@ export class Grid<TItem = any> implements EditorHost {
     declare private _layout: LayoutEngine;
     declare private _numberOfPages: number;
     declare private _options: GridOptions<TItem>;
+    private _optionSignals: GridOptionSignals = {
+        showHeaderRow: signal<boolean>(),
+        showFooterRow: signal<boolean>(),
+        showTopPanel: signal<boolean>()
+    };
     private _page: number = 0;
     declare private _pageHeight: number;
     private _pageOffset: number = 0;
@@ -173,6 +179,7 @@ export class Grid<TItem = any> implements EditorHost {
             this._container.classList.add('ltr');
 
         this.validateAndEnforceOptions();
+        this.setOptionSignals();
         this._colDefaults.width = options.defaultColumnWidth;
 
         this._editController = {
@@ -215,6 +222,7 @@ export class Grid<TItem = any> implements EditorHost {
             getContainerNode: this.getContainerNode.bind(this),
             getDataLength: this.getDataLength.bind(this),
             getOptions: this.getOptions.bind(this),
+            getOptionSignals: () => this._optionSignals,
             getRowFromNode: this.getRowFromNode.bind(this),
             getScrollDims: this.getScrollBarDimensions.bind(this),
             getScrollLeft: () => this._scrollLeft,
@@ -337,11 +345,11 @@ export class Grid<TItem = any> implements EditorHost {
         });
 
         this._layout.getHeaderRowCols().forEach(el => {
-            onEvent(el.parentElement, 'scroll', this.handleHeaderRowScroll);
+            el && onEvent(el.parentElement, 'scroll', this.handleHeaderRowScroll);
         });
 
         this._layout.getFooterRowCols().forEach(el => {
-            onEvent(el.parentElement, 'scroll', this.handleFooterRowScroll);
+            el && onEvent(el.parentElement, 'scroll', this.handleFooterRowScroll);
         });
 
         [this._focusSink1, this._focusSink2].forEach(fs => onEvent(fs, "keydown", this.handleKeyDown.bind(this)));
@@ -1500,6 +1508,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         this._options = Object.assign(this._options, args);
         this.validateAndEnforceOptions();
+        this.setOptionSignals();
         this._layout.afterSetOptions(args);
 
         if (args.columns && !suppressColumnSet) {
@@ -1518,6 +1527,14 @@ export class Grid<TItem = any> implements EditorHost {
     private validateAndEnforceOptions(): void {
         if (this._options.autoHeight) {
             this._options.leaveSpaceForNewRows = false;
+        }
+    }
+
+    private setOptionSignals() {
+        const sig = this._optionSignals;
+        const opt = this._options;
+        for (let k in sig) {
+            (sig as any)[k].value = (opt as any)[k];
         }
     }
 
@@ -1597,8 +1614,7 @@ export class Grid<TItem = any> implements EditorHost {
 
     setTopPanelVisibility(visible: boolean): void {
         if (this._options.showTopPanel != visible) {
-            this._options.showTopPanel = !!visible;
-            this._layout.getTopPanelNodes().forEach(el => el.classList.toggle("slick-hidden", !visible));
+            this._options.showTopPanel = this._optionSignals.showTopPanel.value = !!visible;
             this.resizeCanvas();
         }
     }
@@ -1613,8 +1629,7 @@ export class Grid<TItem = any> implements EditorHost {
 
     setFooterRowVisibility(visible: boolean): void {
         if (this._options.showFooterRow != visible) {
-            this._options.showFooterRow = !!visible;
-            this._layout.getFooterRowCols().forEach(n => n.parentElement?.classList.toggle("slick-hidden", !visible));
+            this._options.showFooterRow = this._optionSignals.showFooterRow.value = !!visible;
             this.resizeCanvas();
         }
     }
@@ -1633,10 +1648,7 @@ export class Grid<TItem = any> implements EditorHost {
 
     setHeaderRowVisibility(visible: boolean): void {
         if (this._options.showHeaderRow != visible) {
-            this._options.showHeaderRow = visible;
-            this._layout.getHeaderRowCols().forEach(n => {
-                n.parentElement?.classList.toggle("slick-hidden", !visible);
-            });
+            this._options.showHeaderRow = this._optionSignals.showHeaderRow.value = !!visible;
             this.resizeCanvas();
         }
     }

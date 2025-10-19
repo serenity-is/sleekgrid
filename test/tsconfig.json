@@ -1,7 +1,6 @@
 ﻿{
     "extends": "../tsconfig.json",
     "compilerOptions": {
-        "baseUrl": ".",
         "noImplicitAny": false,
         "declaration": false,
         "sourceMap": true,
@@ -10,6 +9,6 @@
         ]
     },
     "include": [
-        "**/*.spec.ts"
+        "."
     ]
 }

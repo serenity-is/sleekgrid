@@ -1,3 +1,4 @@
+import { IfElse, signal } from "@serenity-is/signals";
 import { Column, disableSelection, GridOptions, parsePx, spacerDiv, ViewRange } from "../core";
 import { LayoutEngine, LayoutHost } from "../grid";
 
@@ -82,14 +83,15 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     }
 
     var host: LayoutHost;
+    let spacerWidth = signal<string>(null);
 
     function init(hostGrid: LayoutHost) {
         host = hostGrid;
-        const spacerW = calcCanvasWidth() + host.getScrollDims().width + 'px';
+        spacerWidth.value = calcCanvasWidth() + host.getScrollDims().width + 'px';
         const options = host.getOptions();
+        const optSignals = host.getOptionSignals();
 
         const rl1000 = (options.rtl ? "right" : "left") + ':-1000px';
-
 
         host.getContainerNode().append(<>
             <div class="slick-pane slick-pane-header slick-pane-left" tabindex="0" ref={el => paneHeaderL = el}>
@@ -104,37 +106,49 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
                 </div>
             </div>
             <div class="slick-pane slick-pane-top slick-pane-left" tabindex="0" ref={el => paneTopL = el}>
-                <div class={["slick-headerrow", !options.showHeaderRow && "slick-hidden"]}>
-                    <div class="slick-headerrow-columns slick-headerrow-columns-left" ref={el => headerRowColsL = el} />
-                    {headerRowSpacerL = spacerDiv(spacerW)}
-                </div>
-                <div class={["slick-top-panel-scroller", !options.showTopPanel && "slick-hidden"]}>
-                    <div class="slick-top-panel" style="width: 10000px" ref={el => topPanelL = el} />
-                </div>
+                <IfElse when={optSignals.showHeaderRow} else={new Comment("headerrow-left")}>
+                    <div class="slick-headerrow">
+                        <div class="slick-headerrow-columns slick-headerrow-columns-left" ref={el => headerRowColsL = el} />
+                        {headerRowSpacerL = spacerDiv(spacerWidth)}
+                    </div>
+                </IfElse>
+                <IfElse when={optSignals.showTopPanel} else={new Comment("top-panel-left")}>
+                    <div class={"slick-top-panel-scroller"}>
+                        <div class="slick-top-panel" style="width: 10000px" ref={el => topPanelL = el} />
+                    </div>
+                </IfElse>
                 <div class="slick-viewport slick-viewport-top slick-viewport-left" tabindex="0" ref={el => viewportTopL = el}>
                     <div class="grid-canvas grid-canvas-top grid-canvas-left" tabindex="0" ref={el => canvasTopL = el} />
                 </div>
-                <div class={["slick-footerrow", !options.showFooterRow && "slick-hidden"]}>
-                    <div class="slick-footerrow-columns slick-footerrow-columns-left" ref={el => footerRowColsL = el} />
-                    {footerRowSpacerL = spacerDiv(spacerW)}
-                </div>
+                <IfElse when={optSignals.showFooterRow} else={new Comment("footerrow-left")}>
+                    <div class="slick-footerrow">
+                        <div class="slick-footerrow-columns slick-footerrow-columns-left" ref={el => footerRowColsL = el} />
+                        {footerRowSpacerL = spacerDiv(spacerWidth)}
+                    </div>
+                </IfElse>
             </div>
 
             <div class="slick-pane slick-pane-top slick-pane-right" tabindex="0" ref={el => paneTopR = el}>
-                <div class={["slick-headerrow", !options.showHeaderRow && "slick-hidden"]}>
-                    <div class="slick-headerrow-columns slick-headerrow-columns-right" ref={el => headerRowColsR = el} />
-                    {headerRowSpacerR = spacerDiv(spacerW)}
-                </div>
-                <div class={["slick-top-panel-scroller", !options.showTopPanel && "slick-hidden"]}>
-                    <div class="slick-top-panel" style="width: 10000px" ref={el => topPanelR = el} />
-                </div>
+                <IfElse when={optSignals.showHeaderRow} else={new Comment("headerrow-right")}>
+                    <div class="slick-headerrow">
+                        <div class="slick-headerrow-columns slick-headerrow-columns-right" ref={el => headerRowColsR = el} />
+                        {headerRowSpacerR = spacerDiv(spacerWidth)}
+                    </div>
+                </IfElse>
+                <IfElse when={optSignals.showTopPanel} else={new Comment("top-panel-right")}>
+                    <div class={"slick-top-panel-scroller"}>
+                        <div class="slick-top-panel" style="width: 10000px" ref={el => topPanelR = el} />
+                    </div>
+                </IfElse>
                 <div class="slick-viewport slick-viewport-top slick-viewport-right" tabindex="0" ref={el => viewportTopR = el}>
                     <div class="grid-canvas grid-canvas-top grid-canvas-right" tabindex="0" ref={el => canvasTopR = el} />
                 </div>
-                <div class={["slick-footerrow", !options.showFooterRow && "slick-hidden"]}>
-                    <div class="slick-footerrow-columns slick-footerrow-columns-right" ref={el => footerRowColsR = el} />
-                    {footerRowSpacerR = spacerDiv(spacerW)}
-                </div>
+                <IfElse when={optSignals.showFooterRow} else={new Comment("footerrow-right")}>
+                    <div class={"slick-footerrow"}>
+                        <div class="slick-footerrow-columns slick-footerrow-columns-right" ref={el => footerRowColsR = el} />
+                        {footerRowSpacerR = spacerDiv(spacerWidth)}
+                    </div>
+                </IfElse>
             </div>
 
             <div class="slick-pane slick-pane-bottom slick-pane-left" tabindex="0" ref={el => paneBottomL = el}>
@@ -162,11 +176,11 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     }
 
     function getHeaderRowCols() {
-        return [headerRowColsL, headerRowColsR];
+        return exceptNull([headerRowColsL, headerRowColsR]);
     }
 
     function getFooterRowCols() {
-        return [footerRowColsL, footerRowColsR];
+        return exceptNull([footerRowColsL, footerRowColsR]);
     }
 
     const getCanvasNodeFor = (cell: number, row: number) => {
@@ -509,8 +523,6 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         return frozenCols > 0 && cell >= frozenCols ? topPanelR : topPanelL;
     }
 
-    const getTopPanelNodes = () => [topPanelL, topPanelR];
-
     const resizeCanvas = () => {
         var _paneTopH = 0
         var _paneBottomH = 0
@@ -800,7 +812,6 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         getScrollContainerX,
         getScrollContainerY,
         getTopPanelFor,
-        getTopPanelNodes,
         getViewportNodeFor,
         getViewportNodes,
         handleScrollH,
@@ -816,3 +827,5 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         updateCanvasWidth
     }
 } as any;
+
+function exceptNull<T>(x: T[]) { return x.filter(y => y != null); }
