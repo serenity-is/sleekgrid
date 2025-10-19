@@ -345,11 +345,11 @@ export class Grid<TItem = any> implements EditorHost {
         });
 
         this._layout.getHeaderRowCols().forEach(el => {
-            el && onEvent(el.parentElement, 'scroll', this.handleHeaderRowScroll);
+            el && onEvent(el.parentElement, 'scroll', this.handleHeaderFooterRowScroll.bind(this));
         });
 
         this._layout.getFooterRowCols().forEach(el => {
-            el && onEvent(el.parentElement, 'scroll', this.handleFooterRowScroll);
+            el && onEvent(el.parentElement, 'scroll', this.handleHeaderFooterRowScroll.bind(this));
         });
 
         [this._focusSink1, this._focusSink2].forEach(fs => onEvent(fs, "keydown", this.handleKeyDown.bind(this)));
@@ -2690,17 +2690,7 @@ export class Grid<TItem = any> implements EditorHost {
         this._hRender = null;
     }
 
-    private handleHeaderRowScroll = (e: IEventData): void => {
-        if (this._ignoreScrollUntil >= new Date().getTime())
-            return;
-
-        var scrollLeft = (e.target as HTMLElement).scrollLeft;
-        if (scrollLeft != this._layout.getScrollContainerX().scrollLeft) {
-            this._layout.getScrollContainerX().scrollLeft = scrollLeft;
-        }
-    }
-
-    private handleFooterRowScroll = (e: IEventData): void => {
+    private handleHeaderFooterRowScroll = (e: IEventData): void => {
         if (this._ignoreScrollUntil >= new Date().getTime())
             return;
 
@@ -2762,7 +2752,6 @@ export class Grid<TItem = any> implements EditorHost {
             this._scrollLeftPrev = this._scrollLeft;
 
             this._layout.getScrollContainerX().scrollLeft = this._scrollLeft;
-
             this._layout.handleScrollH();
         }
 

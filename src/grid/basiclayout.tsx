@@ -195,19 +195,13 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         footerRowCols.parentElement.scrollLeft = host.getScrollLeft();
     }
 
-    function noop(): void {
-    }
 
     function realScrollHeightChange(): void {
         canvas.style.height = host.getViewportInfo().realScrollHeight + "px"
     }
 
-    function reorderViewColumns(viewCols: Column[]): Column[] {
+    function reorderViewColumns(_: Column[]): Column[] {
         return null;
-    }
-
-    function returnFalse(): boolean {
-        return false;
     }
 
     function setOverflow(): void {
@@ -304,4 +298,6 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
 } as any;
 
 function exceptNull<T>(x: T[]) { return x.filter(y => y != null); }
+function noop(): void {}
 function placeholder(text: string) { return new Comment("placeholder:" + text); }
+function returnFalse(): boolean { return false; }

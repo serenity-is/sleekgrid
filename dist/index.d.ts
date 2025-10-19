@@ -1232,8 +1232,7 @@ export declare class Grid<TItem = any> implements EditorHost {
 	private updateRowPositions;
 	private updateGrandTotals;
 	render: () => void;
-	private handleHeaderRowScroll;
-	private handleFooterRowScroll;
+	private handleHeaderFooterRowScroll;
 	private handleMouseWheel;
 	private handleScroll;
 	private _handleScroll;
