@@ -507,10 +507,11 @@ export interface IDataView<TItem = any> {
 	/** Event fired when specific rows change */
 	readonly onRowsChanged?: EventEmitter<any, IEventData>;
 }
+export type EffectDisposer = (() => void) | null;
 export interface SignalLike<T> {
 	value: T;
 	peek(): T;
-	subscribe(fn: (value: T) => void): ((() => void) | null);
+	subscribe(fn: (value: T) => void): EffectDisposer;
 }
 export type SignalOrValue<T> = T | SignalLike<T>;
 export interface Signal<T> extends SignalLike<T> {
