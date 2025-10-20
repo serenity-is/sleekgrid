@@ -10,7 +10,7 @@ export function mockSignal<T>(initialValue: T): SignalLike<T> & { callbacks?: Ar
             }
         }),
         get value() { return signal.currentValue },
-        set value(val: T) { if (signal.currentValue !== val) { signal.currentValue = val; signal.listeners.forEach(cb => cb(val)); } },
+        set value(val: T) { if (signal.currentValue !== val) { signal.currentValue = val; signal.listeners.forEach(cb => cb.call(this, val)); } },
         listeners: [] as Array<(value: any) => void>
     };
     return signal;

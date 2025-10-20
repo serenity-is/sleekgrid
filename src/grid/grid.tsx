@@ -50,9 +50,9 @@ export class Grid<TItem = any> implements EditorHost {
     declare private _numberOfPages: number;
     declare private _options: GridOptions<TItem>;
     private _optionSignals: GridOptionSignals = {
+        showTopPanel: signal<boolean>(),
         showHeaderRow: signal<boolean>(),
         showFooterRow: signal<boolean>(),
-        showTopPanel: signal<boolean>()
     };
     private _page: number = 0;
     declare private _pageHeight: number;
@@ -161,8 +161,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         if (options?.createPreHeaderPanel) {
             // for compat, as draggable grouping plugin expects preHeaderPanel for grouping
-            if (options.groupingPanel == null)
-                options.groupingPanel = true;
+            options.groupingPanel ??= true;
             if (options.groupingPanelHeight == null && options.preHeaderPanelHeight != null)
                 options.groupingPanelHeight = options.preHeaderPanelHeight;
             if (options.showGroupingPanel == null && options.showPreHeaderPanel != null)

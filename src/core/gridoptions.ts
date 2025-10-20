@@ -71,7 +71,7 @@ export interface GridOptions<TItem = any> {
     columns?: Column<TItem>[];
 
     /**
-     * Defaults to `false`. If `true`, creates an extra pre-header panel for column grouping.
+     * @obsolete Use showGroupingPanel option instead.
      */
     createPreHeaderPanel?: boolean;
 
@@ -280,7 +280,7 @@ export interface GridOptions<TItem = any> {
     multiSelect?: boolean;
 
     /**
-     * Sets grouping panel height. Default is `undefined`, e.g. it is set via CSS.
+     * @obsolete Use groupingPanelHeight option instead.
      */
     preHeaderPanelHeight?: number;
 
@@ -339,7 +339,7 @@ export interface GridOptions<TItem = any> {
     showFooterRow?: boolean;
 
     /**
-     * Defaults to `true`. If `true`, displays the grouping panel.
+     * Defaults to `false`. If `true`, displays the grouping panel.
      */
     showGroupingPanel?: boolean;
 
@@ -349,12 +349,12 @@ export interface GridOptions<TItem = any> {
     showHeaderRow?: boolean;
 
     /**
-     * Defaults to `false`. If `true`, displays the pre-header panel for column grouping.
+     * @obsolete Use showGroupingPanel option instead.
      */
     showPreHeaderPanel?: boolean;
 
     /**
-     * Defaults to `false`. If `true`, displays the top panel for additional controls or information.
+     * Defaults to `false`. If `true`, displays the post-header panel for additional controls or information.
      */
     showTopPanel?: boolean;
 
