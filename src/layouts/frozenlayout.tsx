@@ -85,18 +85,16 @@ export const FrozenLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         const options = host.getOptions();
         const optSignals = host.getOptionSignals();
 
-        const rl1000 = (options.rtl ? "right" : "left") + ':-1000px';
-
         host.getContainerNode().append(<>
             <div class="slick-pane slick-pane-header slick-pane-left" tabindex="0" ref={el => paneHeaderL = el}>
                 <div class={["slick-header slick-header-left", !options.showColumnHeader && "slick-hidden"]} onSelectStart={returnFalse}>
-                    <div class="slick-header-columns slick-header-columns-left slick-hscrolspacer" style={rl1000} ref={el => headerColsL = el} />
+                    <div class="slick-header-columns slick-header-columns-left" ref={el => headerColsL = el} />
                 </div>
             </div>
 
             <div class="slick-pane slick-pane-header slick-pane-right" tabindex="0" ref={el => paneHeaderR = el} onSelectStart={() => false}>
                 <div class={["slick-header slick-header-right", !options.showColumnHeader && "slick-hidden"]}>
-                    <div class="slick-header-columns slick-header-columns-right" style={rl1000} ref={el => headerColsR = el} />
+                    <div class="slick-header-columns slick-header-columns-right" ref={el => headerColsR = el} />
                 </div>
             </div>
             <div class="slick-pane slick-pane-top slick-pane-left" tabindex="0" ref={el => paneTopL = el}>

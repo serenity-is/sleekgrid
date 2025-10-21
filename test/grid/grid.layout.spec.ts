@@ -12,7 +12,7 @@ describe('canvas', () => {
             return canvasNode;
         };
 
-        const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+        const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         expect(grid.getCanvasNode(0, 0)).toBe(canvasNode);
     });
@@ -20,16 +20,16 @@ describe('canvas', () => {
     it('should be able to get canvas with column name', () => {
         const layoutEngine = new BasicLayout();
 
-        let getCanvasNodeForParams: {cell: number, row: number};
+        let getCanvasNodeForParams: { cell: number, row: number };
         const oldGetCanvasNodeFor = layoutEngine.getCanvasNodeFor;
         layoutEngine.getCanvasNodeFor = (cell, row) => {
-            getCanvasNodeForParams = {cell: cell, row: row};
+            getCanvasNodeForParams = { cell: cell, row: row };
             return oldGetCanvasNodeFor(cell, row);
         };
 
         const grid = new Grid(document.createElement('div'), [], [
-            {field: "c1"},
-            {field: "c2"}
+            { field: "c1" },
+            { field: "c2" }
         ], { layoutEngine });
 
         grid.getCanvasNode('c2');
@@ -49,7 +49,7 @@ describe('canvas', () => {
             return canvasNodes;
         };
 
-        const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+        const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         expect(grid.getCanvases()).toBe(canvasNodes);
     });
@@ -110,10 +110,10 @@ describe('canvas', () => {
     it('should return activeCanvasNode after its set with an event', () => {
         const oldGetComputedStyle = window.getComputedStyle;
         window.getComputedStyle = (_el: HTMLElement) => {
-            return {height: '1000px', width: '1000px', getPropertyValue: (_prop: string) => 1000} as any;
+            return { height: '1000px', width: '1000px', getPropertyValue: (_prop: string) => 1000 } as any;
         };
 
-        const grid = new Grid(document.createElement('div'), [{c1: 1, c2: 8}], [{field: "c1"}, {field: "c2"}], {
+        const grid = new Grid(document.createElement('div'), [{ c1: 1, c2: 8 }], [{ field: "c1" }, { field: "c2" }], {
             rowHeight: -1
         });
 
@@ -161,7 +161,7 @@ describe('canvas', () => {
         canvasNodes.forEach(canvasNode => documentFragment.appendChild(canvasNode));
         expect(documentFragment.childNodes.length).toBe(2);
 
-        const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+        const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         expect(canvasNodes[0].parentNode).toBe(documentFragment);
         expect(canvasNodes[1].parentNode).toBe(documentFragment);
@@ -176,7 +176,7 @@ describe('canvas', () => {
 describe('viewport', () => {
     it('should set viewportInfo hasVScroll based on row count and rowHeight if autoHeight is false', () => {
         const layoutEngine = new BasicLayout();
-        let getViewportInfo : () => ViewportInfo;
+        let getViewportInfo: () => ViewportInfo;
 
         const oldLayoutEngineInit = layoutEngine.init;
         layoutEngine.init = function (layoutHost) {
@@ -191,13 +191,13 @@ describe('viewport', () => {
         };
 
         const data = [
-            {c1: 1},
-            {c1: 2},
-            {c1: 3}
+            { c1: 1 },
+            { c1: 2 },
+            { c1: 3 }
         ];
 
         const columns = [
-            {field: "c1"}
+            { field: "c1" }
         ];
 
         const dataHeight = data.length * gridOptions.rowHeight;
@@ -206,7 +206,7 @@ describe('viewport', () => {
         const oldGetComputedStyles = window.getComputedStyle;
         window.getComputedStyle = (el: HTMLElement) => {
             if (el === layoutEngine.getScrollContainerY())
-                return {height: viewportHeight + 'px'} as any;
+                return { height: viewportHeight + 'px' } as any;
 
             return oldGetComputedStyles(el);
         }
@@ -233,7 +233,7 @@ describe('viewport', () => {
             return viewportNode;
         };
 
-        const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+        const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         expect(grid.getViewportNode(1, 2)).toBe(viewportNode);
     });
@@ -247,10 +247,10 @@ describe('viewport', () => {
     it('should return activeViewportNode after its set with an event', () => {
         const oldGetComputedStyle = window.getComputedStyle;
         window.getComputedStyle = (_el: HTMLElement) => {
-            return {height: '1000px', width: '1000px', getPropertyValue: (_prop: string) => 1000} as any;
+            return { height: '1000px', width: '1000px', getPropertyValue: (_prop: string) => 1000 } as any;
         };
 
-        const grid = new Grid(document.createElement('div'), [{c1: 1, c2: 8}], [{field: "c1"}, {field: "c2"}], {
+        const grid = new Grid(document.createElement('div'), [{ c1: 1, c2: 8 }], [{ field: "c1" }, { field: "c2" }], {
             rowHeight: -1
         });
 
@@ -302,7 +302,7 @@ describe('viewport', () => {
             oldLayoutEngineInit(layoutHost);
         };
 
-        new Grid(document.createElement('div'), [], [], {layoutEngine});
+        new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         if (!asserted)
             throw "assertion not made";
@@ -325,7 +325,7 @@ describe('viewport', () => {
             oldLayoutEngineInit(layoutHost);
         };
 
-        new Grid(document.createElement('div'), [], [], {layoutEngine});
+        new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         if (!asserted)
             throw "assertion not made";
@@ -352,7 +352,7 @@ describe('scroll', () => {
             oldLayoutEngineInit(layoutHost);
         };
 
-        new Grid(document.createElement('div'), [], [], {layoutEngine});
+        new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         if (!asserted)
             throw "assertion not made";
@@ -383,7 +383,7 @@ describe('scroll', () => {
             oldLayoutEngineInit(layoutHost);
         }
 
-        const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+        const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         grid.destroy();
 
@@ -398,7 +398,7 @@ describe('headers', () => {
 
         layoutEngine.getHeaderCols = () => headerCols;
 
-        const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+        const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         expect(grid.getHeader()).toBe(headerCols[0]);
     });
@@ -410,7 +410,7 @@ describe('headers', () => {
 
             layoutEngine.getHeaderColumn = (cell) => headerCols[cell];
 
-            const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+            const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
             expect(grid.getHeaderColumn(1)).toBe(headerCols[1]);
         });
@@ -420,7 +420,7 @@ describe('headers', () => {
 
             layoutEngine.getHeaderColumn = () => null;
 
-            const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+            const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
             expect(grid.getHeaderColumn(1)).toBeNull();
         });
@@ -434,7 +434,7 @@ describe('headers', () => {
 
         layoutEngine.getHeaderRowCols = () => headerCols;
 
-        const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+        const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         expect(grid.getHeaderRow()).toBe(headerCols[0]);
     });
@@ -448,7 +448,7 @@ describe('headers', () => {
 
             layoutEngine.getHeaderRowColumn = (cell) => headerCols[cell];
 
-            const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+            const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
             expect(grid.getHeaderRowColumn(1)).toBe(headerCols[1]);
         });
@@ -458,7 +458,7 @@ describe('headers', () => {
 
             layoutEngine.getHeaderRowColumn = () => null;
 
-            const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+            const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
             expect(grid.getHeaderRowColumn(1)).toBeNull();
         });
@@ -472,7 +472,7 @@ describe('headers', () => {
 
         layoutEngine.getFooterRowCols = () => footerCols;
 
-        const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+        const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
         expect(grid.getFooterRow()).toBe(footerCols[0]);
     });
@@ -486,7 +486,7 @@ describe('headers', () => {
 
             layoutEngine.getFooterRowColumn = (cell) => footerCols[cell];
 
-            const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+            const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
             expect(grid.getFooterRowColumn(1)).toBe(footerCols[1]);
         });
@@ -496,7 +496,7 @@ describe('headers', () => {
 
             layoutEngine.getFooterRowColumn = () => null;
 
-            const grid = new Grid(document.createElement('div'), [], [], {layoutEngine});
+            const grid = new Grid(document.createElement('div'), [], [], { layoutEngine });
 
             expect(grid.getFooterRowColumn(1)).toBeNull();
         });

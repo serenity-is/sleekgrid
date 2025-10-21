@@ -1109,8 +1109,6 @@ export class Grid<TItem = any> implements EditorHost {
             "." + this._uid + " { --sleek-cell-height: " + this._options.rowHeight + "px; }",
             "." + this._uid + " { --sleek-scrollbar-width: " + this._scrollDims.width + "px; }",
             "." + this._uid + " { --sleek-scrollbar-height: " + this._scrollDims.height + "px; }",
-            "." + this._uid + " .slick-group-header-column { " + (this._options.rtl ? 'right' : 'left') + ": 1000px; }",
-            "." + this._uid + " .slick-header-column { " + (this._options.rtl ? 'right' : 'left') + ": 1000px; }",
             "." + this._uid + " .slick-top-panel { height:" + this._options.topPanelHeight + "px; }",
             "." + this._uid + " .slick-grouping-panel { height:" + this._options.groupingPanelHeight + "px; }",
             "." + this._uid + " .slick-headerrow-columns { height:" + this._options.headerRowHeight + "px; }",

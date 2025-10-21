@@ -805,11 +805,6 @@ button.ui-datepicker-trigger::before {
   right: var(--r49);
 }
 
-.sleek-vars.ltr .slick-header-column,
-.sleek-vars.ltr .slick-group-header-column {
-  left: 1000px;
-}
-
 .sleek-vars.rtl .l0 {
   right: var(--l0);
 }
@@ -1209,11 +1204,6 @@ button.ui-datepicker-trigger::before {
 
 .sleek-vars.rtl .r49 {
   left: var(--r49);
-}
-
-.sleek-vars.rtl .slick-header-column,
-.sleek-vars.rtl .slick-group-header-column {
-  right: 1000px;
 }
 
 .sleek-vars .slick-cell {

@@ -22,7 +22,7 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
 
         host.getContainerNode().append(<>
             <div class={{ "slick-header": true, "slick-hidden": hideColumnHeader }}>
-                <div class="slick-header-columns" style={{ [(options.rtl ? "right" : "left")]: "-1000px" }} ref={el => headerCols = el} />
+                <div class="slick-header-columns" ref={el => headerCols = el} />
             </div>
             <IfElse when={optSignals.showHeaderRow} else={__("headerrow")}>
                 <div class="slick-headerrow slick-spacer-h">
