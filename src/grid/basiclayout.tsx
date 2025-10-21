@@ -1,5 +1,5 @@
-import { IfElse, signal } from "@serenity-is/signals";
-import { Column, parsePx, spacerDiv } from "../core";
+import { computed, IfElse, signal } from "@serenity-is/signals";
+import { Column, parsePx } from "../core";
 import { LayoutEngine, LayoutHost } from "./layout";
 
 export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
@@ -13,36 +13,33 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     let topPanel: HTMLElement;
     let viewport: HTMLElement;
     let footerRowCols: HTMLElement;
-    let spacerWidth = signal<string>(null);
 
     function init(hostGrid: LayoutHost) {
         host = hostGrid;
-        spacerWidth.value = calcCanvasWidth() + host.getScrollDims().width + "px";
         const options = host.getOptions();
         const optSignals = host.getOptionSignals();
+        const hideColumnHeader = computed(() => !optSignals.showColumnHeader.value);
 
         host.getContainerNode().append(<>
-            <div class={["slick-header", !options.showColumnHeader && "slick-hidden"]}>
+            <div class={{ "slick-header": true, "slick-hidden": hideColumnHeader }}>
                 <div class="slick-header-columns" style={{ [(options.rtl ? "right" : "left")]: "-1000px" }} ref={el => headerCols = el} />
             </div>
-            <IfElse when={optSignals.showHeaderRow}>
-                <div class="slick-headerrow">
+            <IfElse when={optSignals.showHeaderRow} else={__("headerrow")}>
+                <div class="slick-headerrow slick-spacer-h">
                     <div class="slick-headerrow-columns" ref={el => headerRowCols = el} />
-                    {spacerDiv(spacerWidth)}
                 </div>
             </IfElse>
-            <IfElse when={optSignals.showTopPanel}>
-                <div class="slick-top-panel-scroller">
-                    <div class="slick-top-panel" style={{ width: "10000px" }} ref={el => topPanel = el} />
+            <IfElse when={optSignals.showTopPanel} else={__("toppanel")}>
+                <div class="slick-top-panel-container">
+                    <div class="slick-top-panel" ref={el => topPanel = el} />
                 </div>
             </IfElse>
             <div class="slick-viewport" tabindex="0" ref={el => viewport = el}>
                 <div class="grid-canvas" tabindex="0" ref={el => canvas = el} />
             </div>
-            <IfElse when={optSignals.showFooterRow}>
+            <IfElse when={optSignals.showFooterRow} else={__("footerrow")}>
                 <div class="slick-footerrow">
                     <div class="slick-footerrow-columns" ref={el => footerRowCols = el} />
-                    {spacerDiv(spacerWidth)}
                 </div>
             </IfElse>
         </>);
@@ -149,7 +146,7 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     }
 
     function getHeaderRowColumn(cell: number): HTMLElement {
-        return headerRowCols.childNodes.item(cell) as HTMLElement;
+        return headerRowCols?.childNodes.item(cell) as HTMLElement;
     }
 
     function getHeaderRowColsFor(): HTMLElement {
@@ -157,7 +154,7 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     }
 
     function getFooterRowColumn(cell: number): HTMLElement {
-        return footerRowCols.childNodes.item(cell) as HTMLElement;
+        return footerRowCols?.childNodes.item(cell) as HTMLElement;
     }
 
     function getFooterRowColsFor(): HTMLElement {
@@ -189,10 +186,10 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
     }
 
     function handleScrollH(): void {
-        headerCols.parentElement.scrollLeft = host.getScrollLeft();
-        topPanel.parentElement.scrollLeft = host.getScrollLeft();
-        headerRowCols.parentElement.scrollLeft = host.getScrollLeft();
-        footerRowCols.parentElement.scrollLeft = host.getScrollLeft();
+        headerCols && (headerCols.parentElement.scrollLeft = host.getScrollLeft());
+        topPanel && (topPanel.parentElement.scrollLeft = host.getScrollLeft());
+        headerRowCols && (headerRowCols.parentElement.scrollLeft = host.getScrollLeft());
+        footerRowCols && (footerRowCols.parentElement.scrollLeft = host.getScrollLeft());
     }
 
 
@@ -224,7 +221,6 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
         updateHeadersWidth();
         vpi.hasHScroll = (canvasWidth > host.getViewportInfo().width - scrollWidth);
 
-        spacerWidth.value = (canvasWidth + (vpi.hasVScroll ? scrollWidth : 0)) + "px";
         return canvasWidth != oldCanvasWidth;
     }
 
@@ -298,5 +294,6 @@ export const BasicLayout: { new(): LayoutEngine } = function (): LayoutEngine {
 } as any;
 
 function exceptNull<T>(x: T[]) { return x.filter(y => y != null); }
-function noop(): void {}
+function noop(): void { }
 function returnFalse(): boolean { return false; }
+function __(comment?: string): HTMLElement { return new Comment("placeholder:" + comment) as unknown as HTMLElement; }

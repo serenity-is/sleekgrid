@@ -262,7 +262,7 @@ export interface GridOptions<TItem = any> {
     /**
      * Layout engine for custom grid layouts. Default is `BasicLayout`. Use FrozenLayout to enable frozen columns / rows.
      */
-    layoutEngine?: LayoutEngine;
+    layoutEngine?: LayoutEngine | (() => LayoutEngine);
 
     /**
      * Defaults to `3`. Minimum number of rows to keep in the buffer.

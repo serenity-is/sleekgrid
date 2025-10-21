@@ -6,6 +6,7 @@ import { ViewportInfo } from "../core/viewportinfo";
 import { ViewRange } from "../core/viewrange";
 
 export interface GridOptionSignals {
+    showColumnHeader: Signal<boolean>;
     showHeaderRow: Signal<boolean>;
     showFooterRow: Signal<boolean>;
     showTopPanel: Signal<boolean>;

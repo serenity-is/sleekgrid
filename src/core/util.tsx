@@ -131,7 +131,6 @@ export function basicDOMSanitizer(dirtyHtml: string): string {
 
 export function disableSelection(target: HTMLElement) {
     if (target) {
-        target.setAttribute('unselectable', 'on');
         target.style.userSelect = "none";
         target.addEventListener('selectstart', () => false);
     }
@@ -148,10 +147,6 @@ export function removeClass(el: Element, cls: string) {
     }
     else
         el.classList.remove(cls);
-}
-
-export function spacerDiv(width: SignalOrValue<string>): HTMLDivElement {
-    return <div class="slick-spacer-line" style={{ width }} /> as HTMLDivElement;
 }
 
 export function parsePx(str: string) {

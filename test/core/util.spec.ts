@@ -1,4 +1,4 @@
-import { addClass, basicDOMSanitizer, disableSelection, escapeHtml, removeClass, spacerDiv } from "../../src/core/util";
+import { addClass, basicDOMSanitizer, disableSelection, escapeHtml, removeClass } from "../../src/core/util";
 import { jsx as H } from "@serenity-is/sleekdom";
 
 describe('addClass', () => {
@@ -201,20 +201,6 @@ describe('H', () => {
 
 });
 
-describe('spacerDiv', () => {
-    it('returns a div element', () => {
-        const div = spacerDiv("1px");
-
-        expect(div.tagName).toBe('DIV');
-    });
-
-    it('sets the width of the div', () => {
-        const div = spacerDiv("100px");
-
-        expect(div.style.width).toBe('100px');
-    });
-});
-
 describe('disableSelection', () => {
     it('should not do anything if element is null or undefined', () => {
         disableSelection(null);
@@ -228,7 +214,6 @@ describe('disableSelection', () => {
 
         disableSelection(element);
 
-        expect(element.getAttribute('unselectable')).toBe('on');
         expect(element.style.userSelect).toBe('none');
         expect(func).toBeDefined();
         expect(func()).toBe(false);

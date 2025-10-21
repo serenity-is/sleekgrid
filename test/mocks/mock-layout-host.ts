@@ -1,4 +1,4 @@
-import { ViewportInfo, type Column, type RowCell } from "../../src/core";
+import { gridDefaults, ViewportInfo, type Column, type RowCell } from "../../src/core";
 import { GridOptions } from "../../src/core/gridoptions";
 import type { GridOptionSignals } from "../../src/grid/layout";
 import { mockSignal } from "./mock-signal";
@@ -7,6 +7,8 @@ export function mockLayoutHost() {
     const host = {
         container: document.createElement("div"),
         opt: {
+            get showColumnHeader() { return host.optSignals.showColumnHeader.peek(); },
+            set showColumnHeader(value: boolean) { host.optSignals.showColumnHeader.value = value; },
             get showHeaderRow() { return host.optSignals.showHeaderRow.peek(); },
             set showHeaderRow(value: boolean) { host.optSignals.showHeaderRow.value = value; },
             get showFooterRow() { return host.optSignals.showFooterRow.peek(); },
@@ -15,9 +17,10 @@ export function mockLayoutHost() {
             set showTopPanel(value: boolean) { host.optSignals.showTopPanel.value = value; }
         } as GridOptions<any>,
         optSignals: {
-            showHeaderRow: mockSignal(false),
-            showFooterRow: mockSignal(false),
-            showTopPanel: mockSignal(false)
+            showColumnHeader: mockSignal(gridDefaults.showColumnHeader),
+            showHeaderRow: mockSignal(gridDefaults.showHeaderRow),
+            showFooterRow: mockSignal(gridDefaults.showFooterRow),
+            showTopPanel: mockSignal(gridDefaults.showTopPanel)
         } satisfies GridOptionSignals,
         bindAncestorScroll: vi.fn(),
         cleanUpAndRenderCells: vi.fn(),

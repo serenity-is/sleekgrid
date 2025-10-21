@@ -1,5 +1,5 @@
-import { signal, type Signal } from "@serenity-is/signals";
-import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, ViewRange, ViewportInfo, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, disableSelection, escapeHtml, formatterContext, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
+import { signal } from "@serenity-is/signals";
+import { CellRange, CellStylesHash, Column, ColumnFormat, ColumnMetadata, ColumnSort, EditCommand, EditController, Editor, EditorClass, EditorHost, EditorLock, EventData, EventEmitter, FormatterContext, FormatterResult, IEventData, IGroupTotals, ItemMetadata, Position, RowCell, ViewRange, ViewportInfo, addClass, applyFormatterResultToCellNode, columnDefaults, convertCompatFormatter, defaultColumnFormat, escapeHtml, formatterContext, initializeColumns, parsePx, preClickClassName, removeClass } from "../core";
 import { GridOptions, gridDefaults } from "../core/gridoptions";
 import { IDataView } from "../core/idataview";
 import { BasicLayout } from "./basiclayout";
@@ -51,6 +51,7 @@ export class Grid<TItem = any> implements EditorHost {
     declare private _options: GridOptions<TItem>;
     private _optionSignals: GridOptionSignals = {
         showTopPanel: signal<boolean>(),
+        showColumnHeader: signal<boolean>(),
         showHeaderRow: signal<boolean>(),
         showFooterRow: signal<boolean>(),
     };
@@ -202,7 +203,7 @@ export class Grid<TItem = any> implements EditorHost {
 
         this._container.appendChild(<div class="slick-focus-sink" tabindex={0} ref={el => this._focusSink1 = el} />);
 
-        this._layout = options.layoutEngine ?? new BasicLayout();
+        this._layout = typeof options.layoutEngine === "function" ? options.layoutEngine() : (options.layoutEngine ?? new BasicLayout());
         this.setInitialCols(columns);
         this._scrollDims = getScrollBarDimensions();
 
@@ -326,7 +327,7 @@ export class Grid<TItem = any> implements EditorHost {
         });
 
         this._layout.getHeaderCols().forEach(hs => {
-            disableSelection(hs);
+            hs.onselectstart = () => false;
             onEvent(hs, "contextmenu", this.handleHeaderContextMenu.bind(this));
             onEvent(hs, "click", this.handleHeaderClick.bind(this));
             if (this._jQuery) {
@@ -1093,6 +1094,8 @@ export class Grid<TItem = any> implements EditorHost {
             var style = this._container.style;
             style.setProperty("--sleek-row-height", this._options.rowHeight + "px");
             style.setProperty("--sleek-cell-height", cellHeight + "px");
+            style.setProperty("--sleek-scrollbar-width", this._scrollDims.width + "px");
+            style.setProperty("--sleek-scrollbar-height", this._scrollDims.height + "px");
             style.setProperty("--sleek-top-panel-height", this._options.topPanelHeight + "px");
             style.setProperty("--sleek-grouping-panel-height", this._options.groupingPanelHeight + "px");
             style.setProperty("--sleek-headerrow-height", this._options.headerRowHeight + "px");
@@ -1103,7 +1106,9 @@ export class Grid<TItem = any> implements EditorHost {
         var el = this._styleNode = document.createElement('style');
         el.dataset.uid = this._uid;
         var rules = [
-            "." + this._uid + " { --slick-cell-height: " + this._options.rowHeight + "px; }",
+            "." + this._uid + " { --sleek-cell-height: " + this._options.rowHeight + "px; }",
+            "." + this._uid + " { --sleek-scrollbar-width: " + this._scrollDims.width + "px; }",
+            "." + this._uid + " { --sleek-scrollbar-height: " + this._scrollDims.height + "px; }",
             "." + this._uid + " .slick-group-header-column { " + (this._options.rtl ? 'right' : 'left') + ": 1000px; }",
             "." + this._uid + " .slick-header-column { " + (this._options.rtl ? 'right' : 'left') + ": 1000px; }",
             "." + this._uid + " .slick-top-panel { height:" + this._options.topPanelHeight + "px; }",
@@ -1112,6 +1117,7 @@ export class Grid<TItem = any> implements EditorHost {
             "." + this._uid + " .slick-cell { height:" + cellHeight + "px; }",
             "." + this._uid + " .slick-row { height:" + this._options.rowHeight + "px; }",
             "." + this._uid + " .slick-footerrow-columns { height:" + this._options.footerRowHeight + "px; }",
+            "." + this._uid + " .slick-spacer-h { margin-right:" + this._scrollDims.width + "px; }",
         ];
 
         var cols = this._cols;
