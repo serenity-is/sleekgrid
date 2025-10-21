@@ -216,14 +216,6 @@ classes should alter those!
   display: none !important;
 }
 
-.slick-spacer-line {
-  display: block;
-  height: 1px;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
 .slick-hscrollspacer,
 .slick-footerrow-columns,
 .slick-headerrow-columns,
