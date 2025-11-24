@@ -1,5 +1,4 @@
-import { CellRange, EventEmitter, EventSubscriber, IEventData } from "../core";
-import { ArgsCell, Grid, IPlugin, SelectionModel } from "../grid";
+import { CellRange, EventEmitter, EventSubscriber, EventData, type ArgsCell, type ISleekGrid, type GridPlugin, type SelectionModel, type CellEvent } from "../core";
 
 export interface RowSelectionModelOptions {
     selectActiveRow?: boolean;
@@ -26,8 +25,8 @@ function rangesToRows(ranges: CellRange[]) {
     return rows;
 }
 
-export class RowSelectionModel implements IPlugin, SelectionModel {
-    declare private grid: Grid;
+export class RowSelectionModel implements GridPlugin, SelectionModel {
+    declare private grid: ISleekGrid;
     private handler = new EventSubscriber();
     declare private options: RowSelectionModelOptions;
     declare private ranges: CellRange[];
@@ -41,7 +40,7 @@ export class RowSelectionModel implements IPlugin, SelectionModel {
         selectActiveRow: true
     }
 
-    init(grid: Grid): void {
+    init(grid: ISleekGrid): void {
         this.grid = grid;
         this.handler.subscribe(grid.onActiveCellChanged, this.wrapHandler(this.handleActiveCellChange));
         this.handler.subscribe(grid.onKeyDown, this.wrapHandler(this.handleKeyDown));
@@ -92,9 +91,9 @@ export class RowSelectionModel implements IPlugin, SelectionModel {
         return this.ranges;
     }
 
-    private handleActiveCellChange(_: IEventData, data: ArgsCell) {
-        if (this.options.selectActiveRow && data.row != null) {
-            this.setSelectedRanges([new CellRange(data.row, 0, data.row, this.grid.getColumns().length - 1)]);
+    private handleActiveCellChange({ row }: CellEvent) {
+        if (this.options.selectActiveRow && row != null) {
+            this.setSelectedRanges([new CellRange(row, 0, row, this.grid.getColumns().length - 1)]);
         }
     }
 

@@ -1,4 +1,4 @@
-import { ArgsColumn, Grid, IPlugin } from "../grid";
+import type { GridPlugin, HeaderColumnEvent, ISleekGrid } from "../core";
 
 export interface AutoTooltipsOptions {
     enableForCells?: boolean;
@@ -7,9 +7,9 @@ export interface AutoTooltipsOptions {
     replaceExisting?: boolean;
 }
 
-export class AutoTooltips implements IPlugin {
+export class AutoTooltips implements GridPlugin {
 
-    declare private grid: Grid;
+    declare private grid: ISleekGrid;
     declare private options: AutoTooltipsOptions;
 
     constructor(options?: AutoTooltipsOptions) {
@@ -23,7 +23,7 @@ export class AutoTooltips implements IPlugin {
         replaceExisting: true
     }
 
-    init(grid: Grid) {
+    init(grid: ISleekGrid) {
         this.grid = grid;
 
         if (this.options.enableForCells)
@@ -64,8 +64,8 @@ export class AutoTooltips implements IPlugin {
         node = null;
     }
 
-    private handleHeaderMouseEnter = (e: MouseEvent, args: ArgsColumn) => {
-        var column = args.column;
+    private handleHeaderMouseEnter = (e: HeaderColumnEvent) => {
+        var column = e.column;
         if (column && !column.toolTip) {
             var node = (e.target as HTMLElement).closest(".slick-header-column") as HTMLElement;
             node && (node.title = (node.clientWidth < node.scrollWidth ? (typeof column.name === "string" ? column.name : "") : ""));

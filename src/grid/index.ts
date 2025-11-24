@@ -1,6 +1,8 @@
-export { BasicLayout } from "./basiclayout";
-export * from "./eventargs";
-export * from "./grid";
-export type { LayoutEngine, LayoutHost } from "./layout";
-export type { IPlugin, SelectionModel } from "./types";
+export * from "../layouts/basic-layout";
+export * from "../layouts/frozen-layout";
+export * from "../layouts/layout-components";
+export type { LayoutEngine } from "../layouts/layout-engine";
+export type { LayoutHost } from "../layouts/layout-host";
+export type { BandKey, GridBandRefs, GridLayoutRefs, PaneKey } from "../layouts/layout-refs";
+export * from "./sleekgrid";
 

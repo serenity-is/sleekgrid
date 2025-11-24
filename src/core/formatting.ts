@@ -1,5 +1,6 @@
 import type { Column } from "./column";
 import { gridDefaults, GridOptions } from "./gridoptions";
+import type { ISleekGrid } from "./isleekgrid";
 import { addClass, basicDOMSanitizer, escapeHtml, removeClass } from "./util";
 
 /**
@@ -21,16 +22,19 @@ export interface FormatterContext<TItem = any> {
 
     /**
      * True if the formatter is allowed to return raw HTML that will be set using innerHTML.
-     * This is set from grid options and defaults to true for backward compatibility.
-     * When set to false, the formatter should return plain text and the result will be set using textContent
-     * and the escape() method is a noop in that case.
+     * This is set from grid options and defaults to false which means the formatter
+     * should return plain text and the result will be set using textContent and
+     * the escape() method is a noop. If true, the formatter can return HTML strings but should
+     * take care to avoid script injection attacks by using ctx.escape() method.
      */
     readonly enableHtmlRendering: boolean;
 
 	/**
-	 * Returns html escaped ctx.value if called without arguments. Prefer this over
-	 * ctx.value when returning as HTML string to avoid html injection attacks!
-     * Note that when enableHtmlRendering is false, this is simply a noop and returns the value as string.
+     * When enableHtmlRendering is false (default), this simply returns the value as string.
+	 * When enableHtmlRendering is true, returns html escaped value / ctx.value if called without
+     * arguments. Prefer this over ctx.value when returning HTML strings to avoid html injection
+     * attacks when enableHtmlRendering is true. You don't have to use this inside JSX
+     * style formatters as JSX automatically escapes values.
 	 */
     escape(value?: any): string;
 
@@ -52,7 +56,7 @@ export interface FormatterContext<TItem = any> {
     /**
      * The grid instance.
      */
-    grid?: any;
+    grid?: ISleekGrid;
 
     /**
      * The item of the row.
@@ -60,9 +64,9 @@ export interface FormatterContext<TItem = any> {
     item?: TItem;
 
     /**
-     * Purpose of the call, e.g. "autowidth", "excelexport", "groupheader", "headerfilter", "pdfexport", "print".
+     * Purpose of the call, e.g. "auto-width", "excel-export", "group-header", "header-filter", "pdf-export", "print".
      */
-    purpose?: "autowidth" | "excelexport" | "groupheader" | "grand-totals" | "group-totals" | "headerfilter" | "pdfexport" | "print";
+    purpose?: "auto-width" | "excel-export" | "group-header" | "grand-totals" | "group-totals" | "header-filter" | "pdf-export" | "print";
 
     /**
      * Sanitizer function to clean up dirty HTML.
@@ -78,7 +82,7 @@ export interface FormatterContext<TItem = any> {
     value?: any;
 }
 
-export type FormatterResult = (string | HTMLElement | SVGElement | DocumentFragment);
+export type FormatterResult = (string | HTMLElement | SVGElement | MathMLElement | DocumentFragment);
 export type ColumnFormat<TItem = any> = (ctx: FormatterContext<TItem>) => FormatterResult;
 
 export interface CompatFormatterResult {
@@ -87,7 +91,7 @@ export interface CompatFormatterResult {
     toolTip?: string;
 }
 
-export type CompatFormatter<TItem = any> = (row: number, cell: number, value: any, column: Column<TItem>, item: TItem, grid?: any) => string | CompatFormatterResult;
+export type CompatFormatter<TItem = any> = (row: number, cell: number, value: any, column: Column<TItem>, item: TItem, grid?: ISleekGrid) => string | CompatFormatterResult;
 
 export interface FormatterFactory<TItem = any> {
     getFormat?(column: Column<TItem>): ColumnFormat<TItem>;

@@ -1,6 +1,7 @@
 import { ItemMetadata } from "./column";
-import { EventEmitter, IEventData } from "./event";
+import { EventEmitter, EventData } from "./event";
 import { Group, IGroupTotals } from "./group";
+
 
 export interface IDataView<TItem = any> {
     /** Gets the grand totals for all aggregated data. */
@@ -12,9 +13,9 @@ export interface IDataView<TItem = any> {
     /** Gets metadata for the item at the specified row index. */
     getItemMetadata?(row: number): ItemMetadata<TItem>;
     /** Event fired when the underlying data changes */
-    readonly onDataChanged?: EventEmitter<any, IEventData>;
+    readonly onDataChanged?: EventEmitter<{}>;
     /** Event fired when the row count changes */
-    readonly onRowCountChanged?: EventEmitter<any, IEventData>;
+    readonly onRowCountChanged?: EventEmitter<{ previous: number; current: number }>;
     /** Event fired when specific rows change */
-    readonly onRowsChanged?: EventEmitter<any, IEventData>;
+    readonly onRowsChanged?: EventEmitter<{ rows: number[] }>;
 }

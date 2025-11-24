@@ -1,5 +1,5 @@
 import { Column, ColumnMetadata } from "./column";
-import { EventEmitter, IEventData } from "./event";
+import { EventEmitter, EventData } from "./event";
 
 export interface Position {
     bottom?: number;
@@ -26,9 +26,10 @@ export interface EditorHost {
     navigateNext(): boolean;
     navigatePrev(): boolean;
     onCompositeEditorChange: EventEmitter<any>;
+    getEditorFactory(): EditorFactory;
 }
 
-interface CompositeEditorOptions {
+export interface CompositeEditorOptions {
     formValues: any;
 }
 
@@ -42,7 +43,7 @@ export interface EditorOptions {
     compositeEditorOptions?: CompositeEditorOptions;
     container?: HTMLElement;
     item?: any;
-    event?: IEventData;
+    event?: EventData;
     commitChanges?: () => void,
     cancelChanges?: () => void
 }

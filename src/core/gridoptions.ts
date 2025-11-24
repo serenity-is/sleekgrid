@@ -1,8 +1,9 @@
-import { type LayoutEngine } from "../grid/layout";
+import { type LayoutEngine } from "../layouts/layout-engine";
 import { type Column } from "./column";
 import { GlobalEditorLock, type EditCommand, type EditorFactory, type EditorLock } from "./editing";
 import { defaultColumnFormat, type ColumnFormat, type CompatFormatter, type FormatterContext, type FormatterFactory, type FormatterResult } from "./formatting";
 import { type IGroupTotals } from "./group";
+import type { ISleekGrid } from "./isleekgrid";
 
 /**
  * Configuration options for the SleekGrid component.
@@ -71,7 +72,7 @@ export interface GridOptions<TItem = any> {
     columns?: Column<TItem>[];
 
     /**
-     * @obsolete Use showGroupingPanel option instead.
+     * @deprecated Use showGroupingPanel option instead.
      */
     createPreHeaderPanel?: boolean;
 
@@ -177,7 +178,7 @@ export interface GridOptions<TItem = any> {
     explicitInitialization?: boolean;
 
     /**
-     * Defaults to `30`. Height of the footer row in pixels.
+     * Defaults to null which means the footer row height is calculated based on CSS rules.
      */
     footerRowHeight?: number;
 
@@ -229,7 +230,7 @@ export interface GridOptions<TItem = any> {
     groupingPanel?: boolean;
 
     /**
-     * Defaults to `30`. Height of the grouping panel in pixels.
+     * Defaults to null, e.g. calculated based on CSS. Height of the grouping panel in pixels.
      */
     groupingPanelHeight?: number;
 
@@ -242,10 +243,10 @@ export interface GridOptions<TItem = any> {
      * Function to format group totals for display in the grouping panel.
      * @deprecated Use `groupTotalsFormat` with `FormatterContext<IGroupTotals>` signature instead.
      */
-    groupTotalsFormatter?: (totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: any) => string;
+    groupTotalsFormatter?: (totals?: IGroupTotals<TItem>, column?: Column<TItem>, grid?: ISleekGrid) => string;
 
     /**
-     * Defaults to `30`. Height of the header row in pixels.
+     * Defaults to null, e.g. calculated based on CSS. Height of the header row in pixels.
      */
     headerRowHeight?: number;
 
@@ -280,7 +281,7 @@ export interface GridOptions<TItem = any> {
     multiSelect?: boolean;
 
     /**
-     * @obsolete Use groupingPanelHeight option instead.
+     * @deprecated Use groupingPanelHeight option instead.
      */
     preHeaderPanelHeight?: number;
 
@@ -349,7 +350,7 @@ export interface GridOptions<TItem = any> {
     showHeaderRow?: boolean;
 
     /**
-     * @obsolete Use showGroupingPanel option instead.
+     * @deprecated Use showGroupingPanel option instead.
      */
     showPreHeaderPanel?: boolean;
 
@@ -364,12 +365,19 @@ export interface GridOptions<TItem = any> {
     suppressActiveCellChangeOnEdit?: boolean;
 
     /**
+     * Nonce value for CSP (Content Security Policy) when `useCssVars` is `false`. Applied to the dynamically
+     * created `<style>` element to allow inline CSS injection without violating CSP rules.
+     * If not provided, the grid will attempt to detect a nonce from a meta element with `csp-nonce` name or from existing `<style>` or `<script>` elements on the page.
+     */
+    styleNonce?: string;
+
+    /**
      * Defaults to `false`. If `true`, synchronizes column resizing with cell resizing.
      */
     syncColumnCellResize?: boolean;
 
     /**
-     * Defaults to `30`. Height of the top panel in pixels.
+     * Defaults to null which means the top panel height is calculated based on CSS rules.
      */
     topPanelHeight?: number;
 
@@ -379,9 +387,16 @@ export interface GridOptions<TItem = any> {
     useLegacyUI?: boolean;
 
     /**
-     * Defaults to `false`. If `true`, uses CSS variables for styling.
+     * Defaults to `true` which is equivalent to 100. If `true`, uses CSS variables for styling (for up to 100 cols).
+     * If set to a number, enables CSS variables only if column count is less than or equal to that number.
+     * This is dependent on the stylesheet which only supports up to 100 columns by default.
+     * But if you defined your own stylesheet with more columns, you can set this to a higher number.
+     *
+     * If set to `false`, uses a dynamic `<style>` element (with optional `styleNonce` for CSP) to inject CSS rules
+     * for positioning, avoiding inline styles entirely.
+     *
      */
-    useCssVars?: boolean;
+    useCssVars?: boolean | number;
 
     /**
      * CSS class applied to the viewport container. Default is `undefined`.
@@ -416,15 +431,15 @@ export const gridDefaults: GridOptions = {
     enableTabKeyNavigation: true,
     enableTextSelectionOnCells: false,
     explicitInitialization: false,
-    footerRowHeight: 30,
+    footerRowHeight: null,
     forceFitColumns: false,
     forceSyncScrolling: false,
     forceSyncScrollInterval: 250,
     formatterFactory: null,
     fullWidthRows: false,
     groupingPanel: false,
-    groupingPanelHeight: 30,
-    headerRowHeight: 30,
+    groupingPanelHeight: null,
+    headerRowHeight: null,
     leaveSpaceForNewRows: false,
     minBuffer: 3,
     multiColumnSort: false,
@@ -439,6 +454,6 @@ export const gridDefaults: GridOptions = {
     showHeaderRow: false,
     showTopPanel: false,
     suppressActiveCellChangeOnEdit: false,
-    topPanelHeight: 30,
+    topPanelHeight: null,
     useCssVars: true
 }

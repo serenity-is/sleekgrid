@@ -1,5 +1,5 @@
-import { EventEmitter, EventSubscriber } from "../core";
-import { Grid, IPlugin } from "../grid";
+import { bindThis } from "@serenity-is/domwise";
+import { EventEmitter, EventSubscriber, type ISleekGrid, type GridPlugin, type EventData } from "../core";
 
 export interface RowMoveManagerOptions {
     cancelEditOnDrag?: boolean;
@@ -13,13 +13,13 @@ interface RowMoveManagerDragData {
     canMove: boolean
 }
 
-interface ArgsMoveRows {
+export interface ArgsMoveRows {
     rows: number[];
     insertBefore: number;
 }
 
-export class RowMoveManager implements IPlugin {
-    declare private grid: Grid;
+export class RowMoveManager implements GridPlugin {
+    declare private grid: ISleekGrid;
     declare private options: RowMoveManagerOptions;
     declare private dragging: boolean;
     private handler = new EventSubscriber();
@@ -34,24 +34,25 @@ export class RowMoveManager implements IPlugin {
         cancelEditOnDrag: false
     }
 
-    init(grid: Grid) {
+    init(grid: ISleekGrid) {
         this.grid = grid;
-        this.handler.subscribe(grid.onDragInit, this.handleDragInit.bind(this))
-            .subscribe(grid.onDragStart, this.handleDragStart.bind(this))
-            .subscribe(grid.onDrag, this.handleDrag.bind(this))
-            .subscribe(grid.onDragEnd, this.handleDragEnd.bind(this));
+        const boundThis = bindThis(this);
+        this.handler.subscribe(grid.onDragInit, boundThis.handleDragInit)
+            .subscribe(grid.onDragStart, boundThis.handleDragStart)
+            .subscribe(grid.onDrag, boundThis.handleDrag)
+            .subscribe(grid.onDragEnd, boundThis.handleDragEnd);
     }
 
     destroy() {
         this.handler?.unsubscribeAll();
     }
 
-    private handleDragInit(e: UIEvent) {
+    private handleDragInit(e: EventData<{}, UIEvent>) {
         // prevent the grid from cancelling drag'n'drop by default
         e.stopImmediatePropagation();
     }
 
-    private handleDragStart(e: UIEvent, dd: RowMoveManagerDragData) {
+    private handleDragStart(e: EventData<{}, UIEvent>, dd: RowMoveManagerDragData) {
         let cell = this.grid.getCellFromEvent(e);
 
         if (this.options.cancelEditOnDrag && this.grid.getEditorLock().isActive()) {
@@ -87,7 +88,7 @@ export class RowMoveManager implements IPlugin {
         dd.insertBefore = -1;
     }
 
-    private handleDrag(e: UIEvent, dd: RowMoveManagerDragData) {
+    private handleDrag(e: EventData<{}, UIEvent>, dd: RowMoveManagerDragData) {
         if (!this.dragging)
             return;
 
@@ -103,12 +104,12 @@ export class RowMoveManager implements IPlugin {
 
         let insertBefore = Math.max(0, Math.min(Math.round(top / this.grid.getOptions().rowHeight), this.grid.getDataLength()));
         if (insertBefore !== dd.insertBefore) {
-            let eventData = {
+            let sgEvent = {
                 rows: dd.selectedRows,
                 insertBefore: insertBefore
             };
 
-            if (this.onBeforeMoveRows.notify(eventData) === false) {
+            if (this.onBeforeMoveRows.notify(sgEvent).getReturnValue() === false) {
                 dd.guide.style.top = "-1000";
                 dd.canMove = false;
             } else {
@@ -120,7 +121,7 @@ export class RowMoveManager implements IPlugin {
         }
     }
 
-    private handleDragEnd(e: UIEvent, dd: RowMoveManagerDragData) {
+    private handleDragEnd(e: EventData<{}, UIEvent>, dd: RowMoveManagerDragData) {
         if (!this.dragging)
             return;
 
