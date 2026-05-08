@@ -60,12 +60,14 @@ function writeIfChanged() {
 
 const compatDefaults = {
     bundle: true,
-    target: 'es6',
+    target: 'es2022',
     format: 'iife',
     globalName: 'Slick._',
     color: true,
+    jsxSideEffects: true,
     logLevel: 'info',
     sourcemap: true,
+    sourceRoot: "https://packages.serenity.is/sleekgrid/src/",
     footer: {
         js: '["Data", "Editors", "Formatters", "Plugins"].forEach(ns => Slick._[ns] && (Slick[ns] = Object.assign(Slick[ns] || {}, Slick._[ns])) && delete Slick._[ns]); Object.assign(Slick, Slick._); delete Slick._;'
     }
@@ -85,7 +87,7 @@ const compatGrid = {
     entryPoints: ['./src/grid/index.ts'],
     outfile: './dist/compat/slick.grid.js',
     plugins: [globalExternals(/\.\.\/core/, {
-        Slick: ["addClass", "applyFormatterResultToCellNode", "basicRegexSanitizer", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escapeHtml", "defaultColumnFormat", "disableSelection", "Draggable", "EventEmitter", "EventData", "formatterContext", "gridDefaults", "GlobalEditorLock", "initColumnProps", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "CellRange", "removeClass", "RowCell", "spacerDiv", "titleize"]
+        Slick: ["addCssClass", "applyFormatterResultToCellNode", "basicRegexSanitizer", "columnDefaults", "convertCompatFormatter", "ensureUniqueColumnIds", "escapeHtml", "defaultColumnFormat", "disableSelection", "Draggable", "EventEmitter", "EventData", "formatterContext", "gridDefaults", "GlobalEditorLock", "initColumnProps", "keyCode", "NonDataRow", "parsePx", "preClickClassName", "CellRange", "removeCssClass", "RowCell", "spacerDiv", "titleize"]
     })]
 }
 
@@ -150,15 +152,17 @@ const sleekDefaults = {
     bundle: true,
     entryPoints: ['./src/index.ts'],
     color: true,
+    jsxSideEffects: true,
     logLevel: 'info',
-    target: 'es6',
-    sourcemap: true
+    target: 'es2022',
+    sourcemap: true,
+    sourceRoot: "https://packages.serenity.is/sleekgrid/src/"
 }
 
 const sleekIndex = {
     ...sleekDefaults,
     format: 'esm',
-    minify: true,
+    minify: false,
     outfile: './dist/index.js'
 }
 

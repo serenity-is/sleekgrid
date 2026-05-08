@@ -3,7 +3,8 @@ import { preClickClassName } from "../core/base";
 import { CellRange } from "../core/cellrange";
 import { columnDefaults, initColumnProps, type Column, type ColumnMetadata, type ColumnSort, type ItemMetadata } from "../core/column";
 import { Draggable, type DragPosition } from "../core/draggable";
-import type { EditCommand, EditController, Editor, EditorClass, EditorFactory, EditorLock, Position, RowCell } from "../core/editing";
+import type { EditCommand, EditController, Editor, EditorClass, EditorFactory, Position, RowCell } from "../core/editing";
+import { EditorLock } from "../core/editing";
 import { EventEmitter, type EventData } from "../core/event";
 import type { ArgsAddNewRow, ArgsCell, ArgsCellChange, ArgsCellEdit, ArgsColumn, ArgsColumnNode, ArgsCssStyle, ArgsDrag, ArgsEditorDestroy, ArgsGrid, ArgsScroll, ArgsSelectedRowsChange, ArgsSort, ArgsValidationError } from "../core/eventargs";
 import { applyFormatterResultToCellNode, convertCompatFormatter, defaultColumnFormat, formatterContext, type CellStylesHash, type ColumnFormat, type FormatterContext, type FormatterResult } from "../core/formatting";
@@ -14,7 +15,7 @@ import type { IGroupTotals } from "../core/group";
 import { type IDataView } from "../core/idataview";
 import type { GridLayoutInfo, ISleekGrid } from "../core/isleekgrid";
 import type { SelectionModel } from "../core/selection-model";
-import { addClass, escapeHtml, parsePx, removeClass } from "../core/util";
+import { addCssClass, escapeHtml, parsePx, removeCssClass } from "../core/util";
 import type { ViewportInfo } from "../core/viewportinfo";
 import type { ViewRange } from "../core/viewrange";
 import { BasicLayout } from "../layouts/basic-layout";
@@ -123,44 +124,44 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
     declare private _groupingPanel: HTMLElement;
     declare private _eventDisposer: AbortController;
 
-    readonly onActiveCellChanged = new EventEmitter<ArgsCell>();
-    readonly onActiveCellPositionChanged = new EventEmitter<ArgsGrid>();
-    readonly onAddNewRow = new EventEmitter<ArgsAddNewRow>();
-    static readonly onAfterInit = new EventEmitter<ArgsGrid>();
-    readonly onAfterInit = new EventEmitter<ArgsGrid>();
-    readonly onBeforeCellEditorDestroy = new EventEmitter<ArgsEditorDestroy>();
-    readonly onBeforeDestroy = new EventEmitter<ArgsGrid>();
-    readonly onBeforeEditCell = new EventEmitter<ArgsCellEdit>();
-    readonly onBeforeFooterRowCellDestroy = new EventEmitter<ArgsColumnNode>();
-    readonly onBeforeHeaderCellDestroy = new EventEmitter<ArgsColumnNode>();
-    readonly onBeforeHeaderRowCellDestroy = new EventEmitter<ArgsColumnNode>();
-    readonly onCellChange = new EventEmitter<ArgsCellChange>();
-    readonly onCellCssStylesChanged = new EventEmitter<ArgsCssStyle>();
-    readonly onClick = new EventEmitter<ArgsCell, MouseEvent>();
-    readonly onColumnsReordered = new EventEmitter<ArgsGrid>();
-    readonly onColumnsResized = new EventEmitter<ArgsGrid>();
-    readonly onCompositeEditorChange = new EventEmitter<ArgsGrid>();
-    readonly onContextMenu = new EventEmitter<ArgsGrid, UIEvent>();
-    readonly onDblClick = new EventEmitter<ArgsCell, MouseEvent>();
-    readonly onDrag = new EventEmitter<ArgsDrag, UIEvent>();
-    readonly onDragEnd = new EventEmitter<ArgsDrag, UIEvent>();
-    readonly onDragInit = new EventEmitter<ArgsDrag, UIEvent>();
-    readonly onDragStart = new EventEmitter<ArgsDrag, UIEvent>();
-    readonly onFooterRowCellRendered = new EventEmitter<ArgsColumnNode>();
-    readonly onHeaderCellRendered = new EventEmitter<ArgsColumnNode>();
-    readonly onHeaderClick = new EventEmitter<ArgsColumn, MouseEvent>();
-    readonly onHeaderContextMenu = new EventEmitter<ArgsColumn, MouseEvent>();
-    readonly onHeaderMouseEnter = new EventEmitter<ArgsColumn, MouseEvent>();
-    readonly onHeaderMouseLeave = new EventEmitter<ArgsColumn, MouseEvent>();
-    readonly onHeaderRowCellRendered = new EventEmitter<ArgsColumnNode>();
-    readonly onKeyDown = new EventEmitter<ArgsCell, KeyboardEvent>();
-    readonly onMouseEnter = new EventEmitter<ArgsGrid, MouseEvent>();
-    readonly onMouseLeave = new EventEmitter<ArgsGrid, MouseEvent>();
-    readonly onScroll = new EventEmitter<ArgsScroll>();
-    readonly onSelectedRowsChanged = new EventEmitter<ArgsSelectedRowsChange>();
-    readonly onSort = new EventEmitter<ArgsSort>();
-    readonly onValidationError = new EventEmitter<ArgsValidationError>();
-    readonly onViewportChanged = new EventEmitter<ArgsGrid>();
+    readonly onActiveCellChanged: EventEmitter<ArgsCell> = new EventEmitter<ArgsCell>();
+    readonly onActiveCellPositionChanged: EventEmitter<ArgsGrid> = new EventEmitter<ArgsGrid>();
+    readonly onAddNewRow: EventEmitter<ArgsAddNewRow> = new EventEmitter<ArgsAddNewRow>();
+    static readonly onAfterInit: EventEmitter<ArgsGrid> = new EventEmitter<ArgsGrid>();
+    readonly onAfterInit: EventEmitter<ArgsGrid> = new EventEmitter<ArgsGrid>();
+    readonly onBeforeCellEditorDestroy: EventEmitter<ArgsEditorDestroy> = new EventEmitter<ArgsEditorDestroy>();
+    readonly onBeforeDestroy: EventEmitter<ArgsGrid> = new EventEmitter<ArgsGrid>();
+    readonly onBeforeEditCell: EventEmitter<ArgsCellEdit> = new EventEmitter<ArgsCellEdit>();
+    readonly onBeforeFooterRowCellDestroy: EventEmitter<ArgsColumnNode> = new EventEmitter<ArgsColumnNode>();
+    readonly onBeforeHeaderCellDestroy: EventEmitter<ArgsColumnNode> = new EventEmitter<ArgsColumnNode>();
+    readonly onBeforeHeaderRowCellDestroy: EventEmitter<ArgsColumnNode> = new EventEmitter<ArgsColumnNode>();
+    readonly onCellChange: EventEmitter<ArgsCellChange> = new EventEmitter<ArgsCellChange>();
+    readonly onCellCssStylesChanged: EventEmitter<ArgsCssStyle> = new EventEmitter<ArgsCssStyle>();
+    readonly onClick: EventEmitter<ArgsCell, MouseEvent> = new EventEmitter<ArgsCell, MouseEvent>();
+    readonly onColumnsReordered: EventEmitter<ArgsGrid> = new EventEmitter<ArgsGrid>();
+    readonly onColumnsResized: EventEmitter<ArgsGrid> = new EventEmitter<ArgsGrid>();
+    readonly onCompositeEditorChange: EventEmitter<ArgsGrid> = new EventEmitter<ArgsGrid>();
+    readonly onContextMenu: EventEmitter<ArgsGrid, UIEvent> = new EventEmitter<ArgsGrid, UIEvent>();
+    readonly onDblClick: EventEmitter<ArgsCell, MouseEvent> = new EventEmitter<ArgsCell, MouseEvent>();
+    readonly onDrag: EventEmitter<ArgsDrag, UIEvent> = new EventEmitter<ArgsDrag, UIEvent>();
+    readonly onDragEnd: EventEmitter<ArgsDrag, UIEvent> = new EventEmitter<ArgsDrag, UIEvent>();
+    readonly onDragInit: EventEmitter<ArgsDrag, UIEvent> = new EventEmitter<ArgsDrag, UIEvent>();
+    readonly onDragStart: EventEmitter<ArgsDrag, UIEvent> = new EventEmitter<ArgsDrag, UIEvent>();
+    readonly onFooterRowCellRendered: EventEmitter<ArgsColumnNode> = new EventEmitter<ArgsColumnNode>();
+    readonly onHeaderCellRendered: EventEmitter<ArgsColumnNode> = new EventEmitter<ArgsColumnNode>();
+    readonly onHeaderClick: EventEmitter<ArgsColumn, MouseEvent> = new EventEmitter<ArgsColumn, MouseEvent>();
+    readonly onHeaderContextMenu: EventEmitter<ArgsColumn, MouseEvent> = new EventEmitter<ArgsColumn, MouseEvent>();
+    readonly onHeaderMouseEnter: EventEmitter<ArgsColumn, MouseEvent> = new EventEmitter<ArgsColumn, MouseEvent>();
+    readonly onHeaderMouseLeave: EventEmitter<ArgsColumn, MouseEvent> = new EventEmitter<ArgsColumn, MouseEvent>();
+    readonly onHeaderRowCellRendered: EventEmitter<ArgsColumnNode> = new EventEmitter<ArgsColumnNode>();
+    readonly onKeyDown: EventEmitter<ArgsCell, KeyboardEvent> = new EventEmitter<ArgsCell, KeyboardEvent>();
+    readonly onMouseEnter: EventEmitter<ArgsGrid, MouseEvent> = new EventEmitter<ArgsGrid, MouseEvent>();
+    readonly onMouseLeave: EventEmitter<ArgsGrid, MouseEvent> = new EventEmitter<ArgsGrid, MouseEvent>();
+    readonly onScroll: EventEmitter<ArgsScroll> = new EventEmitter<ArgsScroll>();
+    readonly onSelectedRowsChanged: EventEmitter<ArgsSelectedRowsChange> = new EventEmitter<ArgsSelectedRowsChange>();
+    readonly onSort: EventEmitter<ArgsSort> = new EventEmitter<ArgsSort>();
+    readonly onValidationError: EventEmitter<ArgsValidationError> = new EventEmitter<ArgsValidationError>();
+    readonly onViewportChanged: EventEmitter<ArgsGrid> = new EventEmitter<ArgsGrid>();
 
     constructor(container: string | HTMLElement | ArrayLike<HTMLElement>, data: any, columns: Column<TItem>[], options: GridOptions<TItem>) {
 
@@ -295,7 +296,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         this._container.append(this._focusSink2 = this._focusSink1.cloneNode() as HTMLElement);
 
         if (options.viewportClass)
-            this.getViewports().forEach(vp => addClass(vp, options.viewportClass));
+            this.getViewports().forEach(vp => addCssClass(vp, options.viewportClass));
 
         if (!options.explicitInitialization) {
             this.init();
@@ -351,6 +352,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         const boundThis = bindThis(this);
         this._on(this._container, "resize", boundThis.resizeCanvas);
 
+        const scrollContainerX = this.getScrollContainerX();
         this.getViewports().forEach(vp => {
             var scrollTicking = false;
             this._on(vp, "scroll", (e) => {
@@ -363,8 +365,10 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
                     });
                 }
             });
-            this._on(vp, "wheel", boundThis.handleMouseWheel as any);
-            this._on(vp, "mousewheel" as any, boundThis.handleMouseWheel);
+            if (vp !== scrollContainerX) {
+                this._on(vp, "wheel", boundThis.handleMouseWheel as any);
+                this._on(vp, "mousewheel" as any, boundThis.handleMouseWheel);
+            }
         });
 
         this._forEachBand(band => {
@@ -491,7 +495,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         };
     }
 
-    getAbsoluteColumnMinWidth() {
+    getAbsoluteColumnMinWidth(): number {
         return this._absoluteColMinWidth;
     }
 
@@ -824,9 +828,9 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
             this._jQuery && this._jQuery(footerRowCell).data("column", m);
 
             if (m.footerCssClass)
-                addClass(footerRowCell, m.footerCssClass);
+                addCssClass(footerRowCell, m.footerCssClass);
             else if (m.cssClass)
-                addClass(footerRowCell, m.cssClass);
+                addCssClass(footerRowCell, m.cssClass);
 
             footerRowColsNode.appendChild(footerRowCell);
 
@@ -1042,7 +1046,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         });
     }
 
-    public columnsResized(invalidate = true) {
+    public columnsResized(invalidate = true): void {
         this.adjustPinnedColsLimit();
         this.applyColumnHeaderWidths();
         this.applyColumnWidths();
@@ -1061,7 +1065,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         this._refs.main.canvas.body.parentElement.style.overflowY = alwaysVS ? "scroll" : autoHeight ? "hidden" : "auto";
 
         if (this._options.viewportClass)
-            this.getViewports().forEach(vp => addClass(vp, this._options.viewportClass));
+            this.getViewports().forEach(vp => addCssClass(vp, this._options.viewportClass));
     }
 
     private measureCellPaddingAndBorder(): void {
@@ -1095,6 +1099,9 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         this._styleNode?.remove();
         this._styleNode = null;
         this._stylesheet = null;
+        this._cssColRulesL = null;
+        this._cssColRulesR = null;
+        this._cssVarRules = null;
     }
 
     private createCssRules() {
@@ -1116,7 +1123,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         }
     }
 
-    destroy() {
+    destroy(): void {
         this.getEditorLock().cancelCurrentEdit();
 
         this._trigger(this.onBeforeDestroy);
@@ -1230,11 +1237,11 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         this.updateViewColLeftRight();
     }
 
-    setSortColumn(columnId: string, ascending: boolean) {
+    setSortColumn(columnId: string, ascending: boolean): void {
         this.setSortColumns([{ columnId: columnId, sortAsc: ascending }]);
     }
 
-    setSortColumns(cols: ColumnSort[]) {
+    setSortColumns(cols: ColumnSort[]): void {
         this._sortColumns = cols || [];
 
         var headerColumnEls: Element[] = [];
@@ -1254,10 +1261,12 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
                 var header = headerColumnEls[columnIndex];
                 if (header) {
                     header.classList.add("slick-header-column-sorted");
-                    var si = header.querySelector(".slick-sort-indicator");
-                    si && si.classList.add(col.sortAsc ? "slick-sort-indicator-asc" : "slick-sort-indicator-desc");
-                    const sub = si.querySelector("sub");
-                    sub && (sub.textContent = this._sortColumns.length > 1 ? (i + 1).toString() : "");
+                    const si = header.querySelector(".slick-sort-indicator");
+                    if (si) {
+                        si.classList.add(col.sortAsc ? "slick-sort-indicator-asc" : "slick-sort-indicator-desc");
+                        const sub = si.querySelector("sub");
+                        sub && (sub.textContent = this._sortColumns.length > 1 ? (i + 1).toString() : "");
+                    }
                 }
             }
         });
@@ -1466,7 +1475,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         }
     }
 
-    public invalidateColumns() {
+    public invalidateColumns(): void {
         this.updateViewCols();
         this.updateViewColLeftRight();
         if (this._initialized) {
@@ -1482,7 +1491,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
             this.createCssRules();
             this.resizeCanvas();
             this.updateCanvasWidth(true);
-            this.handleScroll();
+            this.handleScroll({ forceSync: true });
             this.getSelectionModel()?.refreshSelections?.();
         }
     }
@@ -1491,12 +1500,19 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         return this._options;
     }
 
-    setOptions(args: GridOptions<TItem>, suppressRender?: boolean, suppressColumnSet?: boolean, suppressSetOverflow?: boolean): void {
-        if (!this.getEditorLock().commitCurrentEdit()) {
+    protected prepareForOptionsChange(): void {
+        const editorLock = this.getEditorLock();
+        if (this._editController && editorLock?.isActive(this._editController) && !editorLock?.commitCurrentEdit()) {
+            editorLock?.cancelCurrentEdit();
             return;
         }
 
         this.makeActiveCellNormal();
+    }
+
+    setOptions(args: GridOptions<TItem>, suppressRender?: boolean, suppressColumnSet?: boolean, suppressSetOverflow?: boolean): void {
+
+        this.prepareForOptionsChange();
 
         if (args.groupingPanel && !this._options.groupingPanel)
             this.createGroupingPanel();
@@ -1533,6 +1549,8 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         if (this._options.autoHeight) {
             this._options.leaveSpaceForNewRows = false;
         }
+        if (!this._options.editorLock)
+            this._options.editorLock = new EditorLock();
     }
 
     private setOptionDependentSignals() {
@@ -1579,7 +1597,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         }
     }
 
-    setData(newData: any, scrollToTop?: boolean) {
+    setData(newData: any, scrollToTop?: boolean): void {
         this.unbindFromData();
         this._data = newData;
         this.bindToData();
@@ -1626,7 +1644,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         }
     }
 
-    setColumnHeaderVisibility(visible: boolean) {
+    setColumnHeaderVisibility(visible: boolean): void {
         if (!this._options.showColumnHeader != !visible) {
             this._signals.showColumnHeader.value = this._options.showColumnHeader = !!visible;
             this.resizeCanvas();
@@ -1636,6 +1654,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
     setFooterRowVisibility(visible: boolean): void {
         if (!this._options.showFooterRow != !visible) {
             this._signals.showFooterRow.value = this._options.showFooterRow = !!visible;
+            visible && this.updateGrandTotals();
             this.resizeCanvas();
         }
     }
@@ -2037,16 +2056,16 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         this.render();
     }
 
-    updatePagingStatusFromView(pagingInfo: { pageSize: number, pageNum: number, totalPages: number }) {
+    updatePagingStatusFromView(pagingInfo: { pageSize: number, pageNum: number, totalPages: number }): void {
         this._pagingActive = (pagingInfo.pageSize !== 0);
         this._pagingIsLastPage = (pagingInfo.pageNum == pagingInfo.totalPages - 1);
     }
 
-    public getScrollContainerX() {
+    public getScrollContainerX(): HTMLElement {
         return this._refs.main.canvas.body.parentElement;
     }
 
-    public getScrollContainerY() {
+    public getScrollContainerY(): HTMLElement {
         return this._refs.main.canvas.body.parentElement;
     }
 
@@ -2631,26 +2650,34 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         }
 
         if (e.wheelDeltaY !== undefined) {
-            deltaY = e.wheelDeltaY / 120;
+            if (!e.wheelDeltaX && e.wheelDeltaY && e.shiftKey) {
+                // some browsers (Chrome) only provide vertical wheel delta if shift is pressed
+                deltaX = -1 * e.wheelDeltaY / 120;
+                deltaY = 0;
+            }
+            else {
+                deltaY = e.wheelDeltaY / 120;
+            }
         }
-        if (e.wheelDeltaX !== undefined) {
+        if (e.wheelDeltaX) {
             deltaX = -1 * e.wheelDeltaX / 120;
         }
 
         this._scrollTop = Math.max(0, this.getScrollContainerY().scrollTop - (deltaY * this._options.rowHeight));
-        this._scrollLeft = this.getScrollContainerX().scrollLeft + (deltaX * 10);
-        if (this._handleScroll(true)) {
+        this._scrollLeft = this.getScrollContainerX().scrollLeft + (deltaX * 100);
+        if (this.handleScroll({ isMouseWheel: true })) {
             e.preventDefault();
         }
     }
 
-    private handleScroll() {
-        this._scrollTop = this.getScrollContainerY().scrollTop;
-        this._scrollLeft = this.getScrollContainerX().scrollLeft;
-        this._handleScroll();
-    }
-
-    private _handleScroll(isMouseWheel?: boolean) {
+    private handleScroll(opt?: {
+        isMouseWheel?: boolean,
+        forceSync?: boolean,
+    }) {
+        if (!opt?.isMouseWheel) {
+            this._scrollTop = this.getScrollContainerY().scrollTop;
+            this._scrollLeft = this.getScrollContainerX().scrollLeft;
+        }
 
         var vScrollDist = Math.abs(this._scrollTop - this._scrollTopPrev);
         var hScrollDist = Math.abs(this._scrollLeft - this._scrollLeftPrev);
@@ -2658,37 +2685,42 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         if (hScrollDist || vScrollDist)
             this._ignoreScrollUntil = new Date().getTime() + 100;
 
-        if (hScrollDist) {
+        if (hScrollDist || opt?.forceSync) {
             const scrollLeft = this._scrollLeftPrev = this._scrollLeft;
             getAllHScrollContainers(this._refs).forEach(sc => sc.scrollLeft = scrollLeft);
         }
 
         const vpi = this._viewportInfo;
 
-        if (vScrollDist) {
-            this._vScrollDir = this._scrollTopPrev < this._scrollTop ? 1 : -1;
-            const scrollTop = this._scrollTopPrev = this._scrollTop;
-
+        if (vScrollDist || opt?.forceSync) {
             const scrollContainerY = this.getScrollContainerY();
-            if (isMouseWheel === true) {
-                scrollContainerY.scrollTop = scrollTop;
+
+            if (vScrollDist) {
+                this._vScrollDir = this._scrollTopPrev < this._scrollTop ? 1 : -1;
+                this._scrollTopPrev = this._scrollTop;
+
+                if (opt?.isMouseWheel) {
+                    scrollContainerY.scrollTop = this._scrollTop;
+                }
             }
 
-            getAllVScrollContainers(this._refs).forEach(sc => sc !== scrollContainerY && (sc.scrollTop = scrollTop));
+            getAllVScrollContainers(this._refs).forEach(sc => sc !== scrollContainerY && (sc.scrollTop = this._scrollTop));
 
-            // switch virtual pages if needed
-            if (vScrollDist < this._viewportInfo.height) {
-                this.scrollTo(scrollTop + this._pageOffset);
-            } else {
-                var oldOffset = this._pageOffset;
-                if (vpi.realScrollHeight == vpi.height) {
-                    this._page = 0;
+            if (vScrollDist) {
+                // switch virtual pages if needed
+                if (vScrollDist < this._viewportInfo.height) {
+                    this.scrollTo(this._scrollTop + this._pageOffset);
                 } else {
-                    this._page = Math.min(this._numberOfPages - 1, Math.floor(scrollTop * ((vpi.virtualHeight - this._viewportInfo.height) / (vpi.realScrollHeight - this._viewportInfo.height)) * (1 / this._pageHeight)));
-                }
-                this._pageOffset = Math.round(this._page * this._jumpinessCoefficient);
-                if (oldOffset != this._pageOffset) {
-                    this.invalidateAllRows();
+                    var oldOffset = this._pageOffset;
+                    if (vpi.realScrollHeight == vpi.height) {
+                        this._page = 0;
+                    } else {
+                        this._page = Math.min(this._numberOfPages - 1, Math.floor(this._scrollTop * ((vpi.virtualHeight - this._viewportInfo.height) / (vpi.realScrollHeight - this._viewportInfo.height)) * (1 / this._pageHeight)));
+                    }
+                    this._pageOffset = Math.round(this._page * this._jumpinessCoefficient);
+                    if (oldOffset != this._pageOffset) {
+                        this.invalidateAllRows();
+                    }
                 }
             }
         }
@@ -2797,7 +2829,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
                         node = this.getCellNode(parseInt(row, 10), this.getColumnIndex(columnId));
                         if (node) {
                             const r = removedRowHash[columnId];
-                            removeClass(node, r);
+                            removeCssClass(node, r);
                         }
                     }
                 }
@@ -2809,7 +2841,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
                         node = this.getCellNode(parseInt(row, 10), this.getColumnIndex(columnId));
                         if (node) {
                             const a = addedRowHash[columnId];
-                            addClass(node, a);
+                            addCssClass(node, a);
                         }
                     }
                 }
@@ -3307,20 +3339,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         this._activeCellNode = newCell;
 
         if (this._activeCellNode) {
-            var bcl = this._activeCellNode.getBoundingClientRect();
-
-            var rowOffset = Math.floor(this._activeCellNode.closest('.grid-canvas')?.getBoundingClientRect().top ?? 0 + document.body.scrollTop);
-            var isBottom = this._activeCellNode.closest('.grid-canvas.sg-bottom') != null;
-            const { frozenBottomFirst } = this._refs;
-            if (frozenBottomFirst != Infinity && isBottom) {
-                rowOffset -= (this._options.frozenBottom)
-                    ? Math.round(parsePx(getComputedStyle(this.getCanvasNode(0, 0)).height))
-                    : (this.getDataLength() - frozenBottomFirst) * this._options.rowHeight;
-            }
-
-            var cell = this.getCellFromPoint(bcl[this._options.rtl ? 'right' : 'left'] + document.body.scrollLeft, Math.ceil(bcl.top + document.body.scrollTop) - rowOffset);
-
-            this._activeRow = cell.row;
+            this._activeRow = this.getRowFromNode(this._activeCellNode.parentElement);
             this._activeCell = this._activePosX = this.getCellFromNode(this._activeCellNode);
 
             if (this._options.showCellSelection) {
@@ -3638,7 +3657,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         this.navigateToRow(this.getDataLength() - 1);
     }
 
-    navigateToRow(row: number) {
+    navigateToRow(row: number): boolean {
         var dataLength = this.getDataLength();
         if (!dataLength) {
             return true;
@@ -3790,7 +3809,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         return null;
     }
 
-    setActiveCell(row: number, cell: number) {
+    setActiveCell(row: number, cell: number): void {
         if (!this._initialized) { return; }
         var cols = this._cols;
         if (row > this.getDataLength() || row < 0 || cell >= cols.length || cell < 0) {
@@ -3805,7 +3824,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         this.setActiveCellInternal(this.getCellNode(row, cell), false);
     }
 
-    setActiveRow(row: number, cell: number, suppressScrollIntoView?: boolean) {
+    setActiveRow(row: number, cell: number, suppressScrollIntoView?: boolean): void {
         if (!this._initialized)
             return;
 
@@ -3817,7 +3836,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
             this.scrollCellIntoView(row, cell || 0, false);
     }
 
-    canCellBeActive(row: number, cell: number): boolean {
+    canCellBeActive(row: number, cell: number, tab?: boolean): boolean {
         var cols = this._cols;
         if (!this._options.enableCellNavigation || row >= this.getDataLengthIncludingAddNew() ||
             row < 0 || cell >= cols.length || cell < 0) {
@@ -3826,21 +3845,45 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
 
         var rowMetadata = (this._data as IDataView).getItemMetadata?.(row);
         if (rowMetadata && typeof rowMetadata.focusable === "boolean") {
-            return rowMetadata.focusable;
+            if (!rowMetadata.focusable)
+                return false;
+
+            if (tab && typeof rowMetadata.tabbable === "boolean")
+                return rowMetadata.tabbable;
+
+            return true;
         }
 
         var colsMetadata = rowMetadata && rowMetadata.columns;
         if (colsMetadata && cols[cell] && colsMetadata[cols[cell].id] && typeof colsMetadata[cols[cell].id].focusable === "boolean") {
-            return colsMetadata[cols[cell].id].focusable;
-        }
-        if (colsMetadata && colsMetadata[cell] && typeof colsMetadata[cell].focusable === "boolean") {
-            return colsMetadata[cell].focusable;
+            if (!(colsMetadata[cols[cell].id].focusable))
+                return false;
+            if (tab && typeof colsMetadata[cols[cell].id].tabbable === "boolean")
+                return colsMetadata[cols[cell].id].tabbable;
+
+            return true;
         }
 
-        return cols[cell].focusable;
+        if (colsMetadata && colsMetadata[cell] && typeof colsMetadata[cell].focusable === "boolean") {
+            if (!(colsMetadata[cell].focusable))
+                return false;
+
+            if (tab && typeof colsMetadata[cell].tabbable === "boolean")
+                return colsMetadata[cell].tabbable;
+
+            return true;
+        }
+
+        if (!(cols[cell].focusable))
+            return false;
+
+        if (tab && typeof cols[cell].tabbable === "boolean")
+            return cols[cell].tabbable;
+
+        return true;
     }
 
-    canCellBeSelected(row: number, cell: number) {
+    canCellBeSelected(row: number, cell: number): boolean {
         var cols = this._cols;
         if (row >= this.getDataLength() || row < 0 || cell >= cols.length || cell < 0) {
             return false;
@@ -3859,7 +3902,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         return cols[cell].selectable;
     }
 
-    gotoCell(row: number, cell: number, forceEdit?: boolean) {
+    gotoCell(row: number, cell: number, forceEdit?: boolean): void {
         if (!this._initialized) { return; }
         if (!this.canCellBeActive(row, cell)) {
             return;
@@ -3885,13 +3928,13 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
     //////////////////////////////////////////////////////////////////////////////////////////////
     // IEditor implementation for the editor lock
 
-    commitCurrentEdit(): boolean {
+    commitCurrentEdit(opt?: { forceValueChange?: boolean }): boolean {
         var item = this.getDataItem(this._activeRow);
         var column = this._cols[this._activeCell];
         var self = this;
 
         if (this._currentEditor) {
-            if (this._currentEditor.isValueChanged()) {
+            if (this._currentEditor.isValueChanged({ commitEdit: true }) || opt?.forceValueChange) {
                 var validationResults = this._currentEditor.validate();
 
                 if (validationResults.valid) {
@@ -3964,7 +4007,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         return true;
     }
 
-    private cancelCurrentEdit() {
+    cancelCurrentEdit() {
         this.makeActiveCellNormal();
         return true;
     }
@@ -3985,7 +4028,7 @@ export class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
         return this._selectedRows;
     }
 
-    setSelectedRows(rows: number[]) {
+    setSelectedRows(rows: number[]): void {
         if (!this._selectionModel) {
             throw "Selection model is not set";
         }

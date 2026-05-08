@@ -1,6 +1,6 @@
 import { FormatterContext, FormatterResult } from "../core";
 
-export function PercentCompleteFormatter(ctx: FormatterContext) {
+export function PercentCompleteFormatter(ctx: FormatterContext): FormatterResult {
     if (ctx.value == null || ctx.value === "")
         return "-";
     const span = document.createElement('span');
@@ -38,7 +38,7 @@ export function YesNoFormatter(ctx: FormatterContext): FormatterResult {
 }
 
 
-export function CheckboxFormatter(ctx: FormatterContext): FormatterResult {
+export function CheckBoxFormatter(ctx: FormatterContext): FormatterResult {
     const i = document.createElement('i');
     i.className = 'slick-checkbox slick-edit-preclick' + (ctx.value ? ' checked' : '');
     return i;

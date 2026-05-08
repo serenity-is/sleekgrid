@@ -77,7 +77,7 @@ export class GroupItemMetadataProvider implements GridPlugin {
         applyFormatterResultToCellNode(ctx, fmtResultTitle, titleSpan, contentOnly);
         return <>
             <span class={opt.toggleCssClass + " " + (group.collapsed ? opt.toggleCollapsedCssClass : opt.toggleExpandedCssClass)}
-                style={"margin-left:" + indentation + "px"}></span>
+                style={{ marginLeft: indentation + "px" }}></span>
             {titleSpan}
         </>
     }
@@ -98,7 +98,7 @@ export class GroupItemMetadataProvider implements GridPlugin {
         return "";
     }
 
-    init(grid: ISleekGrid) {
+    init(grid: ISleekGrid): void {
         this.grid = grid;
         grid.onClick.subscribe(this.handleGridClick);
         grid.onKeyDown.subscribe(this.handleGridKeyDown);
@@ -106,22 +106,22 @@ export class GroupItemMetadataProvider implements GridPlugin {
 
     readonly pluginName = "GroupItemMetadataProvider";
 
-    destroy() {
+    destroy(): void {
         if (this.grid) {
             this.grid.onClick?.unsubscribe(this.handleGridClick);
             this.grid.onKeyDown?.unsubscribe(this.handleGridKeyDown);
         }
     }
 
-    getOptions() {
+    getOptions(): GroupItemMetadataProviderOptions {
         return this.options;
     }
 
-    setOptions(value: GroupItemMetadataProviderOptions) {
+    setOptions(value: GroupItemMetadataProviderOptions): void {
         Object.assign(this.options, value);
     }
 
-    handleGridClick = (e: CellMouseEvent) => {
+    handleGridClick = (e: CellMouseEvent): void => {
         let grid = e?.grid ?? this.grid;
         if (!grid)
             return;
@@ -147,7 +147,7 @@ export class GroupItemMetadataProvider implements GridPlugin {
             grid.getData().collapseGroup?.(item.groupingKey);
     }
 
-    handleGridKeyDown = (e: CellKeyboardEvent) => {
+    handleGridKeyDown = (e: CellKeyboardEvent): void => {
         if (!this.options.enableExpandCollapse ||
             (e.key !== " " && e.key !== "-" && e.key !== "+"))
             return;
@@ -183,7 +183,10 @@ export class GroupItemMetadataProvider implements GridPlugin {
             grid.getData().collapseGroup?.(item.groupingKey);
     }
 
-    groupCellPosition = () => {
+    groupCellPosition = (): {
+        cell: number;
+        colspan: (number | "*");
+    } => {
 
         const result = {
             cell: 0,

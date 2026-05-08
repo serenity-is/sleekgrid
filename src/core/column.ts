@@ -33,6 +33,7 @@ export interface Column<TItem = any> {
     rerenderOnResize?: boolean;
     resizable?: boolean;
     selectable?: boolean;
+    tabbable?: boolean;
     sortable?: boolean;
     sortOrder?: number;
     toolTip?: string;
@@ -49,11 +50,12 @@ export const columnDefaults: Partial<Column> = {
     rerenderOnResize: false,
     defaultSortAsc: true,
     focusable: true,
-    selectable: true
+    selectable: true,
+    tabbable: true
 };
 
 export interface ColumnMetadata<TItem = any> {
-    colspan: number | '*';
+    colspan?: number | '*';
     cssClasses?: string;
     focusable?: boolean;
     editor?: EditorClass;
@@ -61,6 +63,7 @@ export interface ColumnMetadata<TItem = any> {
     /** @deprecated */
     formatter?: CompatFormatter<TItem>;
     selectable?: boolean;
+    tabbable?: boolean;
 }
 
 export interface ColumnSort {
@@ -76,9 +79,10 @@ export interface ItemMetadata<TItem = any> {
     /** @deprecated */
     formatter?: CompatFormatter<TItem>;
     selectable?: boolean;
+    tabbable?: boolean;
 }
 
-export function initColumnProps(columns: Column[], defaults: Partial<Column<any>>) {
+export function initColumnProps(columns: Column[], defaults: Partial<Column<any>>): void {
     var usedIds: { [key: string]: boolean } = {};
 
     for (var i = 0; i < columns.length; i++) {
@@ -113,7 +117,7 @@ export function initColumnProps(columns: Column[], defaults: Partial<Column<any>
     }
 }
 
-export function titleize(str: string) {
+export function titleize(str: string): string {
     if (!str)
         return str;
 

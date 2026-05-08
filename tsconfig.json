@@ -4,12 +4,13 @@
       "allowJs": false,
       "declaration": true,
       "emitBOM": true,
-      "lib": [
-        "ES2017",
-        "DOM"
-      ],
+      "isolatedDeclarations": true,
       "jsx": "react-jsx",
       "jsxImportSource": "@serenity-is/domwise",
+      "lib": [
+        "ES2022",
+        "DOM"
+      ],
       "module": "ESNext",
       "moduleResolution": "Bundler",
       "newLine": "lf",
@@ -19,6 +20,7 @@
       "isolatedModules": true,
       "sourceMap": false,
       "skipLibCheck": false,
+      "strict": false,
       "outDir": "./dist",
       "target": "ESNext",
       "useDefineForClassFields": false

@@ -1,4 +1,4 @@
-import { Computed, Signal } from '@serenity-is/domwise';
+import { Computed, JSXElement, Signal } from '@serenity-is/domwise';
 
 /***
  * A base class that all special / non-data rows (like Group and GroupTotals) derive from.
@@ -85,7 +85,7 @@ export declare class EventDataWrapper<TArgs, TEvent = {}> implements IEventData<
 	constructor(event?: TEvent | null, args?: TArgs);
 	get defaultPrevented(): boolean;
 	preventDefault(): void;
-	isDefaultPrevented(): any;
+	isDefaultPrevented(): boolean;
 	/***
 	 * Stops event from propagating up the DOM tree.
 	 */
@@ -224,7 +224,9 @@ export interface Editor {
 	destroy(): void;
 	applyValue(item: any, value: any): void;
 	focus(): void;
-	isValueChanged(): boolean;
+	isValueChanged(args: {
+		commitEdit?: boolean;
+	}): boolean;
 	keyCaptureList?: number[];
 	loadValue(value: any): void;
 	serializeValue(): any;
@@ -953,11 +955,14 @@ export interface ISleekGrid<TItem = any> extends CellNavigation, EditorHost, Gri
 	init(): void;
 	addCellCssStyles(key: string, hash: CellStylesHash): void;
 	autosizeColumns(): void;
-	canCellBeActive(row: number, cell: number): boolean;
+	cancelCurrentEdit(): boolean;
+	canCellBeActive(row: number, cell: number, tab?: boolean): boolean;
 	canCellBeSelected(row: number, cell: number): boolean;
 	clearTextSelection(): void;
 	columnsResized(invalidate?: boolean): void;
-	commitCurrentEdit(): boolean;
+	commitCurrentEdit(opt?: {
+		forceValueChange?: boolean;
+	}): boolean;
 	destroy(): void;
 	editActiveCell(editor?: EditorClass): void;
 	flashCell(row: number, cell: number, speed?: number): void;
@@ -1204,7 +1209,7 @@ export type CellStylesHash = {
 		[columnId: string]: string;
 	};
 };
-export declare function defaultColumnFormat(ctx: FormatterContext): any;
+export declare function defaultColumnFormat(ctx: FormatterContext): FormatterResult;
 export declare function convertCompatFormatter(compatFormatter: CompatFormatter): ColumnFormat;
 export declare function applyFormatterResultToCellNode(ctx: FormatterContext, fmtResult: FormatterResult, node: HTMLElement, opt?: {
 	contentOnly?: boolean;
@@ -1240,6 +1245,7 @@ export interface Column<TItem = any> {
 	rerenderOnResize?: boolean;
 	resizable?: boolean;
 	selectable?: boolean;
+	tabbable?: boolean;
 	sortable?: boolean;
 	sortOrder?: number;
 	toolTip?: string;
@@ -1249,7 +1255,7 @@ export interface Column<TItem = any> {
 }
 export declare const columnDefaults: Partial<Column>;
 export interface ColumnMetadata<TItem = any> {
-	colspan: number | "*";
+	colspan?: number | "*";
 	cssClasses?: string;
 	focusable?: boolean;
 	editor?: EditorClass;
@@ -1257,6 +1263,7 @@ export interface ColumnMetadata<TItem = any> {
 	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
 	selectable?: boolean;
+	tabbable?: boolean;
 }
 export interface ColumnSort {
 	columnId: string;
@@ -1272,6 +1279,7 @@ export interface ItemMetadata<TItem = any> {
 	/** @deprecated */
 	formatter?: CompatFormatter<TItem>;
 	selectable?: boolean;
+	tabbable?: boolean;
 }
 export declare function initColumnProps(columns: Column[], defaults: Partial<Column<any>>): void;
 export declare function titleize(str: string): string;
@@ -1296,11 +1304,11 @@ export interface IDataView<TItem = any> {
 		rows: number[];
 	}>;
 }
-export declare function addClass(el: Element, cls: string): void;
-export declare function escapeHtml(s: any): any;
+export declare function addCssClass(el: Element, cls: string): void;
+export declare function escapeHtml(s: any): string;
 export declare function basicDOMSanitizer(dirtyHtml: string): string;
 export declare function disableSelection(target: HTMLElement): void;
-export declare function removeClass(el: Element, cls: string): void;
+export declare function removeCssClass(el: Element, cls: string): void;
 export declare function parsePx(str: string): number;
 export declare class BasicLayout implements LayoutEngine {
 	protected host: LayoutHost;
@@ -1326,27 +1334,27 @@ export declare const Header: ({ band, refs, signals }: {
 	band: BandKey;
 	refs: GridLayoutRefs;
 	signals: Pick<GridSignals, "hideColumnHeader" | "pinnedStartCols" | "pinnedEndCols">;
-}) => import("@serenity-is/domwise").JSXElement;
+}) => JSXElement;
 export declare const HeaderRow: ({ band, refs, signals }: {
 	band: BandKey;
 	refs: GridLayoutRefs;
 	signals: Pick<GridSignals, "hideHeaderRow" | "pinnedStartCols" | "pinnedEndCols">;
-}) => import("@serenity-is/domwise").JSXElement;
+}) => JSXElement;
 export declare const TopPanel: ({ refs, signals }: {
 	refs: GridLayoutRefs;
 	signals: Pick<GridSignals, "hideTopPanel">;
-}) => import("@serenity-is/domwise").JSXElement;
+}) => JSXElement;
 export declare const Viewport: ({ band, pane, refs, signals }: {
 	band: BandKey;
 	pane: PaneKey;
 	refs: GridLayoutRefs;
 	signals: Pick<GridSignals, "frozenTopRows" | "frozenBottomRows" | "pinnedStartCols" | "pinnedEndCols">;
-}) => import("@serenity-is/domwise").JSXElement;
+}) => JSXElement;
 export declare const FooterRow: ({ band, refs, signals }: {
 	band: BandKey;
 	refs: GridLayoutRefs;
 	signals: Pick<GridSignals, "hideFooterRow" | "pinnedStartCols" | "pinnedEndCols">;
-}) => import("@serenity-is/domwise").JSXElement;
+}) => JSXElement;
 export declare class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
 	private _absoluteColMinWidth;
 	private _activeCanvasNode;
@@ -1437,44 +1445,44 @@ export declare class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
 	private _focusSink2;
 	private _groupingPanel;
 	private _eventDisposer;
-	readonly onActiveCellChanged: EventEmitter<ArgsCell, {}>;
-	readonly onActiveCellPositionChanged: EventEmitter<ArgsGrid, {}>;
-	readonly onAddNewRow: EventEmitter<ArgsAddNewRow, {}>;
-	static readonly onAfterInit: EventEmitter<ArgsGrid, {}>;
-	readonly onAfterInit: EventEmitter<ArgsGrid, {}>;
-	readonly onBeforeCellEditorDestroy: EventEmitter<ArgsEditorDestroy, {}>;
-	readonly onBeforeDestroy: EventEmitter<ArgsGrid, {}>;
-	readonly onBeforeEditCell: EventEmitter<ArgsCellEdit, {}>;
-	readonly onBeforeFooterRowCellDestroy: EventEmitter<ArgsColumnNode, {}>;
-	readonly onBeforeHeaderCellDestroy: EventEmitter<ArgsColumnNode, {}>;
-	readonly onBeforeHeaderRowCellDestroy: EventEmitter<ArgsColumnNode, {}>;
-	readonly onCellChange: EventEmitter<ArgsCellChange, {}>;
-	readonly onCellCssStylesChanged: EventEmitter<ArgsCssStyle, {}>;
+	readonly onActiveCellChanged: EventEmitter<ArgsCell>;
+	readonly onActiveCellPositionChanged: EventEmitter<ArgsGrid>;
+	readonly onAddNewRow: EventEmitter<ArgsAddNewRow>;
+	static readonly onAfterInit: EventEmitter<ArgsGrid>;
+	readonly onAfterInit: EventEmitter<ArgsGrid>;
+	readonly onBeforeCellEditorDestroy: EventEmitter<ArgsEditorDestroy>;
+	readonly onBeforeDestroy: EventEmitter<ArgsGrid>;
+	readonly onBeforeEditCell: EventEmitter<ArgsCellEdit>;
+	readonly onBeforeFooterRowCellDestroy: EventEmitter<ArgsColumnNode>;
+	readonly onBeforeHeaderCellDestroy: EventEmitter<ArgsColumnNode>;
+	readonly onBeforeHeaderRowCellDestroy: EventEmitter<ArgsColumnNode>;
+	readonly onCellChange: EventEmitter<ArgsCellChange>;
+	readonly onCellCssStylesChanged: EventEmitter<ArgsCssStyle>;
 	readonly onClick: EventEmitter<ArgsCell, MouseEvent>;
-	readonly onColumnsReordered: EventEmitter<ArgsGrid, {}>;
-	readonly onColumnsResized: EventEmitter<ArgsGrid, {}>;
-	readonly onCompositeEditorChange: EventEmitter<ArgsGrid, {}>;
+	readonly onColumnsReordered: EventEmitter<ArgsGrid>;
+	readonly onColumnsResized: EventEmitter<ArgsGrid>;
+	readonly onCompositeEditorChange: EventEmitter<ArgsGrid>;
 	readonly onContextMenu: EventEmitter<ArgsGrid, UIEvent>;
 	readonly onDblClick: EventEmitter<ArgsCell, MouseEvent>;
 	readonly onDrag: EventEmitter<ArgsDrag, UIEvent>;
 	readonly onDragEnd: EventEmitter<ArgsDrag, UIEvent>;
 	readonly onDragInit: EventEmitter<ArgsDrag, UIEvent>;
 	readonly onDragStart: EventEmitter<ArgsDrag, UIEvent>;
-	readonly onFooterRowCellRendered: EventEmitter<ArgsColumnNode, {}>;
-	readonly onHeaderCellRendered: EventEmitter<ArgsColumnNode, {}>;
+	readonly onFooterRowCellRendered: EventEmitter<ArgsColumnNode>;
+	readonly onHeaderCellRendered: EventEmitter<ArgsColumnNode>;
 	readonly onHeaderClick: EventEmitter<ArgsColumn, MouseEvent>;
 	readonly onHeaderContextMenu: EventEmitter<ArgsColumn, MouseEvent>;
 	readonly onHeaderMouseEnter: EventEmitter<ArgsColumn, MouseEvent>;
 	readonly onHeaderMouseLeave: EventEmitter<ArgsColumn, MouseEvent>;
-	readonly onHeaderRowCellRendered: EventEmitter<ArgsColumnNode, {}>;
+	readonly onHeaderRowCellRendered: EventEmitter<ArgsColumnNode>;
 	readonly onKeyDown: EventEmitter<ArgsCell, KeyboardEvent>;
 	readonly onMouseEnter: EventEmitter<ArgsGrid, MouseEvent>;
 	readonly onMouseLeave: EventEmitter<ArgsGrid, MouseEvent>;
-	readonly onScroll: EventEmitter<ArgsScroll, {}>;
-	readonly onSelectedRowsChanged: EventEmitter<ArgsSelectedRowsChange, {}>;
-	readonly onSort: EventEmitter<ArgsSort, {}>;
-	readonly onValidationError: EventEmitter<ArgsValidationError, {}>;
-	readonly onViewportChanged: EventEmitter<ArgsGrid, {}>;
+	readonly onScroll: EventEmitter<ArgsScroll>;
+	readonly onSelectedRowsChanged: EventEmitter<ArgsSelectedRowsChange>;
+	readonly onSort: EventEmitter<ArgsSort>;
+	readonly onValidationError: EventEmitter<ArgsValidationError>;
+	readonly onViewportChanged: EventEmitter<ArgsGrid>;
 	constructor(container: string | HTMLElement | ArrayLike<HTMLElement>, data: any, columns: Column<TItem>[], options: GridOptions<TItem>);
 	private applyLegacyHeightOptions;
 	private createGroupingPanel;
@@ -1574,6 +1582,7 @@ export declare class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
 	}): void;
 	invalidateColumns(): void;
 	getOptions(): GridOptions<TItem>;
+	protected prepareForOptionsChange(): void;
 	setOptions(args: GridOptions<TItem>, suppressRender?: boolean, suppressColumnSet?: boolean, suppressSetOverflow?: boolean): void;
 	private validateAndEnforceOptions;
 	private setOptionDependentSignals;
@@ -1645,7 +1654,6 @@ export declare class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
 	private handleHeaderFooterRowScroll;
 	private handleMouseWheel;
 	private handleScroll;
-	private _handleScroll;
 	private asyncPostProcessRows;
 	private asyncPostProcessCleanupRows;
 	private updateCellCssStylesOnRenderedRows;
@@ -1733,22 +1741,24 @@ export declare class SleekGrid<TItem = any> implements ISleekGrid<TItem> {
 	getCellNode(row: number, cell: number): HTMLElement;
 	setActiveCell(row: number, cell: number): void;
 	setActiveRow(row: number, cell: number, suppressScrollIntoView?: boolean): void;
-	canCellBeActive(row: number, cell: number): boolean;
+	canCellBeActive(row: number, cell: number, tab?: boolean): boolean;
 	canCellBeSelected(row: number, cell: number): boolean;
 	gotoCell(row: number, cell: number, forceEdit?: boolean): void;
-	commitCurrentEdit(): boolean;
-	private cancelCurrentEdit;
+	commitCurrentEdit(opt?: {
+		forceValueChange?: boolean;
+	}): boolean;
+	cancelCurrentEdit(): boolean;
 	private rowsToRanges;
 	getSelectedRows(): number[];
 	setSelectedRows(rows: number[]): void;
 }
-export declare function PercentCompleteFormatter(ctx: FormatterContext): HTMLSpanElement | "-";
+export declare function PercentCompleteFormatter(ctx: FormatterContext): FormatterResult;
 export declare function PercentCompleteBarFormatter(ctx: FormatterContext): FormatterResult;
 export declare function YesNoFormatter(ctx: FormatterContext): FormatterResult;
-export declare function CheckboxFormatter(ctx: FormatterContext): FormatterResult;
+export declare function CheckBoxFormatter(ctx: FormatterContext): FormatterResult;
 export declare function CheckmarkFormatter(ctx: FormatterContext): FormatterResult;
 export declare namespace Formatters {
-	function PercentComplete(_row: number, _cell: number, value: any): HTMLSpanElement | "-";
+	function PercentComplete(_row: number, _cell: number, value: any): FormatterResult;
 	function PercentCompleteBar(_row: number, _cell: number, value: any): FormatterResult;
 	function YesNo(_row: number, _cell: number, value: any): FormatterResult;
 	function Checkbox(_row: number, _cell: number, value: any): FormatterResult;
@@ -1775,7 +1785,7 @@ export declare class TextCellEdit extends BaseCellEdit {
 	init(): void;
 }
 export declare class IntegerCellEdit extends TextCellEdit {
-	serializeValue(): number;
+	serializeValue(): any;
 	validate(): ValidationResult;
 }
 export declare class FloatCellEdit extends TextCellEdit {
@@ -1798,19 +1808,16 @@ export declare class YesNoSelectCellEdit extends BaseCellEdit {
 	_input: HTMLSelectElement;
 	init(): void;
 	loadValue(item: any): void;
-	serializeValue(): boolean;
+	serializeValue(): any;
 	isValueChanged(): boolean;
-	validate(): {
-		valid: boolean;
-		msg: string;
-	};
+	validate(): ValidationResult;
 }
 export declare class CheckboxCellEdit extends BaseCellEdit {
 	_input: HTMLInputElement;
 	init(): void;
 	loadValue(item: any): void;
 	preClick(): void;
-	serializeValue(): boolean;
+	serializeValue(): any;
 	applyValue(item: any, state: any): void;
 	isValueChanged(): boolean;
 	validate(): {
@@ -1918,8 +1925,8 @@ export declare class RowMoveManager implements GridPlugin {
 	private options;
 	private dragging;
 	private handler;
-	onBeforeMoveRows: EventEmitter<ArgsMoveRows, {}>;
-	onMoveRows: EventEmitter<ArgsMoveRows, {}>;
+	onBeforeMoveRows: EventEmitter<ArgsMoveRows>;
+	onMoveRows: EventEmitter<ArgsMoveRows>;
 	constructor(options?: RowMoveManagerOptions);
 	static readonly defaults: RowMoveManagerOptions;
 	init(grid: ISleekGrid): void;
@@ -1937,7 +1944,7 @@ export declare class RowSelectionModel implements GridPlugin, SelectionModel {
 	private handler;
 	private options;
 	private ranges;
-	onSelectedRangesChanged: EventEmitter<CellRange[], {}>;
+	onSelectedRangesChanged: EventEmitter<CellRange[]>;
 	constructor(options?: RowSelectionModelOptions);
 	static readonly defaults: RowSelectionModelOptions;
 	init(grid: ISleekGrid): void;
